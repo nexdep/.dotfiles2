@@ -43,10 +43,14 @@ check "zshrc initializes starship" grep -q "starship init zsh" "$zshrc"
 # extra tier: laptop + wsl
 if [[ "$machine" != server ]]; then
   check "gomi installed" command -v gomi
+  check "conda installed" test -x "$HOME/miniforge3/bin/conda"
+  check "condarc deployed" test -f "$HOME/.condarc"
+  check "zshrc initializes conda" grep -q "miniforge3/etc/profile.d/conda.sh" "$zshrc"
   check "workstation zshrc fragment" has_fragment "workstation (laptop/wsl)"
   check "no server zshrc fragment" no_fragment "server ---"
 else
   check "gomi absent" absent gomi
+  check "conda absent" test ! -e "$HOME/miniforge3"
   check "server zshrc fragment" has_fragment "server ---"
   check "no workstation zshrc fragment" no_fragment "workstation (laptop/wsl)"
 fi

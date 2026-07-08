@@ -55,6 +55,7 @@ $SUDO apt-get install -y --no-install-recommends "${packages[@]}"
 "$LIB_DIR/install-starship.sh"
 if [[ "$MACHINE" != server ]]; then
   "$LIB_DIR/install-gomi.sh"
+  "$LIB_DIR/install-conda.sh"
 fi
 if [[ "$MACHINE" == laptop ]]; then
   "$LIB_DIR/install-gui.sh"

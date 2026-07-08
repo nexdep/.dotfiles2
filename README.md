@@ -11,7 +11,7 @@ Each tier is a superset of the one below it (laptop ⊃ wsl ⊃ server):
 | Tier  | Machines       | Programs                                          |
 |-------|----------------|---------------------------------------------------|
 | core  | all            | zsh (default shell), gopass, starship, git, curl, chezmoi |
-| extra | laptop, wsl    | gomi                                              |
+| extra | laptop, wsl    | gomi, conda (miniforge)                           |
 | gui   | laptop         | Firefox Developer Edition, Thunderbird Beta       |
 
 The `.zshrc` is layered the same way: a core fragment for every machine, a
@@ -36,6 +36,7 @@ type is remembered by chezmoi, so config changes are just `chezmoi apply`.
 bootstrap.sh                 entry point: tier-aware installs + chezmoi init
 lib/packages-*.txt           apt package lists per tier
 lib/install-gomi.sh          gomi from GitHub release binaries (laptop+wsl)
+lib/install-conda.sh         Miniforge3 from the official installer script (laptop+wsl)
 lib/install-gui.sh           Firefox Dev Edition + Thunderbird Beta (laptop)
 home/                        chezmoi source directory (via .chezmoiroot)
 tests/verify.sh              tier-aware assertions, used by CI
@@ -55,6 +56,13 @@ tests/verify.sh              tier-aware assertions, used by CI
 - **starship**: prebuilt binary from GitHub releases into `/usr/local/bin`,
   same pattern as gomi. Config (`home/dot_config/starship.toml`) is the same
   on every machine and just disables the battery module.
+- **conda**: Miniforge3 (conda-forge's installer, not Anaconda/Miniconda),
+  installed per-user into `$HOME/miniforge3` via the official installer
+  script in batch mode. Config (`home/dot_condarc`) is taken from the
+  current system: conda-forge channel only, and `changeps1: false` since
+  starship's conda module already shows the active env in the prompt.
+  Base env is auto-activated in every shell by the workstation zshrc
+  fragment, matching the current system's `auto_activate_base: true`.
 
 ## CI
 
