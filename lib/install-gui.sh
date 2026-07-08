@@ -16,6 +16,10 @@
 #   - Google Chrome from the official .deb at dl.google.com (fixed URL, no
 #     version to resolve). Its postinst self-registers Google's apt repo,
 #     so unlike Obsidian it updates with a normal apt upgrade afterwards.
+#   - Slack from the official .deb at downloads.slack-edge.com. Like
+#     Obsidian, release filenames embed the version and there's no apt
+#     repo, so the latest version is scraped from Slack's own downloads
+#     page (Slack publishes no versioned API or GitHub releases for this).
 set -euo pipefail
 
 log() { printf '\033[1;34m[gui]\033[0m %s\n' "$*"; }
@@ -129,5 +133,23 @@ else
   log "downloading google chrome"
   curl -fsSL https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -o "$tmp/google-chrome.deb"
   $SUDO apt-get install -y "$tmp/google-chrome.deb"
+  rm -rf "$tmp"
+fi
+
+# --- Slack (official .deb) --------------------------------------------------------
+if command -v slack >/dev/null 2>&1; then
+  log "slack already installed, skipping"
+else
+  [[ "$(uname -m)" == x86_64 ]] || die "slack: unsupported architecture $(uname -m) (only amd64 .deb is published)"
+
+  url="$(curl -fsSL 'https://slack.com/downloads/instructions/linux?ddl=1&build=deb' |
+    grep -oE 'https://downloads\.slack-edge\.com/desktop-releases/linux/x64/[0-9.]+/slack-desktop-[0-9.]+-amd64\.deb' |
+    head -n1)"
+  [[ -n "$url" ]] || die "slack: could not find the latest .deb download URL"
+
+  tmp="$(mktemp -d)"
+  log "downloading slack ($url)"
+  curl -fsSL "$url" -o "$tmp/slack.deb"
+  $SUDO apt-get install -y "$tmp/slack.deb"
   rm -rf "$tmp"
 fi

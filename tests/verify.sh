@@ -74,6 +74,9 @@ if [[ "$machine" == laptop ]]; then
   # evolution-ews is a backend module with no executable of its own.
   check "evolution-ews installed" dpkg -s evolution-ews
   check "google chrome installed" google-chrome --version
+  # slack is Electron-based like obsidian/code-insiders and its --version
+  # behavior isn't guaranteed safe headless as root, so just check PATH.
+  check "slack installed" command -v slack
 else
   check "firefox-devedition absent" absent firefox-devedition
   check "thunderbird beta absent" test ! -e /usr/local/bin/thunderbird-beta
@@ -83,6 +86,7 @@ else
   check "evolution absent" absent evolution
   check "evolution-ews absent" pkg_absent evolution-ews
   check "google chrome absent" absent google-chrome
+  check "slack absent" absent slack
 fi
 
 exit "$fail"
