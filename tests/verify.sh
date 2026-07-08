@@ -84,6 +84,7 @@ if [[ "$machine" == laptop ]]; then
   # vlc --version exits non-zero with no output in this headless container;
   # just check the binary is on PATH, like the other GUI apps above.
   check "vlc installed" command -v vlc
+  check "zotero installed" command -v zotero
 else
   check "firefox-devedition absent" absent firefox-devedition
   check "thunderbird beta absent" test ! -e /usr/local/bin/thunderbird-beta
@@ -97,6 +98,7 @@ else
   check "zoom absent" absent zoom
   check "paraview absent" absent paraview
   check "vlc absent" absent vlc
+  check "zotero absent" absent zotero
 fi
 
 exit "$fail"

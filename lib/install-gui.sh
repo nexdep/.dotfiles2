@@ -25,6 +25,10 @@
 #   - ParaView from the official Kitware build: a tarball (no .deb/apt repo
 #     exists), so it follows the Thunderbird Beta pattern (/opt + symlink).
 #     The latest version is resolved from paraview.org's directory listing.
+#   - Zotero via the community apt repo's own install script, exactly as
+#     documented at https://zotero.retorque.re/file/apt-package-archive/
+#     (zotero.org itself only distributes a tarball; this repo is the
+#     de facto standard apt source, referenced from zotero.org's own docs).
 set -euo pipefail
 
 log() { printf '\033[1;34m[gui]\033[0m %s\n' "$*"; }
@@ -209,4 +213,21 @@ Categories=Graphics;Science;
 EOF
   rm -rf "$tmp"
   log "installed paraview $filename to /opt/paraview"
+fi
+
+# --- Zotero (official community apt repo) -------------------------------------------
+if command -v zotero >/dev/null 2>&1; then
+  log "zotero already installed, skipping"
+else
+  # zotero-pkg's install.sh calls `sudo` internally regardless of how it's
+  # invoked, so make sure sudo exists even when we're already root (bare
+  # containers usually don't ship it).
+  command -v sudo >/dev/null 2>&1 || $SUDO apt-get install -y sudo
+
+  log "installing zotero apt repository"
+  curl -sL https://raw.githubusercontent.com/retorquere/zotero-pkg/master/install.sh | sudo bash
+
+  $SUDO apt-get update
+  log "installing zotero"
+  $SUDO apt-get install -y zotero
 fi

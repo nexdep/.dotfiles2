@@ -12,7 +12,7 @@ Each tier is a superset of the one below it (laptop ⊃ wsl ⊃ server):
 |-------|----------------|---------------------------------------------------|
 | core  | all            | zsh (default shell), gopass, starship, git, curl, chezmoi |
 | extra | laptop, wsl    | gomi, conda (miniforge)                           |
-| gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS), Google Chrome, Slack, Zoom, ParaView, VLC |
+| gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS), Google Chrome, Slack, Zoom, ParaView, VLC, Zotero |
 
 The `.zshrc` is layered the same way: a core fragment for every machine, a
 workstation fragment for laptop/wsl, and a server fragment for servers. The
@@ -96,6 +96,14 @@ tests/verify.sh              tier-aware assertions, used by CI
   directory listing at `paraview.org/files/`.
 - **VLC**: plain Ubuntu universe apt package, listed in
   `lib/packages-gui.txt` like Evolution — no extra repo needed.
+- **Zotero**: installed exactly per the community apt repo's own
+  instructions (https://zotero.retorque.re/file/apt-package-archive/) —
+  its `install.sh` sets up the apt repo/keyring, then `apt install zotero`.
+  zotero.org itself only ships a tarball; this repo (referenced from
+  zotero.org's own Linux install docs) is the de facto standard apt
+  source and updates with a normal `apt upgrade`. `install.sh` calls
+  `sudo` internally regardless of how it's invoked, so `sudo` is
+  installed first if missing (bare containers usually lack it).
 
 ## CI
 
