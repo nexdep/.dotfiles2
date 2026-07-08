@@ -4,17 +4,13 @@
 # published, so aarch64 uses the musl build (works fine on glibc systems).
 set -euo pipefail
 
-log() { printf '\033[1;34m[starship]\033[0m %s\n' "$*"; }
-die() { printf '\033[1;31m[starship]\033[0m %s\n' "$*" >&2; exit 1; }
+LOG_TAG=starship
+# shellcheck source=lib/common.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/common.sh"
 
 if command -v starship >/dev/null 2>&1; then
   log "already installed, skipping"
   exit 0
-fi
-
-SUDO=""
-if [[ "$(id -u)" -ne 0 ]]; then
-  SUDO="sudo"
 fi
 
 case "$(uname -m)" in

@@ -34,12 +34,14 @@ type is remembered by chezmoi, so config changes are just `chezmoi apply`.
 
 ```
 bootstrap.sh                 entry point: tier-aware installs + chezmoi init
+lib/common.sh                shared helpers: SUDO/log/die, add_apt_repo, install_deb
 lib/packages-*.txt           apt package lists per tier
+lib/install-starship.sh      starship from GitHub release binaries (all machines)
 lib/install-gomi.sh          gomi from GitHub release binaries (laptop+wsl)
 lib/install-conda.sh         Miniforge3 from the official installer script (laptop+wsl)
-lib/install-gui.sh           Firefox Dev Edition + Thunderbird Beta (laptop)
+lib/install-gui.sh           all laptop GUI apps (apt repos, tarballs, .debs)
 home/                        chezmoi source directory (via .chezmoiroot)
-tests/verify.sh              tier-aware assertions, used by CI
+tests/verify.sh              tier-aware assertions (data-driven app table), used by CI
 .github/workflows/ci.yml     lint + full bootstrap of all 3 machine types
 ```
 
@@ -59,6 +61,9 @@ pulls in ibus and mesa extras).
   maintained PPA ships a Thunderbird beta channel for this release; the app
   self-updates through its internal updater (the install dir is chowned to
   the bootstrapping user so the updater can write to it).
+- **gopass**: from its official apt repo (packages.gopass.pw, registered by
+  `bootstrap.sh`) since Ubuntu 26.04 dropped it from universe; updates with
+  `apt upgrade`.
 - **gomi**: prebuilt binary from GitHub releases into `/usr/local/bin`.
 - **starship**: prebuilt binary from GitHub releases into `/usr/local/bin`,
   same pattern as gomi. Config (`home/dot_config/starship.toml`) is the same

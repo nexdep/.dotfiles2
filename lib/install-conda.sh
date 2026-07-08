@@ -5,10 +5,12 @@
 # script and runs it in batch mode, same pattern as bootstrap.sh uses for
 # chezmoi itself. Shell integration is wired up separately by chezmoi
 # (home/.chezmoitemplates/zshrc-workstation.zsh), not by this script.
+# Always a per-user install into $HOME — no sudo involved.
 set -euo pipefail
 
-log() { printf '\033[1;34m[conda]\033[0m %s\n' "$*"; }
-die() { printf '\033[1;31m[conda]\033[0m %s\n' "$*" >&2; exit 1; }
+LOG_TAG=conda
+# shellcheck source=lib/common.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/common.sh"
 
 if [[ -x "$HOME/miniforge3/bin/conda" ]]; then
   log "already installed, skipping"

@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # Tier-aware post-bootstrap assertions. Exits non-zero if any check fails.
 # Usage: tests/verify.sh <wsl|server|laptop>
+#
+# Check strings are deliberately single-quoted so $HOME/$(mktemp) expand at
+# check time via eval, not at table-definition time.
+# shellcheck disable=SC2016
 set -uo pipefail
 
 machine="${1:?usage: $0 <wsl|server|laptop>}"
@@ -18,90 +22,78 @@ check() {
   fi
 }
 
-# invoked indirectly through check()
-# shellcheck disable=SC2317,SC2329
-absent() { ! command -v "$1" >/dev/null 2>&1; }
-# shellcheck disable=SC2317,SC2329
-has_fragment() { grep -q -- "--- $1" "$zshrc"; }
-# shellcheck disable=SC2317,SC2329
-no_fragment() { ! grep -q -- "--- $1" "$zshrc"; }
-# shellcheck disable=SC2317,SC2329
-pkg_absent() { ! dpkg -s "$1" >/dev/null 2>&1; }
+# Tiers and machines share a rank: an app is asserted present on machines at
+# or above its tier and absent below it (laptop ⊃ wsl ⊃ server).
+rank() {
+  case "$1" in
+    core | server) echo 0 ;;
+    extra | wsl) echo 1 ;;
+    gui | laptop) echo 2 ;;
+    *) echo "unknown tier/machine: $1" >&2; exit 1 ;;
+  esac
+}
+
+# One row per program: 'tier|name|present-check[|absent-check]'.
+# Default absent check: the command is not on PATH.
+# Notes on the present checks:
+#  - code-insiders: Electron refuses to run as root (this CI container)
+#    without --no-sandbox and an explicit --user-data-dir; both flags are
+#    harmless for normal (non-root) use on the real machine.
+#  - obsidian/slack/zoom/clockify/paraview/vlc/zotero: running --version is
+#    not safe or meaningful headless as root (obsidian launches the full app
+#    and hangs, vlc exits 1 with no output), so only PATH presence is checked.
+#  - evolution-ews is a backend module with no executable, hence dpkg -s.
+apps=(
+  'core|zsh|command -v zsh'
+  'core|gopass|command -v gopass'
+  'core|chezmoi|command -v chezmoi'
+  'core|starship|command -v starship'
+  'extra|gomi|command -v gomi'
+  'extra|conda|test -x "$HOME/miniforge3/bin/conda"|test ! -e "$HOME/miniforge3"'
+  'gui|firefox-devedition|firefox-devedition --version'
+  'gui|thunderbird-beta|/usr/local/bin/thunderbird-beta --version|test ! -e /usr/local/bin/thunderbird-beta'
+  'gui|wezterm|wezterm --version'
+  'gui|code-insiders|code-insiders --version --no-sandbox --user-data-dir="$(mktemp -d)"'
+  'gui|obsidian|command -v obsidian'
+  'gui|evolution|command -v evolution'
+  'gui|evolution-ews|dpkg -s evolution-ews|! dpkg -s evolution-ews'
+  'gui|google-chrome|google-chrome --version'
+  'gui|slack|command -v slack'
+  'gui|zoom|command -v zoom'
+  'gui|paraview|command -v paraview'
+  'gui|vlc|command -v vlc'
+  'gui|zotero|command -v zotero'
+  'gui|clockify|command -v clockify'
+)
 
 echo "== verify machine=$machine =="
+machine_rank="$(rank "$machine")"
 
-# core tier: every machine
-check "zsh installed" command -v zsh
-check "gopass installed" command -v gopass
-check "chezmoi installed" command -v chezmoi
+for entry in "${apps[@]}"; do
+  IFS='|' read -r tier name present absent <<<"$entry"
+  if (( machine_rank >= $(rank "$tier") )); then
+    check "$name installed" eval "$present"
+  else
+    check "$name absent" eval "${absent:-! command -v $name}"
+  fi
+done
+
+# --- configuration checks (not simple present/absent pairs) --------------------
 check ".zshrc deployed" test -f "$zshrc"
 check ".zshrc parses" zsh -n "$zshrc"
-check "core zshrc fragment" has_fragment "core (all machines)"
-check "login shell is zsh" test "$(getent passwd "$(id -un)" | cut -d: -f7)" = "$(command -v zsh)"
-check "starship installed" command -v starship
+check "core zshrc fragment" grep -q -- "--- core (all machines)" "$zshrc"
 check "starship config deployed" test -f "$HOME/.config/starship.toml"
 check "zshrc initializes starship" grep -q "starship init zsh" "$zshrc"
+check "login shell is zsh" test "$(getent passwd "$(id -un)" | cut -d: -f7)" = "$(command -v zsh)"
 
-# extra tier: laptop + wsl
 if [[ "$machine" != server ]]; then
-  check "gomi installed" command -v gomi
-  check "conda installed" test -x "$HOME/miniforge3/bin/conda"
   check "condarc deployed" test -f "$HOME/.condarc"
   check "zshrc initializes conda" grep -q "miniforge3/etc/profile.d/conda.sh" "$zshrc"
-  check "workstation zshrc fragment" has_fragment "workstation (laptop/wsl)"
-  check "no server zshrc fragment" no_fragment "server ---"
+  check "workstation zshrc fragment" grep -q -- "--- workstation (laptop/wsl)" "$zshrc"
+  check "no server zshrc fragment" eval '! grep -q -- "--- server ---" "$zshrc"'
 else
-  check "gomi absent" absent gomi
-  check "conda absent" test ! -e "$HOME/miniforge3"
-  check "server zshrc fragment" has_fragment "server ---"
-  check "no workstation zshrc fragment" no_fragment "workstation (laptop/wsl)"
-fi
-
-# gui tier: laptop only
-if [[ "$machine" == laptop ]]; then
-  check "firefox-devedition installed" firefox-devedition --version
-  check "thunderbird beta installed" /usr/local/bin/thunderbird-beta --version
-  check "wezterm-nightly installed" wezterm --version
-  # --no-sandbox + --user-data-dir: Electron refuses to run as root (this CI
-  # container) without both; not needed for normal (non-root) use on the
-  # real machine.
-  check "code-insiders installed" \
-    code-insiders --version --no-sandbox --user-data-dir="$(mktemp -d)"
-  # obsidian ignores --version and launches the full app instead of exiting,
-  # so (unlike the other GUI apps here) just check the binary is on PATH.
-  check "obsidian installed" command -v obsidian
-  check "evolution installed" command -v evolution
-  # evolution-ews is a backend module with no executable of its own.
-  check "evolution-ews installed" dpkg -s evolution-ews
-  check "google chrome installed" google-chrome --version
-  # slack is Electron-based like obsidian/code-insiders and its --version
-  # behavior isn't guaranteed safe headless as root, so just check PATH.
-  check "slack installed" command -v slack
-  # zoom's CLI flags aren't guaranteed safe headless as root either.
-  check "zoom installed" command -v zoom
-  # paraview is a heavy Qt/OpenGL app; just check the binary is on PATH.
-  check "paraview installed" command -v paraview
-  # vlc --version exits non-zero with no output in this headless container;
-  # just check the binary is on PATH, like the other GUI apps above.
-  check "vlc installed" command -v vlc
-  check "zotero installed" command -v zotero
-  # clockify is Electron-built like obsidian; just check the binary is on PATH.
-  check "clockify installed" command -v clockify
-else
-  check "firefox-devedition absent" absent firefox-devedition
-  check "thunderbird beta absent" test ! -e /usr/local/bin/thunderbird-beta
-  check "wezterm absent" absent wezterm
-  check "code-insiders absent" absent code-insiders
-  check "obsidian absent" absent obsidian
-  check "evolution absent" absent evolution
-  check "evolution-ews absent" pkg_absent evolution-ews
-  check "google chrome absent" absent google-chrome
-  check "slack absent" absent slack
-  check "zoom absent" absent zoom
-  check "paraview absent" absent paraview
-  check "vlc absent" absent vlc
-  check "zotero absent" absent zotero
-  check "clockify absent" absent clockify
+  check "server zshrc fragment" grep -q -- "--- server ---" "$zshrc"
+  check "no workstation zshrc fragment" eval '! grep -q -- "--- workstation (laptop/wsl)" "$zshrc"'
 fi
 
 exit "$fail"

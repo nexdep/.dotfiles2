@@ -9,8 +9,9 @@ set -euo pipefail
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LIB_DIR="$REPO_DIR/lib"
 
-log() { printf '\033[1;34m[bootstrap]\033[0m %s\n' "$*"; }
-die() { printf '\033[1;31m[bootstrap]\033[0m %s\n' "$*" >&2; exit 1; }
+LOG_TAG=bootstrap
+# shellcheck source=lib/common.sh
+source "$LIB_DIR/common.sh"
 
 MACHINE="${1:-}"
 if [[ -z "$MACHINE" ]]; then
@@ -27,16 +28,22 @@ case "$MACHINE" in
 esac
 log "machine type: $MACHINE"
 
-SUDO=""
 if [[ "$(id -u)" -ne 0 ]]; then
   command -v sudo >/dev/null 2>&1 || die "not root and sudo is not available"
-  SUDO="sudo"
 fi
-export DEBIAN_FRONTEND=noninteractive
 
 read_packages() { sed -e 's/#.*//' -e 's/[[:space:]]*$//' "$1" | grep -vE '^$' || true; }
 
 # --- apt packages per tier ---------------------------------------------------
+# curl is needed to fetch third-party repo keys but isn't present in a bare
+# system, so install it (and ca-certificates) before adding repos; the
+# second update then picks up the new sources.
+$SUDO apt-get update
+$SUDO apt-get install -y --no-install-recommends curl ca-certificates
+
+add_apt_repo gopass https://packages.gopass.pw/repos/gopass/gopass-archive-keyring.gpg \
+  "" "https://packages.gopass.pw/repos/gopass stable main"
+
 packages=()
 mapfile -t -O "${#packages[@]}" packages < <(read_packages "$LIB_DIR/packages-core.txt")
 if [[ "$MACHINE" != server ]]; then
@@ -51,7 +58,6 @@ $SUDO apt-get update
 $SUDO apt-get install -y --no-install-recommends "${packages[@]}"
 
 # --- non-apt installers per tier ----------------------------------------------
-"$LIB_DIR/install-gopass.sh"
 "$LIB_DIR/install-starship.sh"
 if [[ "$MACHINE" != server ]]; then
   "$LIB_DIR/install-gomi.sh"
