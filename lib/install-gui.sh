@@ -51,7 +51,7 @@ if [[ ! -f "$keyring" ]]; then
 fi
 echo "deb [signed-by=$keyring] https://packages.mozilla.org/apt mozilla main" |
   $SUDO tee /etc/apt/sources.list.d/mozilla.list >/dev/null
-printf 'Package: *\nPin: origin packages.mozilla.org\nPin-Priority: 1000\n' |
+printf 'Package: firefox*\nPin: origin packages.mozilla.org\nPin-Priority: 1000\n' |
   $SUDO tee /etc/apt/preferences.d/mozilla >/dev/null
 
 $SUDO apt-get update
@@ -70,6 +70,8 @@ else
   tar -xf "$tmp/thunderbird.tar" -C "$tmp/extract"
   $SUDO rm -rf /opt/thunderbird-beta
   $SUDO mv "$tmp/extract/thunderbird" /opt/thunderbird-beta
+  # the internal updater runs as the user, so it needs write access to /opt
+  $SUDO chown -R "$(id -un):$(id -gn)" /opt/thunderbird-beta
   $SUDO ln -sf /opt/thunderbird-beta/thunderbird /usr/local/bin/thunderbird-beta
 
   $SUDO install -d -m 0755 /usr/local/share/applications

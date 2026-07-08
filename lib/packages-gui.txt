@@ -2,9 +2,8 @@
 # Firefox Developer Edition, Thunderbird Beta, WezTerm, VS Code Insiders and
 # Obsidian need extra apt repos, tarballs or a direct .deb, so they are
 # installed by lib/install-gui.sh instead of listed here.
-# xz/bzip2 are needed to unpack Mozilla tarballs.
+# xz-utils is needed to unpack the Thunderbird Beta .tar.xz tarball.
 xz-utils
-bzip2
 
 # Evolution mail/calendar client, plus the Exchange Web Services connector.
 # Both are plain Ubuntu universe packages, no extra repo needed.

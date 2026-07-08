@@ -45,13 +45,20 @@ tests/verify.sh              tier-aware assertions, used by CI
 
 ## Install method notes
 
+Note on Recommends: packages from the `lib/packages-*.txt` lists are
+installed with `--no-install-recommends` to keep servers and CI lean, while
+the GUI apps below (both repo- and .deb-based) deliberately keep apt's
+default Recommends handling — desktop apps often rely on them (e.g. Zoom
+pulls in ibus and mesa extras).
+
 - **Firefox Developer Edition**: Mozilla's official apt repo
   (packages.mozilla.org), pinned above Ubuntu's snap-transition stubs, so it
   updates with `apt upgrade`.
 - **Thunderbird Beta**: official Mozilla tarball in `/opt/thunderbird-beta`
   (symlinked as `thunderbird-beta`). Neither packages.mozilla.org nor a
   maintained PPA ships a Thunderbird beta channel for this release; the app
-  self-updates through its internal updater.
+  self-updates through its internal updater (the install dir is chowned to
+  the bootstrapping user so the updater can write to it).
 - **gomi**: prebuilt binary from GitHub releases into `/usr/local/bin`.
 - **starship**: prebuilt binary from GitHub releases into `/usr/local/bin`,
   same pattern as gomi. Config (`home/dot_config/starship.toml`) is the same

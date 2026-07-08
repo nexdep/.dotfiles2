@@ -34,7 +34,7 @@ if [[ "$(id -u)" -ne 0 ]]; then
 fi
 export DEBIAN_FRONTEND=noninteractive
 
-read_packages() { grep -vE '^\s*(#|$)' "$1" || true; }
+read_packages() { sed -e 's/#.*//' -e 's/[[:space:]]*$//' "$1" | grep -vE '^$' || true; }
 
 # --- apt packages per tier ---------------------------------------------------
 packages=()
@@ -77,5 +77,8 @@ if [[ "$current_shell" != "$zsh_path" ]]; then
   log "setting default shell to $zsh_path"
   $SUDO chsh -s "$zsh_path" "$(id -un)"
 fi
+
+log "cleaning apt cache"
+$SUDO apt-get clean
 
 log "done"
