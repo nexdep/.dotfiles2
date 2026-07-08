@@ -12,7 +12,7 @@ Each tier is a superset of the one below it (laptop ⊃ wsl ⊃ server):
 |-------|----------------|---------------------------------------------------|
 | core  | all            | zsh (default shell), gopass, starship, git, curl, chezmoi |
 | extra | laptop, wsl    | gomi, conda (miniforge)                           |
-| gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS), Google Chrome, Slack, Zoom |
+| gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS), Google Chrome, Slack, Zoom, ParaView |
 
 The `.zshrc` is layered the same way: a core fragment for every machine, a
 workstation fragment for laptop/wsl, and a server fragment for servers. The
@@ -90,6 +90,10 @@ tests/verify.sh              tier-aware assertions, used by CI
   version to resolve, like Google Chrome). No apt repo is published, so
   re-running `bootstrap.sh` only reinstalls if the `zoom` command is
   missing.
+- **ParaView**: official Kitware tarball in `/opt/paraview` (symlinked as
+  `paraview`), same pattern as Thunderbird Beta — no `.deb` or apt repo is
+  published. The latest version is resolved from paraview.org's own
+  directory listing at `paraview.org/files/`.
 
 ## CI
 

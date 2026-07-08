@@ -22,6 +22,9 @@
 #     page (Slack publishes no versioned API or GitHub releases for this).
 #   - Zoom from the official .deb at zoom.us/client/latest (fixed URL, no
 #     version to resolve, like Google Chrome). No apt repo is published.
+#   - ParaView from the official Kitware build: a tarball (no .deb/apt repo
+#     exists), so it follows the Thunderbird Beta pattern (/opt + symlink).
+#     The latest version is resolved from paraview.org's directory listing.
 set -euo pipefail
 
 log() { printf '\033[1;34m[gui]\033[0m %s\n' "$*"; }
@@ -167,4 +170,43 @@ else
   curl -fsSL https://zoom.us/client/latest/zoom_amd64.deb -o "$tmp/zoom.deb"
   $SUDO apt-get install -y "$tmp/zoom.deb"
   rm -rf "$tmp"
+fi
+
+# --- ParaView (official Kitware tarball) -------------------------------------------
+if [[ -x /opt/paraview/bin/paraview ]]; then
+  log "paraview already installed, skipping"
+else
+  [[ "$(uname -m)" == x86_64 ]] || die "paraview: unsupported architecture $(uname -m) (only x86_64 builds are published)"
+
+  minor="$(curl -fsSL https://www.paraview.org/files/ |
+    grep -oE 'href="v[0-9]+\.[0-9]+/"' | sed -E 's/href="v(.*)\/"/\1/' | sort -V | tail -n1)"
+  filename="$(curl -fsSL "https://www.paraview.org/files/v${minor}/" |
+    grep -oE 'href="ParaView-[0-9.]+-MPI-Linux-Python3\.[0-9]+-x86_64\.tar\.gz"' |
+    sed -E 's/href="(.*)"/\1/' | sort -V | tail -n1)"
+  [[ -n "$minor" && -n "$filename" ]] || die "paraview: could not find the latest Linux build"
+  url="https://www.paraview.org/files/v${minor}/${filename}"
+
+  tmp="$(mktemp -d)"
+  log "downloading paraview ($filename)"
+  curl -fsSL "$url" -o "$tmp/paraview.tar.gz"
+  mkdir "$tmp/extract"
+  tar -xzf "$tmp/paraview.tar.gz" -C "$tmp/extract"
+  extracted="$(find "$tmp/extract" -mindepth 1 -maxdepth 1 -type d)"
+  $SUDO rm -rf /opt/paraview
+  $SUDO mv "$extracted" /opt/paraview
+  $SUDO ln -sf /opt/paraview/bin/paraview /usr/local/bin/paraview
+
+  $SUDO install -d -m 0755 /usr/local/share/applications
+  $SUDO tee /usr/local/share/applications/paraview.desktop >/dev/null <<'EOF'
+[Desktop Entry]
+Name=ParaView
+Comment=Data analysis and visualization application
+Exec=/opt/paraview/bin/paraview
+Icon=/opt/paraview/share/icons/hicolor/96x96/apps/paraview.png
+Type=Application
+Terminal=false
+Categories=Graphics;Science;
+EOF
+  rm -rf "$tmp"
+  log "installed paraview $filename to /opt/paraview"
 fi

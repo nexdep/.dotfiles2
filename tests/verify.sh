@@ -79,6 +79,8 @@ if [[ "$machine" == laptop ]]; then
   check "slack installed" command -v slack
   # zoom's CLI flags aren't guaranteed safe headless as root either.
   check "zoom installed" command -v zoom
+  # paraview is a heavy Qt/OpenGL app; just check the binary is on PATH.
+  check "paraview installed" command -v paraview
 else
   check "firefox-devedition absent" absent firefox-devedition
   check "thunderbird beta absent" test ! -e /usr/local/bin/thunderbird-beta
@@ -90,6 +92,7 @@ else
   check "google chrome absent" absent google-chrome
   check "slack absent" absent slack
   check "zoom absent" absent zoom
+  check "paraview absent" absent paraview
 fi
 
 exit "$fail"
