@@ -25,6 +25,8 @@ absent() { ! command -v "$1" >/dev/null 2>&1; }
 has_fragment() { grep -q -- "--- $1" "$zshrc"; }
 # shellcheck disable=SC2317,SC2329
 no_fragment() { ! grep -q -- "--- $1" "$zshrc"; }
+# shellcheck disable=SC2317,SC2329
+pkg_absent() { ! dpkg -s "$1" >/dev/null 2>&1; }
 
 echo "== verify machine=$machine =="
 
@@ -68,12 +70,17 @@ if [[ "$machine" == laptop ]]; then
   # obsidian ignores --version and launches the full app instead of exiting,
   # so (unlike the other GUI apps here) just check the binary is on PATH.
   check "obsidian installed" command -v obsidian
+  check "evolution installed" command -v evolution
+  # evolution-ews is a backend module with no executable of its own.
+  check "evolution-ews installed" dpkg -s evolution-ews
 else
   check "firefox-devedition absent" absent firefox-devedition
   check "thunderbird beta absent" test ! -e /usr/local/bin/thunderbird-beta
   check "wezterm absent" absent wezterm
   check "code-insiders absent" absent code-insiders
   check "obsidian absent" absent obsidian
+  check "evolution absent" absent evolution
+  check "evolution-ews absent" pkg_absent evolution-ews
 fi
 
 exit "$fail"

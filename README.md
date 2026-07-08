@@ -12,7 +12,7 @@ Each tier is a superset of the one below it (laptop ⊃ wsl ⊃ server):
 |-------|----------------|---------------------------------------------------|
 | core  | all            | zsh (default shell), gopass, starship, git, curl, chezmoi |
 | extra | laptop, wsl    | gomi, conda (miniforge)                           |
-| gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian |
+| gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS) |
 
 The `.zshrc` is layered the same way: a core fragment for every machine, a
 workstation fragment for laptop/wsl, and a server fragment for servers. The
@@ -73,6 +73,10 @@ tests/verify.sh              tier-aware assertions, used by CI
   so its declared dependencies resolve from the standard repos. No apt repo
   is published, so this doesn't auto-update with `apt upgrade` — re-running
   `bootstrap.sh` only reinstalls if the `obsidian` command is missing.
+- **Evolution / evolution-ews**: plain Ubuntu universe apt packages, listed
+  in `lib/packages-gui.txt` like any other apt package (no extra repo
+  needed). `evolution-ews` adds the Exchange Web Services connector; it's a
+  backend module with no executable of its own.
 
 ## CI
 
