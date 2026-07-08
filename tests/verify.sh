@@ -65,11 +65,14 @@ if [[ "$machine" == laptop ]]; then
   # real machine.
   check "code-insiders installed" \
     code-insiders --version --no-sandbox --user-data-dir="$(mktemp -d)"
+  check "obsidian installed" \
+    obsidian --version --no-sandbox --user-data-dir="$(mktemp -d)"
 else
   check "firefox-devedition absent" absent firefox-devedition
   check "thunderbird beta absent" test ! -e /usr/local/bin/thunderbird-beta
   check "wezterm absent" absent wezterm
   check "code-insiders absent" absent code-insiders
+  check "obsidian absent" absent obsidian
 fi
 
 exit "$fail"

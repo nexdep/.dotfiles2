@@ -10,9 +10,13 @@
 #     (apt.fury.io/wez), a flat Gemfury repo (Codename/Component both "*").
 #   - VS Code Insiders (code-insiders) from Microsoft's official apt
 #     repository (packages.microsoft.com/repos/code).
+#   - Obsidian from the official .deb release on GitHub. Obsidian has no
+#     apt repo and release filenames embed the version, so the latest tag
+#     is resolved via GitHub's releases/latest redirect (no jq dependency).
 set -euo pipefail
 
 log() { printf '\033[1;34m[gui]\033[0m %s\n' "$*"; }
+die() { printf '\033[1;31m[gui]\033[0m %s\n' "$*" >&2; exit 1; }
 
 SUDO=""
 if [[ "$(id -u)" -ne 0 ]]; then
@@ -42,7 +46,6 @@ if [[ -x /opt/thunderbird-beta/thunderbird ]]; then
 else
   url='https://download.mozilla.org/?product=thunderbird-beta-latest-SSL&os=linux64&lang=en-US'
   tmp="$(mktemp -d)"
-  trap 'rm -rf "$tmp"' EXIT
   log "downloading thunderbird beta tarball"
   curl -fsSL -o "$tmp/thunderbird.tar" "$url"
   mkdir "$tmp/extract"
@@ -63,6 +66,7 @@ Terminal=false
 Categories=Network;Email;
 MimeType=x-scheme-handler/mailto;message/rfc822;
 EOF
+  rm -rf "$tmp"
   log "installed thunderbird beta to /opt/thunderbird-beta"
 fi
 
@@ -93,3 +97,21 @@ echo "deb [arch=amd64,arm64,armhf signed-by=$keyring] https://packages.microsoft
 $SUDO apt-get update
 log "installing code-insiders"
 $SUDO apt-get install -y code-insiders
+
+# --- Obsidian (official .deb) ---------------------------------------------------
+if command -v obsidian >/dev/null 2>&1; then
+  log "obsidian already installed, skipping"
+else
+  [[ "$(uname -m)" == x86_64 ]] || die "obsidian: unsupported architecture $(uname -m) (only amd64 .deb is published)"
+
+  tag="$(curl -fsSL -I -o /dev/null -w '%{url_effective}' \
+    https://github.com/obsidianmd/obsidian-releases/releases/latest | sed 's#.*/tag/##')"
+  version="${tag#v}"
+  url="https://github.com/obsidianmd/obsidian-releases/releases/download/${tag}/obsidian_${version}_amd64.deb"
+
+  tmp="$(mktemp -d)"
+  log "downloading obsidian $version"
+  curl -fsSL "$url" -o "$tmp/obsidian.deb"
+  $SUDO apt-get install -y "$tmp/obsidian.deb"
+  rm -rf "$tmp"
+fi
