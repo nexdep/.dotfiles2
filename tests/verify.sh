@@ -77,6 +77,8 @@ if [[ "$machine" == laptop ]]; then
   # slack is Electron-based like obsidian/code-insiders and its --version
   # behavior isn't guaranteed safe headless as root, so just check PATH.
   check "slack installed" command -v slack
+  # zoom's CLI flags aren't guaranteed safe headless as root either.
+  check "zoom installed" command -v zoom
 else
   check "firefox-devedition absent" absent firefox-devedition
   check "thunderbird beta absent" test ! -e /usr/local/bin/thunderbird-beta
@@ -87,6 +89,7 @@ else
   check "evolution-ews absent" pkg_absent evolution-ews
   check "google chrome absent" absent google-chrome
   check "slack absent" absent slack
+  check "zoom absent" absent zoom
 fi
 
 exit "$fail"

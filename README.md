@@ -12,7 +12,7 @@ Each tier is a superset of the one below it (laptop ⊃ wsl ⊃ server):
 |-------|----------------|---------------------------------------------------|
 | core  | all            | zsh (default shell), gopass, starship, git, curl, chezmoi |
 | extra | laptop, wsl    | gomi, conda (miniforge)                           |
-| gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS), Google Chrome, Slack |
+| gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS), Google Chrome, Slack, Zoom |
 
 The `.zshrc` is layered the same way: a core fragment for every machine, a
 workstation fragment for laptop/wsl, and a server fragment for servers. The
@@ -86,6 +86,10 @@ tests/verify.sh              tier-aware assertions, used by CI
   or GitHub releases, so the latest download URL is scraped from Slack's
   own downloads page. Re-running `bootstrap.sh` only reinstalls if the
   `slack` command is missing.
+- **Zoom**: official `.deb` from `zoom.us/client/latest` (fixed URL, no
+  version to resolve, like Google Chrome). No apt repo is published, so
+  re-running `bootstrap.sh` only reinstalls if the `zoom` command is
+  missing.
 
 ## CI
 

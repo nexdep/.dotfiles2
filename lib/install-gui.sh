@@ -20,6 +20,8 @@
 #     Obsidian, release filenames embed the version and there's no apt
 #     repo, so the latest version is scraped from Slack's own downloads
 #     page (Slack publishes no versioned API or GitHub releases for this).
+#   - Zoom from the official .deb at zoom.us/client/latest (fixed URL, no
+#     version to resolve, like Google Chrome). No apt repo is published.
 set -euo pipefail
 
 log() { printf '\033[1;34m[gui]\033[0m %s\n' "$*"; }
@@ -151,5 +153,18 @@ else
   log "downloading slack ($url)"
   curl -fsSL "$url" -o "$tmp/slack.deb"
   $SUDO apt-get install -y "$tmp/slack.deb"
+  rm -rf "$tmp"
+fi
+
+# --- Zoom (official .deb) ---------------------------------------------------------
+if command -v zoom >/dev/null 2>&1; then
+  log "zoom already installed, skipping"
+else
+  [[ "$(uname -m)" == x86_64 ]] || die "zoom: unsupported architecture $(uname -m) (only amd64 .deb is published)"
+
+  tmp="$(mktemp -d)"
+  log "downloading zoom"
+  curl -fsSL https://zoom.us/client/latest/zoom_amd64.deb -o "$tmp/zoom.deb"
+  $SUDO apt-get install -y "$tmp/zoom.deb"
   rm -rf "$tmp"
 fi
