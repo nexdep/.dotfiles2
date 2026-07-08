@@ -60,8 +60,9 @@ if [[ "$machine" == laptop ]]; then
   check "firefox-devedition installed" firefox-devedition --version
   check "thunderbird beta installed" /usr/local/bin/thunderbird-beta --version
   check "wezterm-nightly installed" wezterm --version
-  # --no-sandbox: Electron refuses to run as root (this CI container) without it;
-  # not needed for normal (non-root) use on the real machine.
+  echo "--- debug: code-insiders --version --no-sandbox ---"
+  code-insiders --version --no-sandbox
+  echo "--- debug: exit code $? ---"
   check "code-insiders installed" code-insiders --version --no-sandbox
 else
   check "firefox-devedition absent" absent firefox-devedition
