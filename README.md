@@ -12,7 +12,7 @@ Each tier is a superset of the one below it (laptop ⊃ wsl ⊃ server):
 |-------|----------------|---------------------------------------------------|
 | core  | all            | zsh (default shell), gopass, starship, git, curl, chezmoi |
 | extra | laptop, wsl    | gomi, conda (miniforge)                           |
-| gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS), Google Chrome, Slack, Zoom, ParaView |
+| gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS), Google Chrome, Slack, Zoom, ParaView, VLC |
 
 The `.zshrc` is layered the same way: a core fragment for every machine, a
 workstation fragment for laptop/wsl, and a server fragment for servers. The
@@ -94,6 +94,8 @@ tests/verify.sh              tier-aware assertions, used by CI
   `paraview`), same pattern as Thunderbird Beta — no `.deb` or apt repo is
   published. The latest version is resolved from paraview.org's own
   directory listing at `paraview.org/files/`.
+- **VLC**: plain Ubuntu universe apt package, listed in
+  `lib/packages-gui.txt` like Evolution — no extra repo needed.
 
 ## CI
 

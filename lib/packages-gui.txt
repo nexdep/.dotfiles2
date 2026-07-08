@@ -10,3 +10,6 @@ bzip2
 # Both are plain Ubuntu universe packages, no extra repo needed.
 evolution
 evolution-ews
+
+# VLC media player, also a plain Ubuntu universe package.
+vlc
