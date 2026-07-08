@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# Tier-aware post-bootstrap assertions. Exits non-zero if any check fails.
+# Usage: tests/verify.sh <wsl|server|laptop>
+set -uo pipefail
+
+machine="${1:?usage: $0 <wsl|server|laptop>}"
+zshrc="$HOME/.zshrc"
+fail=0
+
+check() {
+  local desc="$1"
+  shift
+  if "$@" >/dev/null 2>&1; then
+    printf 'ok    %s\n' "$desc"
+  else
+    printf 'FAIL  %s\n' "$desc"
+    fail=1
+  fi
+}
+
+# invoked indirectly through check()
+# shellcheck disable=SC2329
+absent() { ! command -v "$1" >/dev/null 2>&1; }
+# shellcheck disable=SC2329
+has_fragment() { grep -q -- "--- $1" "$zshrc"; }
+# shellcheck disable=SC2329
+no_fragment() { ! grep -q -- "--- $1" "$zshrc"; }
+
+echo "== verify machine=$machine =="
+
+# core tier: every machine
+check "zsh installed" command -v zsh
+check "gopass installed" command -v gopass
+check "chezmoi installed" command -v chezmoi
+check ".zshrc deployed" test -f "$zshrc"
+check ".zshrc parses" zsh -n "$zshrc"
+check "core zshrc fragment" has_fragment "core (all machines)"
+check "login shell is zsh" test "$(getent passwd "$(id -un)" | cut -d: -f7)" = "$(command -v zsh)"
+
+# extra tier: laptop + wsl
+if [[ "$machine" != server ]]; then
+  check "gomi installed" command -v gomi
+  check "workstation zshrc fragment" has_fragment "workstation (laptop/wsl)"
+  check "no server zshrc fragment" no_fragment "server ---"
+else
+  check "gomi absent" absent gomi
+  check "server zshrc fragment" has_fragment "server ---"
+  check "no workstation zshrc fragment" no_fragment "workstation (laptop/wsl)"
+fi
+
+# gui tier: laptop only
+if [[ "$machine" == laptop ]]; then
+  check "firefox-devedition installed" firefox-devedition --version
+  check "thunderbird beta installed" /usr/local/bin/thunderbird-beta --version
+else
+  check "firefox-devedition absent" absent firefox-devedition
+  check "thunderbird beta absent" test ! -e /usr/local/bin/thunderbird-beta
+fi
+
+exit "$fail"

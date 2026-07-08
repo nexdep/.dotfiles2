@@ -1,0 +1,6 @@
+# apt packages installed only on the laptop (gui tier).
+# Firefox Developer Edition and Thunderbird Beta need extra apt repos or
+# tarballs, so they are installed by lib/install-gui.sh.
+# xz/bzip2 are needed to unpack Mozilla tarballs.
+xz-utils
+bzip2

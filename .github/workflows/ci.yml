@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends shellcheck zsh
+          sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$RUNNER_TEMP/bin"
+      - name: shellcheck
+        run: shellcheck bootstrap.sh lib/*.sh tests/*.sh
+      - name: Render .zshrc for every machine type
+        run: |
+          for machine in wsl server laptop; do
+            home="$(mktemp -d)"
+            HOME="$home" MACHINE_TYPE="$machine" "$RUNNER_TEMP/bin/chezmoi" init --apply --source "$PWD"
+            zsh -n "$home/.zshrc"
+            echo "--- rendered $machine OK ---"
+          done
+
+  bootstrap:
+    strategy:
+      fail-fast: false
+      matrix:
+        machine: [server, wsl, laptop]
+    runs-on: ubuntu-latest
+    # Run inside the exact target OS; also keeps the install methods
+    # snap-free by construction (no snapd in containers).
+    container: ubuntu:26.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bootstrap (${{ matrix.machine }})
+        run: ./bootstrap.sh ${{ matrix.machine }}
+      - name: Verify (${{ matrix.machine }})
+        run: tests/verify.sh ${{ matrix.machine }}

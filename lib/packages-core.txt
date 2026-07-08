@@ -1,0 +1,6 @@
+# apt packages installed on every machine (core tier)
+ca-certificates
+curl
+git
+gopass
+zsh

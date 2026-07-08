@@ -1,0 +1,12 @@
+{{- /* Machine type: taken from $MACHINE_TYPE (set by bootstrap.sh / CI),
+       otherwise prompted once and remembered across chezmoi init runs. */ -}}
+{{- $machine := env "MACHINE_TYPE" -}}
+{{- if not $machine -}}
+{{-   $machine = promptStringOnce . "machine" "Machine type (wsl/server/laptop)" -}}
+{{- end -}}
+{{- if not (list "wsl" "server" "laptop" | has $machine) -}}
+{{-   fail (printf "invalid machine type %q (expected wsl, server or laptop)" $machine) -}}
+{{- end -}}
+
+[data]
+    machine = {{ $machine | quote }}

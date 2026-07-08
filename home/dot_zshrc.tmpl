@@ -1,0 +1,10 @@
+# ~/.zshrc — managed by chezmoi (machine: {{ .machine }})
+# Edit in the dotfiles repo, then run `chezmoi apply`.
+
+{{ template "zshrc-core.zsh" . }}
+{{- if ne .machine "server" }}
+{{ template "zshrc-workstation.zsh" . }}
+{{- end }}
+{{- if eq .machine "server" }}
+{{ template "zshrc-server.zsh" . }}
+{{- end }}
