@@ -12,7 +12,7 @@ Each tier is a superset of the one below it (laptop ⊃ wsl ⊃ server):
 |-------|----------------|---------------------------------------------------|
 | core  | all            | zsh (default shell), gopass, starship, git, curl, chezmoi |
 | extra | laptop, wsl    | gomi, conda (miniforge)                           |
-| gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly) |
+| gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders |
 
 The `.zshrc` is layered the same way: a core fragment for every machine, a
 workstation fragment for laptop/wsl, and a server fragment for servers. The
@@ -65,6 +65,9 @@ tests/verify.sh              tier-aware assertions, used by CI
   fragment, matching the current system's `auto_activate_base: true`.
 - **WezTerm**: `wezterm-nightly` apt package from WezTerm's official Fury
   repo (apt.fury.io/wez), so it updates with `apt upgrade`.
+- **VS Code Insiders**: `code-insiders` apt package from Microsoft's
+  official repo (packages.microsoft.com/repos/code), so it updates with
+  `apt upgrade`.
 
 ## CI
 

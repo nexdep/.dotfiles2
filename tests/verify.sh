@@ -60,10 +60,12 @@ if [[ "$machine" == laptop ]]; then
   check "firefox-devedition installed" firefox-devedition --version
   check "thunderbird beta installed" /usr/local/bin/thunderbird-beta --version
   check "wezterm-nightly installed" wezterm --version
+  check "code-insiders installed" code-insiders --version
 else
   check "firefox-devedition absent" absent firefox-devedition
   check "thunderbird beta absent" test ! -e /usr/local/bin/thunderbird-beta
   check "wezterm absent" absent wezterm
+  check "code-insiders absent" absent code-insiders
 fi
 
 exit "$fail"

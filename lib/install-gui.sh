@@ -8,6 +8,8 @@
 #     path; the app keeps itself updated via its internal updater.
 #   - WezTerm (wezterm-nightly) from WezTerm's official apt repository
 #     (apt.fury.io/wez), a flat Gemfury repo (Codename/Component both "*").
+#   - VS Code Insiders (code-insiders) from Microsoft's official apt
+#     repository (packages.microsoft.com/repos/code).
 set -euo pipefail
 
 log() { printf '\033[1;34m[gui]\033[0m %s\n' "$*"; }
@@ -77,3 +79,17 @@ echo "deb [signed-by=$keyring] https://apt.fury.io/wez/ * *" |
 $SUDO apt-get update
 log "installing wezterm-nightly"
 $SUDO apt-get install -y wezterm-nightly
+
+# --- VS Code Insiders (apt) -----------------------------------------------------
+keyring=/etc/apt/keyrings/packages.microsoft.asc
+if [[ ! -f "$keyring" ]]; then
+  log "adding Microsoft apt repository"
+  $SUDO install -d -m 0755 /etc/apt/keyrings
+  curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | $SUDO tee "$keyring" >/dev/null
+fi
+echo "deb [arch=amd64,arm64,armhf signed-by=$keyring] https://packages.microsoft.com/repos/code stable main" |
+  $SUDO tee /etc/apt/sources.list.d/vscode.list >/dev/null
+
+$SUDO apt-get update
+log "installing code-insiders"
+$SUDO apt-get install -y code-insiders
