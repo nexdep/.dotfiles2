@@ -12,7 +12,7 @@ Each tier is a superset of the one below it (laptop ⊃ wsl ⊃ server):
 |-------|----------------|---------------------------------------------------|
 | core  | all            | zsh (default shell), gopass, starship, git, curl, chezmoi |
 | extra | laptop, wsl    | gomi, conda (miniforge)                           |
-| gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS) |
+| gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS), Google Chrome |
 
 The `.zshrc` is layered the same way: a core fragment for every machine, a
 workstation fragment for laptop/wsl, and a server fragment for servers. The
@@ -77,6 +77,10 @@ tests/verify.sh              tier-aware assertions, used by CI
   in `lib/packages-gui.txt` like any other apt package (no extra repo
   needed). `evolution-ews` adds the Exchange Web Services connector; it's a
   backend module with no executable of its own.
+- **Google Chrome**: official `.deb` from `dl.google.com` (fixed URL, no
+  version to resolve), installed via `apt install ./google-chrome.deb`.
+  Unlike Obsidian, its postinst script self-registers Google's own apt
+  repo, so it updates with a normal `apt upgrade` afterwards.
 
 ## CI
 

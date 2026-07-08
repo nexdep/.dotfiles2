@@ -13,6 +13,9 @@
 #   - Obsidian from the official .deb release on GitHub. Obsidian has no
 #     apt repo and release filenames embed the version, so the latest tag
 #     is resolved via GitHub's releases/latest redirect (no jq dependency).
+#   - Google Chrome from the official .deb at dl.google.com (fixed URL, no
+#     version to resolve). Its postinst self-registers Google's apt repo,
+#     so unlike Obsidian it updates with a normal apt upgrade afterwards.
 set -euo pipefail
 
 log() { printf '\033[1;34m[gui]\033[0m %s\n' "$*"; }
@@ -113,5 +116,18 @@ else
   log "downloading obsidian $version"
   curl -fsSL "$url" -o "$tmp/obsidian.deb"
   $SUDO apt-get install -y "$tmp/obsidian.deb"
+  rm -rf "$tmp"
+fi
+
+# --- Google Chrome (official .deb) -----------------------------------------------
+if command -v google-chrome >/dev/null 2>&1; then
+  log "google chrome already installed, skipping"
+else
+  [[ "$(uname -m)" == x86_64 ]] || die "google-chrome: unsupported architecture $(uname -m) (only amd64 .deb is published)"
+
+  tmp="$(mktemp -d)"
+  log "downloading google chrome"
+  curl -fsSL https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -o "$tmp/google-chrome.deb"
+  $SUDO apt-get install -y "$tmp/google-chrome.deb"
   rm -rf "$tmp"
 fi

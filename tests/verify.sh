@@ -73,6 +73,7 @@ if [[ "$machine" == laptop ]]; then
   check "evolution installed" command -v evolution
   # evolution-ews is a backend module with no executable of its own.
   check "evolution-ews installed" dpkg -s evolution-ews
+  check "google chrome installed" google-chrome --version
 else
   check "firefox-devedition absent" absent firefox-devedition
   check "thunderbird beta absent" test ! -e /usr/local/bin/thunderbird-beta
@@ -81,6 +82,7 @@ else
   check "obsidian absent" absent obsidian
   check "evolution absent" absent evolution
   check "evolution-ews absent" pkg_absent evolution-ews
+  check "google chrome absent" absent google-chrome
 fi
 
 exit "$fail"
