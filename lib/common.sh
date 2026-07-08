@@ -15,16 +15,29 @@ die() {
 }
 
 # add_apt_repo <name> <key_url> <options> <repo-and-suites>
-# Writes /etc/apt/keyrings/<name>.asc and /etc/apt/sources.list.d/<name>.list.
+# Writes the signing key to /etc/apt/keyrings/<name>.{asc,gpg} and the source
+# to /etc/apt/sources.list.d/<name>.list. apt decides armored-vs-binary key
+# format by file EXTENSION, so it is chosen from the downloaded content.
 # <options> is extra bracket options like "arch=amd64" ("" for none). Does NOT
 # run apt-get update — callers batch one update after adding all their repos.
 add_apt_repo() {
   local name="$1" key_url="$2" options="$3" repo="$4"
-  local keyring="/etc/apt/keyrings/${name}.asc"
-  if [[ ! -f "$keyring" ]]; then
+  local keydir=/etc/apt/keyrings keyring
+  if [[ -f "$keydir/$name.asc" ]]; then
+    keyring="$keydir/$name.asc"
+  elif [[ -f "$keydir/$name.gpg" ]]; then
+    keyring="$keydir/$name.gpg"
+  else
     log "adding $name apt repository"
-    $SUDO install -d -m 0755 /etc/apt/keyrings
-    curl -fsSL "$key_url" | $SUDO tee "$keyring" >/dev/null
+    local tmpkey
+    tmpkey="$(mktemp)"
+    curl -fsSL "$key_url" -o "$tmpkey"
+    case "$(head -c 14 "$tmpkey")" in
+      "-----BEGIN PGP") keyring="$keydir/$name.asc" ;;
+      *) keyring="$keydir/$name.gpg" ;;
+    esac
+    $SUDO install -D -m 0644 "$tmpkey" "$keyring"
+    rm -f "$tmpkey"
   fi
   echo "deb [signed-by=${keyring}${options:+ $options}] $repo" |
     $SUDO tee "/etc/apt/sources.list.d/${name}.list" >/dev/null
