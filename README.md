@@ -12,7 +12,7 @@ Each tier is a superset of the one below it (laptop ⊃ wsl ⊃ server):
 |-------|----------------|---------------------------------------------------|
 | core  | all            | zsh (default shell), gopass, starship, git, curl, chezmoi |
 | extra | laptop, wsl    | gomi, conda (miniforge)                           |
-| gui   | laptop         | Firefox Developer Edition, Thunderbird Beta       |
+| gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly) |
 
 The `.zshrc` is layered the same way: a core fragment for every machine, a
 workstation fragment for laptop/wsl, and a server fragment for servers. The
@@ -63,6 +63,8 @@ tests/verify.sh              tier-aware assertions, used by CI
   starship's conda module already shows the active env in the prompt.
   Base env is auto-activated in every shell by the workstation zshrc
   fragment, matching the current system's `auto_activate_base: true`.
+- **WezTerm**: `wezterm-nightly` apt package from WezTerm's official Fury
+  repo (apt.fury.io/wez), so it updates with `apt upgrade`.
 
 ## CI
 

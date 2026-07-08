@@ -6,6 +6,8 @@
 #     Neither packages.mozilla.org nor a maintained PPA ships a Thunderbird
 #     beta channel for this Ubuntu release, so the tarball is the supported
 #     path; the app keeps itself updated via its internal updater.
+#   - WezTerm (wezterm-nightly) from WezTerm's official apt repository
+#     (apt.fury.io/wez), a flat Gemfury repo (Codename/Component both "*").
 set -euo pipefail
 
 log() { printf '\033[1;34m[gui]\033[0m %s\n' "$*"; }
@@ -61,3 +63,17 @@ MimeType=x-scheme-handler/mailto;message/rfc822;
 EOF
   log "installed thunderbird beta to /opt/thunderbird-beta"
 fi
+
+# --- WezTerm nightly (apt) -----------------------------------------------------
+keyring=/etc/apt/keyrings/wezterm-fury.asc
+if [[ ! -f "$keyring" ]]; then
+  log "adding WezTerm apt repository"
+  $SUDO install -d -m 0755 /etc/apt/keyrings
+  curl -fsSL https://apt.fury.io/wez/gpg.key | $SUDO tee "$keyring" >/dev/null
+fi
+echo "deb [signed-by=$keyring] https://apt.fury.io/wez/ * *" |
+  $SUDO tee /etc/apt/sources.list.d/wezterm.list >/dev/null
+
+$SUDO apt-get update
+log "installing wezterm-nightly"
+$SUDO apt-get install -y wezterm-nightly
