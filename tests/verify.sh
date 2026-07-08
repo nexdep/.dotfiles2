@@ -65,11 +65,9 @@ if [[ "$machine" == laptop ]]; then
   # real machine.
   check "code-insiders installed" \
     code-insiders --version --no-sandbox --user-data-dir="$(mktemp -d)"
-  echo "--- debug: obsidian --version --no-sandbox ---"
-  timeout 30 obsidian --version --no-sandbox --user-data-dir="$(mktemp -d)"
-  echo "--- debug: exit code $? ---"
-  check "obsidian installed" \
-    timeout 30 obsidian --version --no-sandbox --user-data-dir="$(mktemp -d)"
+  # obsidian ignores --version and launches the full app instead of exiting,
+  # so (unlike the other GUI apps here) just check the binary is on PATH.
+  check "obsidian installed" command -v obsidian
 else
   check "firefox-devedition absent" absent firefox-devedition
   check "thunderbird beta absent" test ! -e /usr/local/bin/thunderbird-beta
