@@ -85,6 +85,8 @@ if [[ "$machine" == laptop ]]; then
   # just check the binary is on PATH, like the other GUI apps above.
   check "vlc installed" command -v vlc
   check "zotero installed" command -v zotero
+  # clockify is Electron-built like obsidian; just check the binary is on PATH.
+  check "clockify installed" command -v clockify
 else
   check "firefox-devedition absent" absent firefox-devedition
   check "thunderbird beta absent" test ! -e /usr/local/bin/thunderbird-beta
@@ -99,6 +101,7 @@ else
   check "paraview absent" absent paraview
   check "vlc absent" absent vlc
   check "zotero absent" absent zotero
+  check "clockify absent" absent clockify
 fi
 
 exit "$fail"

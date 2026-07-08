@@ -29,6 +29,8 @@
 #     documented at https://zotero.retorque.re/file/apt-package-archive/
 #     (zotero.org itself only distributes a tarball; this repo is the
 #     de facto standard apt source, referenced from zotero.org's own docs).
+#   - Clockify from the official .deb at clockify.me/downloads (fixed URL
+#     per arch, no version to resolve), per clockify.me/linux-time-tracking.
 set -euo pipefail
 
 log() { printf '\033[1;34m[gui]\033[0m %s\n' "$*"; }
@@ -230,4 +232,21 @@ else
   $SUDO apt-get update
   log "installing zotero"
   $SUDO apt-get install -y zotero
+fi
+
+# --- Clockify (official .deb) ------------------------------------------------------
+if command -v clockify >/dev/null 2>&1; then
+  log "clockify already installed, skipping"
+else
+  case "$(uname -m)" in
+    x86_64) arch=x64 ;;
+    aarch64) arch=arm64 ;;
+    *) die "clockify: unsupported architecture $(uname -m)" ;;
+  esac
+
+  tmp="$(mktemp -d)"
+  log "downloading clockify"
+  curl -fsSL "https://clockify.me/downloads/Clockify_Setup_${arch}.deb" -o "$tmp/clockify.deb"
+  $SUDO apt-get install -y "$tmp/clockify.deb"
+  rm -rf "$tmp"
 fi

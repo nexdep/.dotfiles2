@@ -12,7 +12,7 @@ Each tier is a superset of the one below it (laptop ⊃ wsl ⊃ server):
 |-------|----------------|---------------------------------------------------|
 | core  | all            | zsh (default shell), gopass, starship, git, curl, chezmoi |
 | extra | laptop, wsl    | gomi, conda (miniforge)                           |
-| gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS), Google Chrome, Slack, Zoom, ParaView, VLC, Zotero |
+| gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS), Google Chrome, Slack, Zoom, ParaView, VLC, Zotero, Clockify |
 
 The `.zshrc` is layered the same way: a core fragment for every machine, a
 workstation fragment for laptop/wsl, and a server fragment for servers. The
@@ -104,6 +104,11 @@ tests/verify.sh              tier-aware assertions, used by CI
   source and updates with a normal `apt upgrade`. `install.sh` calls
   `sudo` internally regardless of how it's invoked, so `sudo` is
   installed first if missing (bare containers usually lack it).
+- **Clockify**: official `.deb` from `clockify.me/downloads` (fixed URL per
+  architecture — both x64 and arm64 are published — no version to
+  resolve), per the instructions at clockify.me/linux-time-tracking. No
+  apt repo is published, so re-running `bootstrap.sh` only reinstalls if
+  the `clockify` command is missing.
 
 ## CI
 
