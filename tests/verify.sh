@@ -36,6 +36,9 @@ check ".zshrc deployed" test -f "$zshrc"
 check ".zshrc parses" zsh -n "$zshrc"
 check "core zshrc fragment" has_fragment "core (all machines)"
 check "login shell is zsh" test "$(getent passwd "$(id -un)" | cut -d: -f7)" = "$(command -v zsh)"
+check "starship installed" command -v starship
+check "starship config deployed" test -f "$HOME/.config/starship.toml"
+check "zshrc initializes starship" grep -q "starship init zsh" "$zshrc"
 
 # extra tier: laptop + wsl
 if [[ "$machine" != server ]]; then

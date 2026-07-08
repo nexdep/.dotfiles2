@@ -19,7 +19,7 @@ path=("$HOME/.local/bin" $path)
 export PATH
 
 # prompt
-PROMPT='%F{green}%n@%m%f:%F{blue}%~%f %# '
+command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
 
 # aliases
 alias ll='ls -lah --color=auto'

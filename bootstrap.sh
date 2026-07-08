@@ -52,6 +52,7 @@ $SUDO apt-get install -y --no-install-recommends "${packages[@]}"
 
 # --- non-apt installers per tier ----------------------------------------------
 "$LIB_DIR/install-gopass.sh"
+"$LIB_DIR/install-starship.sh"
 if [[ "$MACHINE" != server ]]; then
   "$LIB_DIR/install-gomi.sh"
 fi

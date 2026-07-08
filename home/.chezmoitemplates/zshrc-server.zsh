@@ -1,4 +1,3 @@
 # --- server ---
-
-# make it obvious in the prompt that this is a server
-PROMPT='%F{red}%n@%m%f:%F{blue}%~%f %# '
+# placeholder for server-only config; the prompt is handled by starship
+# (see zshrc-core.zsh), configured from home/dot_config/starship.toml.

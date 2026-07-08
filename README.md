@@ -10,7 +10,7 @@ Each tier is a superset of the one below it (laptop ⊃ wsl ⊃ server):
 
 | Tier  | Machines       | Programs                                          |
 |-------|----------------|---------------------------------------------------|
-| core  | all            | zsh (default shell), gopass, git, curl, chezmoi   |
+| core  | all            | zsh (default shell), gopass, starship, git, curl, chezmoi |
 | extra | laptop, wsl    | gomi                                              |
 | gui   | laptop         | Firefox Developer Edition, Thunderbird Beta       |
 
@@ -52,6 +52,9 @@ tests/verify.sh              tier-aware assertions, used by CI
   maintained PPA ships a Thunderbird beta channel for this release; the app
   self-updates through its internal updater.
 - **gomi**: prebuilt binary from GitHub releases into `/usr/local/bin`.
+- **starship**: prebuilt binary from GitHub releases into `/usr/local/bin`,
+  same pattern as gomi. Config (`home/dot_config/starship.toml`) is the same
+  on every machine and just disables the battery module.
 
 ## CI
 
