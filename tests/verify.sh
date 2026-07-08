@@ -65,8 +65,11 @@ if [[ "$machine" == laptop ]]; then
   # real machine.
   check "code-insiders installed" \
     code-insiders --version --no-sandbox --user-data-dir="$(mktemp -d)"
+  echo "--- debug: obsidian --version --no-sandbox ---"
+  timeout 30 obsidian --version --no-sandbox --user-data-dir="$(mktemp -d)"
+  echo "--- debug: exit code $? ---"
   check "obsidian installed" \
-    obsidian --version --no-sandbox --user-data-dir="$(mktemp -d)"
+    timeout 30 obsidian --version --no-sandbox --user-data-dir="$(mktemp -d)"
 else
   check "firefox-devedition absent" absent firefox-devedition
   check "thunderbird beta absent" test ! -e /usr/local/bin/thunderbird-beta
