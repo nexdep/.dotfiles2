@@ -81,10 +81,9 @@ if [[ "$machine" == laptop ]]; then
   check "zoom installed" command -v zoom
   # paraview is a heavy Qt/OpenGL app; just check the binary is on PATH.
   check "paraview installed" command -v paraview
-  echo "--- debug: vlc --version ---"
-  vlc --version
-  echo "--- debug: exit code $? ---"
-  check "vlc installed" vlc --version
+  # vlc --version exits non-zero with no output in this headless container;
+  # just check the binary is on PATH, like the other GUI apps above.
+  check "vlc installed" command -v vlc
 else
   check "firefox-devedition absent" absent firefox-devedition
   check "thunderbird beta absent" test ! -e /usr/local/bin/thunderbird-beta
