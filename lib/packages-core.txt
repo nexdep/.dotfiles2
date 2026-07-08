@@ -1,6 +1,7 @@
-# apt packages installed on every machine (core tier)
+# apt packages installed on every machine (core tier).
+# gopass comes from its own apt repo (lib/install-gopass.sh) because
+# Ubuntu 26.04 dropped it from universe.
 ca-certificates
 curl
 git
-gopass
 zsh

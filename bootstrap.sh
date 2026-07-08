@@ -51,6 +51,7 @@ $SUDO apt-get update
 $SUDO apt-get install -y --no-install-recommends "${packages[@]}"
 
 # --- non-apt installers per tier ----------------------------------------------
+"$LIB_DIR/install-gopass.sh"
 if [[ "$MACHINE" != server ]]; then
   "$LIB_DIR/install-gomi.sh"
 fi

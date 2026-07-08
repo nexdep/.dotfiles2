@@ -19,11 +19,11 @@ check() {
 }
 
 # invoked indirectly through check()
-# shellcheck disable=SC2329
+# shellcheck disable=SC2317,SC2329
 absent() { ! command -v "$1" >/dev/null 2>&1; }
-# shellcheck disable=SC2329
+# shellcheck disable=SC2317,SC2329
 has_fragment() { grep -q -- "--- $1" "$zshrc"; }
-# shellcheck disable=SC2329
+# shellcheck disable=SC2317,SC2329
 no_fragment() { ! grep -q -- "--- $1" "$zshrc"; }
 
 echo "== verify machine=$machine =="
