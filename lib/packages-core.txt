@@ -6,4 +6,5 @@ curl
 git
 gnupg # gpg: gopass encryption + personal key import (lib/install-gpg-key.sh)
 gopass
+tmux
 zsh

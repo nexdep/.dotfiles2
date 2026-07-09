@@ -50,6 +50,7 @@ apps=(
   'core|chezmoi|command -v chezmoi'
   'core|starship|command -v starship'
   'core|neovim|/usr/local/bin/nvim --version'
+  'core|tmux|command -v tmux'
   'extra|gomi|command -v gomi'
   'extra|conda|test -x "$HOME/miniforge3/bin/conda"|test ! -e "$HOME/miniforge3"'
   'gui|firefox-devedition|firefox-devedition --version'
@@ -87,6 +88,7 @@ check "core zshrc fragment" grep -q -- "--- core (all machines)" "$zshrc"
 check "starship config deployed" test -f "$HOME/.config/starship.toml"
 check "nvim config deployed" test -f "$HOME/.config/nvim/init.lua"
 check "nvim lazy-lock deployed" test -f "$HOME/.config/nvim/lazy-lock.json"
+check "tmux config deployed" test -f "$HOME/.config/tmux/tmux.conf"
 check "ssh config deployed" test -f "$HOME/.ssh/config"
 check "zshrc initializes starship" grep -q "starship init zsh" "$zshrc"
 check "login shell is zsh" test "$(getent passwd "$(id -un)" | cut -d: -f7)" = "$(command -v zsh)"
