@@ -59,6 +59,7 @@ $SUDO apt-get install -y --no-install-recommends "${packages[@]}"
 
 # --- non-apt installers per tier ----------------------------------------------
 "$LIB_DIR/install-starship.sh"
+"$LIB_DIR/install-neovim.sh"
 "$LIB_DIR/install-gpg-key.sh" # personal key for gopass; self-skips without a TTY
 "$LIB_DIR/install-gopass-store.sh" # personal password store (public repo, keyless clone)
 if [[ "$MACHINE" != server ]]; then

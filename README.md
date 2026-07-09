@@ -10,7 +10,7 @@ Each tier is a superset of the one below it (laptop ⊃ wsl ⊃ server):
 
 | Tier  | Machines       | Programs                                          |
 |-------|----------------|---------------------------------------------------|
-| core  | all            | zsh (default shell), gopass (+ password store), gnupg (+ personal GPG key), starship, git, curl, chezmoi |
+| core  | all            | zsh (default shell), gopass (+ password store), gnupg (+ personal GPG key), starship, neovim (+ LazyVim config), git, curl, chezmoi |
 | extra | laptop, wsl    | gomi, conda (miniforge)                           |
 | gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS), Google Chrome, Slack, Zoom, ParaView, VLC, Zotero, Clockify |
 
@@ -41,6 +41,7 @@ bootstrap.sh                 entry point: tier-aware installs + chezmoi init
 lib/common.sh                shared helpers: SUDO/log/die, add_apt_repo, install_deb
 lib/packages-*.txt           apt package lists per tier
 lib/install-starship.sh      starship from GitHub release binaries (all machines)
+lib/install-neovim.sh        Neovim from the official release tarball into /opt (all machines)
 lib/install-gpg-key.sh       imports the personal GPG key from gpg/ (all machines, TTY only)
 lib/install-gopass-store.sh  clones the gopass password store from GitHub (all machines)
 lib/generate-gpg-backup.sh   manual tool: re-export the key into gpg/ (never run by bootstrap)
@@ -98,6 +99,20 @@ pulls in ibus and mesa extras).
 - **starship**: prebuilt binary from GitHub releases into `/usr/local/bin`,
   same pattern as gomi. Config (`home/dot_config/starship.toml`) is the same
   on every machine and just disables the battery module.
+- **neovim**: official tarball from the latest GitHub release
+  (fixed-name assets for x86_64 and arm64) into `/opt/nvim`, symlinked as
+  `nvim` in `/usr/local/bin` — Ubuntu's apt package lags far behind
+  upstream. No apt repo, so re-running `bootstrap.sh` only reinstalls if
+  `/opt/nvim/bin/nvim` is missing. The config (`home/dot_config/nvim/`) is
+  a [LazyVim](https://www.lazyvim.org) setup (based on the LazyVim
+  starter), identical on every machine: the WSL-only clipboard integration
+  is a runtime `vim.fn.has("wsl")` check in `lua/config/options.lua`, not
+  a template. That clipboard block uses `win32yank.exe`, which this repo
+  does **not** install — it's a Windows-side utility expected on the WSL
+  interop PATH (e.g. shipped with a Windows Neovim install).
+  `lazy-lock.json` (pinned plugin versions) is chezmoi-managed, so after a
+  `:Lazy update` run `chezmoi re-add ~/.config/nvim/lazy-lock.json` to
+  record the new pins.
 - **conda**: Miniforge3 (conda-forge's installer, not Anaconda/Miniconda),
   installed per-user into `$HOME/miniforge3` via the official installer
   script in batch mode. Config (`home/dot_condarc`) is taken from the
