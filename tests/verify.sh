@@ -45,6 +45,7 @@ rank() {
 #  - evolution-ews is a backend module with no executable, hence dpkg -s.
 apps=(
   'core|zsh|command -v zsh'
+  'core|gnupg|command -v gpg'
   'core|gopass|command -v gopass'
   'core|chezmoi|command -v chezmoi'
   'core|starship|command -v starship'
@@ -85,6 +86,9 @@ check "core zshrc fragment" grep -q -- "--- core (all machines)" "$zshrc"
 check "starship config deployed" test -f "$HOME/.config/starship.toml"
 check "zshrc initializes starship" grep -q "starship init zsh" "$zshrc"
 check "login shell is zsh" test "$(getent passwd "$(id -un)" | cut -d: -f7)" = "$(command -v zsh)"
+# install-gpg-key.sh must skip the personal key import when there is no TTY
+# (as in CI), so no secret key may exist here.
+check "gpg key import skipped (no TTY)" eval '! gpg --list-secret-keys --with-colons 2>/dev/null | grep -q "^sec"'
 
 if [[ "$machine" != server ]]; then
   check "condarc deployed" test -f "$HOME/.condarc"

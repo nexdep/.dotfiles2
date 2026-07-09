@@ -10,7 +10,7 @@ Each tier is a superset of the one below it (laptop ⊃ wsl ⊃ server):
 
 | Tier  | Machines       | Programs                                          |
 |-------|----------------|---------------------------------------------------|
-| core  | all            | zsh (default shell), gopass, starship, git, curl, chezmoi |
+| core  | all            | zsh (default shell), gopass, gnupg (+ personal GPG key), starship, git, curl, chezmoi |
 | extra | laptop, wsl    | gomi, conda (miniforge)                           |
 | gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS), Google Chrome, Slack, Zoom, ParaView, VLC, Zotero, Clockify |
 
@@ -30,6 +30,10 @@ cd dotfiles2
 Re-running is safe; everything is idempotent. After the first run the machine
 type is remembered by chezmoi, so config changes are just `chezmoi apply`.
 
+On an interactive first run, bootstrap also asks for one passphrase to
+decrypt and import the personal GPG key (see "Personal GPG key" below);
+unattended runs (CI, no TTY) skip that step automatically.
+
 ## Layout
 
 ```
@@ -37,6 +41,9 @@ bootstrap.sh                 entry point: tier-aware installs + chezmoi init
 lib/common.sh                shared helpers: SUDO/log/die, add_apt_repo, install_deb
 lib/packages-*.txt           apt package lists per tier
 lib/install-starship.sh      starship from GitHub release binaries (all machines)
+lib/install-gpg-key.sh       imports the personal GPG key from gpg/ (all machines, TTY only)
+lib/generate-gpg-backup.sh   manual tool: re-export the key into gpg/ (never run by bootstrap)
+gpg/private-key.asc.gpg      passphrase-encrypted backup of the personal GPG key
 lib/install-gomi.sh          gomi from GitHub release binaries (laptop+wsl)
 lib/install-conda.sh         Miniforge3 from the official installer script (laptop+wsl)
 lib/install-gui.sh           all laptop GUI apps (apt repos, tarballs, .debs)
@@ -64,6 +71,18 @@ pulls in ibus and mesa extras).
 - **gopass**: from its official apt repo (packages.gopass.pw, registered by
   `bootstrap.sh`) since Ubuntu 26.04 dropped it from universe; updates with
   `apt upgrade`.
+- **Personal GPG key**: the key the gopass store is encrypted to lives in
+  the repo as `gpg/private-key.asc.gpg` — a symmetric, passphrase-encrypted
+  (AES256) export of the private key; its security rests entirely on that
+  passphrase. `lib/install-gpg-key.sh` (called by `bootstrap.sh` on every
+  tier) decrypts it, imports it, and marks it ultimately trusted. It skips
+  itself when the key is already in the keyring or when there is no TTY, so
+  CI never imports it (`tests/verify.sh` asserts this). The public key and
+  ownertrust are derived from the private key on import, so the backup is a
+  single file. To rotate or refresh the backup, run
+  `lib/generate-gpg-backup.sh` on a machine that has the key and commit the
+  new blob; the key id is pinned in both scripts (override with
+  `GPG_KEY_ID`).
 - **gomi**: prebuilt binary from GitHub releases into `/usr/local/bin`.
 - **starship**: prebuilt binary from GitHub releases into `/usr/local/bin`,
   same pattern as gomi. Config (`home/dot_config/starship.toml`) is the same

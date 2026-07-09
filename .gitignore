@@ -1,0 +1,4 @@
+# gpg/: only the passphrase-encrypted key backup may be committed; raw key
+# material must never land in git.
+gpg/*
+!gpg/private-key.asc.gpg
