@@ -1,0 +1,29 @@
+Host marco-hetzner-storage-1
+    HostName u426683.your-storagebox.de
+    User u426683
+    Port 23
+    IdentityFile ~/.ssh/marco-hetzner-storage
+    IdentitiesOnly yes
+    ServerAliveInterval 15
+    ServerAliveCountMax 3
+    UserKnownHostsFile /home/marco/.ssh/known_hosts
+    StrictHostKeyChecking accept-new
+    BatchMode yes
+
+Host hetzner-2
+    HostName 46.225.153.179
+    User marco
+    Port 2222
+    IdentityFile ~/.ssh/hetzner-key-2
+
+Host github-work
+  HostName github.com
+  User marco-de-pietri
+  IdentityFile ~/.ssh/marco-dev-1
+  IdentitiesOnly yes
+
+Host github-nexdep
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/marco-dev-2
+

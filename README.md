@@ -10,7 +10,7 @@ Each tier is a superset of the one below it (laptop ⊃ wsl ⊃ server):
 
 | Tier  | Machines       | Programs                                          |
 |-------|----------------|---------------------------------------------------|
-| core  | all            | zsh (default shell), gopass (+ password store), gnupg (+ personal GPG key), starship, neovim (+ LazyVim config), git, curl, chezmoi |
+| core  | all            | zsh (default shell), gopass (+ password store), gnupg (+ personal GPG key), starship, neovim (+ LazyVim config), ssh config, git, curl, chezmoi |
 | extra | laptop, wsl    | gomi, conda (miniforge)                           |
 | gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS), Google Chrome, Slack, Zoom, ParaView, VLC, Zotero, Clockify |
 
@@ -18,6 +18,12 @@ The `.zshrc` is layered the same way: a core fragment for every machine, a
 workstation fragment for laptop/wsl, and a server fragment for servers. The
 fragments live in `home/.chezmoitemplates/` and are assembled by
 `home/dot_zshrc.tmpl` based on the machine type stored in chezmoi's data.
+
+The SSH client config (`home/private_dot_ssh/config`) is deployed to
+`~/.ssh/config` on every machine — only the config (host aliases) is
+versioned, never private keys. The `private_` prefix keeps `~/.ssh` at mode
+`0700`, and chezmoi manages just that one file, leaving existing keys and
+`known_hosts` in place.
 
 ## Usage
 

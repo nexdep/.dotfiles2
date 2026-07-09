@@ -87,6 +87,7 @@ check "core zshrc fragment" grep -q -- "--- core (all machines)" "$zshrc"
 check "starship config deployed" test -f "$HOME/.config/starship.toml"
 check "nvim config deployed" test -f "$HOME/.config/nvim/init.lua"
 check "nvim lazy-lock deployed" test -f "$HOME/.config/nvim/lazy-lock.json"
+check "ssh config deployed" test -f "$HOME/.ssh/config"
 check "zshrc initializes starship" grep -q "starship init zsh" "$zshrc"
 check "login shell is zsh" test "$(getent passwd "$(id -un)" | cut -d: -f7)" = "$(command -v zsh)"
 # install-gpg-key.sh must skip the personal key import when there is no TTY
