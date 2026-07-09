@@ -31,6 +31,12 @@ missing), so Windows-side tools resolve the same host aliases while
 Windows-only hosts stay in the Windows file. The script no-ops when WSL
 interop is unavailable (as in CI containers).
 
+A few empty quiet-login markers (`~/.hushlogin`, `~/.motd_shown`,
+`~/.sudo_as_admin_successful`) are deployed **only on wsl**, gated by
+`home/.chezmoiignore` (which ignores them on server/laptop). They carry the
+`empty_` attribute so chezmoi keeps the zero-byte files; no program is
+associated with them.
+
 ## Usage
 
 ```sh
@@ -63,6 +69,7 @@ lib/install-conda.sh         Miniforge3 from the official installer script (lapt
 lib/install-gui.sh           all laptop GUI apps (apt repos, tarballs, .debs)
 home/                        chezmoi source directory (via .chezmoiroot)
 home/.chezmoiscripts/        chezmoi run scripts (Windows-side ssh config on wsl)
+home/.chezmoiignore          per-machine deploy filter (wsl-only quiet-login markers)
 tests/verify.sh              tier-aware assertions (data-driven app table), used by CI
 .github/workflows/ci.yml     lint + full bootstrap of all 3 machine types
 ```

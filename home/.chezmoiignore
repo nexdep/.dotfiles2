@@ -1,0 +1,6 @@
+{{/* WSL-only quiet-login markers: deploy on wsl, ignore elsewhere. */}}
+{{ if ne .machine "wsl" }}
+.hushlogin
+.motd_shown
+.sudo_as_admin_successful
+{{ end -}}

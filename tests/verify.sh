@@ -112,4 +112,14 @@ else
   check "no workstation zshrc fragment" eval '! grep -q -- "--- workstation (laptop/wsl)" "$zshrc"'
 fi
 
+# WSL-only quiet-login markers (deployed via home/.chezmoiignore). Present on
+# wsl, absent on server/laptop.
+for marker in .hushlogin .motd_shown .sudo_as_admin_successful; do
+  if [[ "$machine" == wsl ]]; then
+    check "wsl marker $marker deployed" test -f "$HOME/$marker"
+  else
+    check "wsl marker $marker absent" test ! -e "$HOME/$marker"
+  fi
+done
+
 exit "$fail"
