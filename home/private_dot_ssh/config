@@ -6,7 +6,6 @@ Host marco-hetzner-storage-1
     IdentitiesOnly yes
     ServerAliveInterval 15
     ServerAliveCountMax 3
-    UserKnownHostsFile /home/marco/.ssh/known_hosts
     StrictHostKeyChecking accept-new
     BatchMode yes
 

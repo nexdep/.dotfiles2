@@ -1,0 +1,31 @@
+{{ if eq .machine "wsl" -}}
+#!/bin/sh
+# Mirror the SSH config into the Windows user's home so Windows-side tools
+# (OpenSSH, VS Code) can use the same host aliases. Non-destructive: the
+# repo config lands in .ssh/config_dotfiles and the Windows .ssh/config
+# gets an Include line prepended; Windows-only hosts stay in that file.
+# config hash: {{ include "private_dot_ssh/config" | sha256sum }}
+set -eu
+
+# No WSL interop (e.g. CI containers): nothing to do.
+[ -e /proc/sys/fs/binfmt_misc/WSLInterop ] || exit 0
+command -v cmd.exe >/dev/null 2>&1 || exit 0
+
+# cd to a Windows filesystem path first: cmd.exe warns on UNC/Linux cwd.
+winhome="$(cd /mnt/c && wslpath "$(cmd.exe /c 'echo %USERPROFILE%' 2>/dev/null | tr -d '\r')")"
+[ -d "$winhome" ] || exit 0
+
+mkdir -p "$winhome/.ssh"
+cp "$HOME/.ssh/config" "$winhome/.ssh/config_dotfiles"
+
+# Ensure the Windows ssh config Includes it, before any Host block
+# (an Include after a Host line would nest under that host).
+winconfig="$winhome/.ssh/config"
+if [ ! -f "$winconfig" ]; then
+  printf 'Include config_dotfiles\n' >"$winconfig"
+elif ! grep -q '^Include config_dotfiles$' "$winconfig"; then
+  printf 'Include config_dotfiles\n\n%s\n' "$(cat "$winconfig")" >"$winconfig.tmp"
+  mv "$winconfig.tmp" "$winconfig"
+fi
+echo "windows ssh config updated in $winhome/.ssh"
+{{ end -}}

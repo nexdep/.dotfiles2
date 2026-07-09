@@ -23,7 +23,13 @@ The SSH client config (`home/private_dot_ssh/config`) is deployed to
 `~/.ssh/config` on every machine — only the config (host aliases) is
 versioned, never private keys. The `private_` prefix keeps `~/.ssh` at mode
 `0700`, and chezmoi manages just that one file, leaving existing keys and
-`known_hosts` in place.
+`known_hosts` in place. On WSL, a chezmoi `run_onchange` script
+(`home/.chezmoiscripts/`) additionally mirrors the config into the Windows
+user's home as `.ssh/config_dotfiles` and prepends
+`Include config_dotfiles` to the Windows `.ssh/config` (creating it if
+missing), so Windows-side tools resolve the same host aliases while
+Windows-only hosts stay in the Windows file. The script no-ops when WSL
+interop is unavailable (as in CI containers).
 
 ## Usage
 
@@ -56,6 +62,7 @@ lib/install-gomi.sh          gomi from GitHub release binaries (laptop+wsl)
 lib/install-conda.sh         Miniforge3 from the official installer script (laptop+wsl)
 lib/install-gui.sh           all laptop GUI apps (apt repos, tarballs, .debs)
 home/                        chezmoi source directory (via .chezmoiroot)
+home/.chezmoiscripts/        chezmoi run scripts (Windows-side ssh config on wsl)
 tests/verify.sh              tier-aware assertions (data-driven app table), used by CI
 .github/workflows/ci.yml     lint + full bootstrap of all 3 machine types
 ```
