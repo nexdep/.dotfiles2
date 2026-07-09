@@ -89,6 +89,10 @@ check "login shell is zsh" test "$(getent passwd "$(id -un)" | cut -d: -f7)" = "
 # install-gpg-key.sh must skip the personal key import when there is no TTY
 # (as in CI), so no secret key may exist here.
 check "gpg key import skipped (no TTY)" eval '! gpg --list-secret-keys --with-colons 2>/dev/null | grep -q "^sec"'
+# The gopass store is a public repo cloned keylessly on every tier; the push
+# URL must have been switched to SSH.
+check "gopass store cloned" test -d "$HOME/.local/share/gopass/stores/root/.git"
+check "gopass store push url is ssh" eval '[[ "$(git -C "$HOME/.local/share/gopass/stores/root" remote get-url --push origin)" == git@* ]]'
 
 if [[ "$machine" != server ]]; then
   check "condarc deployed" test -f "$HOME/.condarc"

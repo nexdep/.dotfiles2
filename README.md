@@ -10,7 +10,7 @@ Each tier is a superset of the one below it (laptop ⊃ wsl ⊃ server):
 
 | Tier  | Machines       | Programs                                          |
 |-------|----------------|---------------------------------------------------|
-| core  | all            | zsh (default shell), gopass, gnupg (+ personal GPG key), starship, git, curl, chezmoi |
+| core  | all            | zsh (default shell), gopass (+ password store), gnupg (+ personal GPG key), starship, git, curl, chezmoi |
 | extra | laptop, wsl    | gomi, conda (miniforge)                           |
 | gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS), Google Chrome, Slack, Zoom, ParaView, VLC, Zotero, Clockify |
 
@@ -42,6 +42,7 @@ lib/common.sh                shared helpers: SUDO/log/die, add_apt_repo, install
 lib/packages-*.txt           apt package lists per tier
 lib/install-starship.sh      starship from GitHub release binaries (all machines)
 lib/install-gpg-key.sh       imports the personal GPG key from gpg/ (all machines, TTY only)
+lib/install-gopass-store.sh  clones the gopass password store from GitHub (all machines)
 lib/generate-gpg-backup.sh   manual tool: re-export the key into gpg/ (never run by bootstrap)
 gpg/private-key.asc.gpg      passphrase-encrypted backup of the personal GPG key
 lib/install-gomi.sh          gomi from GitHub release binaries (laptop+wsl)
@@ -83,6 +84,16 @@ pulls in ibus and mesa extras).
   `lib/generate-gpg-backup.sh` on a machine that has the key and commit the
   new blob; the key id is pinned in both scripts (override with
   `GPG_KEY_ID`).
+- **gopass store**: the password store itself is the public repo
+  `github.com/nexdep/.gopass`, cloned keylessly over HTTPS by
+  `lib/install-gopass-store.sh` (every tier, CI included) into gopass's
+  default root-store path (`~/.local/share/gopass/stores/root`); re-runs
+  skip if the store exists. The push URL is switched to SSH so
+  `gopass sync` can push once an SSH key is set up, while pulls need no
+  credentials. Being public, the repo exposes secret *names* (file paths)
+  and git history; the contents are encrypted to the personal GPG key, so
+  they are unreadable without it (as in CI, where the key import is
+  skipped).
 - **gomi**: prebuilt binary from GitHub releases into `/usr/local/bin`.
 - **starship**: prebuilt binary from GitHub releases into `/usr/local/bin`,
   same pattern as gomi. Config (`home/dot_config/starship.toml`) is the same
