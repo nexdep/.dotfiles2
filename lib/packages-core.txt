@@ -7,4 +7,5 @@ git
 gnupg # gpg: gopass encryption + personal key import (lib/install-gpg-key.sh)
 gopass
 tmux
+vim-gtk3 # vim with +clipboard (needed by ~/.vimrc's clipboard=unnamedplus)
 zsh
