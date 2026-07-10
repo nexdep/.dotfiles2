@@ -51,9 +51,20 @@ files with no associated program.
 
 `home/dot_scripts/` deploys to `~/.scripts/` on every machine — handy
 standalone scripts that are **not** used by `bootstrap.sh`, organized into
-category subfolders (e.g. `gpg/generate-gpg-backup.sh`). Unlike the
-`lib/` install scripts they are self-contained and do not source
-`lib/common.sh`, since they run from `~/.scripts/` rather than the repo.
+category subfolders: `gpg/` (the GPG backup tool), `hetzner_mount/` (SSHFS
+Storage Box user-systemd mount), `openmc_scripts/` (conda/OpenMC build +
+neutronics tooling + data fetcher), and `restic_b2_backups/`
+(restic→Backblaze systemd backup). Unlike the `lib/` install scripts they are
+self-contained and do not source `lib/common.sh`, since they run from
+`~/.scripts/` rather than the repo. Secrets are never committed — the restic
+scripts only write `CHANGE_ME` placeholders into `/etc/restic`.
+
+The core `.zshrc` sources every file in `~/.zsh/` (a drop-in dir that is
+**not** chezmoi-managed): put machine-local shell snippets there instead of
+editing the generated `~/.zshrc`. For example
+`~/.scripts/openmc_scripts/openmc_data_fetcher.sh` downloads nuclear data and
+writes the `OPENMC_CROSS_SECTIONS` / `OPENMC_CHAIN_FILE` exports to
+`~/.zsh/openmc.zsh`.
 
 A few empty quiet-login markers (`~/.hushlogin`, `~/.motd_shown`,
 `~/.sudo_as_admin_successful`) are deployed **only on wsl**, gated by
@@ -92,7 +103,7 @@ lib/install-conda.sh         Miniforge3 from the official installer script (lapt
 lib/install-yazi.sh          yazi + ya from GitHub release binaries (laptop+wsl)
 lib/install-gui.sh           all laptop GUI apps (apt repos, tarballs, .debs)
 home/                        chezmoi source directory (via .chezmoiroot)
-home/dot_scripts/            non-bootstrap scripts deployed to ~/.scripts/ (e.g. gpg/ backup tool)
+home/dot_scripts/            non-bootstrap scripts deployed to ~/.scripts/ (gpg, hetzner_mount, openmc_scripts, restic_b2_backups)
 home/.chezmoiscripts/        chezmoi run scripts (Windows-side ssh config, yazi plugins)
 home/.chezmoiignore          per-machine deploy filter (quiet-login markers, yazi config)
 tests/verify.sh              tier-aware assertions (data-driven app table), used by CI

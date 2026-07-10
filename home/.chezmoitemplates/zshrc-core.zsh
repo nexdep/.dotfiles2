@@ -36,3 +36,13 @@ alias grep='grep --color=auto'
 if command -v gopass >/dev/null 2>&1; then
   source <(gopass completion zsh)
 fi
+
+# ~/.zsh: machine-local shell drop-ins (e.g. OpenMC data paths written by
+# ~/.scripts/openmc_scripts/openmc_data_fetcher.sh), sourced if present.
+# Not chezmoi-managed — put per-machine snippets here instead of editing ~/.zshrc.
+if [[ -d "$HOME/.zsh" ]]; then
+  for _zsh_dropin in "$HOME"/.zsh/*(N.); do
+    source "$_zsh_dropin"
+  done
+  unset _zsh_dropin
+fi

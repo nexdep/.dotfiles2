@@ -106,6 +106,10 @@ check "gitconfig excludesFile set" eval '[[ "$(git config --file "$HOME/.gitconf
 check "prompts folder deployed" test -d "$HOME/.prompts/shared"
 check "prompts folder has all files" eval '[[ $(find "$HOME/.prompts/shared" -maxdepth 1 -name "*.md" | wc -l) -eq 8 ]]'
 check "gpg backup script deployed" test -x "$HOME/.scripts/gpg/generate-gpg-backup.sh"
+check "hetzner scripts deployed" test -x "$HOME/.scripts/hetzner_mount/setup_hetzner_storagebox_systemd.sh"
+check "openmc scripts deployed" test -x "$HOME/.scripts/openmc_scripts/openmc_data_fetcher.sh"
+check "restic scripts deployed" test -x "$HOME/.scripts/restic_b2_backups/setup-restic-systemd-backup.sh"
+check "zshrc sources ~/.zsh drop-ins" grep -q 'HOME/.zsh' "$zshrc"
 # the ephemeral devcontainer credential helper must not have shipped
 check "no ephemeral credential helper" eval '! grep -q vscode-remote-containers "$HOME/.gitconfig_marco"'
 check "zshrc initializes starship" grep -q "starship init zsh" "$zshrc"
