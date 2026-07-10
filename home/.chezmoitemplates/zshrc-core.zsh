@@ -15,7 +15,7 @@ autoload -Uz compinit && compinit
 
 # path
 typeset -U path
-path=("$HOME/.local/bin" $path)
+path=("$HOME/.local/bin" "$HOME/.cargo/bin" $path)
 export PATH
 
 # prompt

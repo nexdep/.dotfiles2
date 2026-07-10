@@ -56,9 +56,43 @@ apps=(
   'core|fzf|command -v fzf'
   'core|bat|command -v bat' # also proves bootstrap's bat -> batcat shim
   'core|zoxide|command -v zoxide'
+  'core|git-lfs|command -v git-lfs'
+  'core|gh|command -v gh'
+  'core|jq|command -v jq'
+  'core|btop|command -v btop'
+  'core|build-essential|command -v gcc'
+  'core|npm|command -v npm'
+  'core|luarocks|command -v luarocks'
+  'core|sqlite3|command -v sqlite3'
+  'core|fd-find|command -v fd' # also proves bootstrap's fd -> fdfind shim
+  'core|restic|command -v restic'
+  'core|sshfs|command -v sshfs'
+  'core|openssh-server|test -x /usr/sbin/sshd'
+  'core|bubblewrap|command -v bwrap'
+  'core|eza|command -v eza'
+  'core|fastfetch|command -v fastfetch'
+  'core|tailscale|command -v tailscale'
+  'core|rclone|command -v rclone'
+  'core|lazygit|command -v lazygit'
+  'core|rust|test -x "$HOME/.cargo/bin/cargo"'
+  'core|tree-sitter|test -x "$HOME/.cargo/bin/tree-sitter"'
+  'core|claude|test -x "$HOME/.local/bin/claude"'
+  'core|codex|test -x "$HOME/.local/bin/codex"'
+  'core|uv|test -x "$HOME/.local/bin/uv"'
   'extra|gomi|command -v gomi'
   'extra|conda|test -x "$HOME/miniforge3/bin/conda"|test ! -e "$HOME/miniforge3"'
   'extra|yazi|command -v yazi && command -v ya|! command -v yazi && ! command -v ya'
+  'extra|imagemagick|command -v convert'
+  'extra|ffmpeg|command -v ffmpeg'
+  'extra|poppler-utils|command -v pdftoppm'
+  'extra|chafa|command -v chafa'
+  'extra|p7zip-full|command -v 7z'
+  'extra|pandoc|command -v pandoc'
+  'extra|rga|command -v rga'
+  'extra|dezoomify-rs|command -v dezoomify-rs'
+  'extra|latexmk|command -v latexmk'
+  'extra|zathura|command -v zathura'
+  'extra|qt6-wayland|dpkg -s qt6-wayland|! dpkg -s qt6-wayland'
   'gui|firefox-devedition|firefox-devedition --version'
   'gui|thunderbird-beta|/usr/local/bin/thunderbird-beta --version|test ! -e /usr/local/bin/thunderbird-beta'
   'gui|wezterm|wezterm --version'
@@ -73,6 +107,7 @@ apps=(
   'gui|vlc|command -v vlc'
   'gui|zotero|command -v zotero'
   'gui|clockify|command -v clockify'
+  'gui|libfuse2t64|dpkg -s libfuse2t64|! dpkg -s libfuse2t64'
 )
 
 echo "== verify machine=$machine =="
@@ -133,6 +168,7 @@ if [[ "$machine" != server ]]; then
   check "yazi config deployed" test -f "$HOME/.config/yazi/yazi.toml"
   # proves the ya pkg run script installed the plugins pinned in package.toml
   check "yazi fg plugin installed" test -d "$HOME/.config/yazi/plugins/fg.yazi"
+  check "yazi zsh completions installed" test -f /usr/local/share/zsh/site-functions/_yazi
 else
   check "server zshrc fragment" grep -q -- "--- server ---" "$zshrc"
   check "no workstation zshrc fragment" eval '! grep -q -- "--- workstation (laptop/wsl)" "$zshrc"'

@@ -64,15 +64,30 @@ if command -v batcat >/dev/null 2>&1 && ! command -v bat >/dev/null 2>&1; then
   $SUDO ln -s "$(command -v batcat)" /usr/local/bin/bat
 fi
 
+# Same story for fd: Ubuntu ships it as fdfind (LazyVim and friends call `fd`).
+if command -v fdfind >/dev/null 2>&1 && ! command -v fd >/dev/null 2>&1; then
+  log "symlinking fd -> fdfind"
+  $SUDO ln -s "$(command -v fdfind)" /usr/local/bin/fd
+fi
+
 # --- non-apt installers per tier ----------------------------------------------
 "$LIB_DIR/install-starship.sh"
 "$LIB_DIR/install-neovim.sh"
 "$LIB_DIR/install-gpg-key.sh" # personal key for gopass; self-skips without a TTY
 "$LIB_DIR/install-gopass-store.sh" # personal password store (public repo, keyless clone)
+"$LIB_DIR/install-tailscale.sh"
+"$LIB_DIR/install-rclone.sh"
+"$LIB_DIR/install-rust.sh" # rustup + tree-sitter-cli (user-level, ~/.cargo)
+"$LIB_DIR/install-claude-code.sh" # user-level, ~/.local/bin
+"$LIB_DIR/install-codex.sh" # user-level, ~/.local/bin
+"$LIB_DIR/install-uv.sh" # user-level, ~/.local/bin
+"$LIB_DIR/install-lazygit.sh"
 if [[ "$MACHINE" != server ]]; then
   "$LIB_DIR/install-gomi.sh"
   "$LIB_DIR/install-conda.sh"
   "$LIB_DIR/install-yazi.sh"
+  "$LIB_DIR/install-rga.sh"
+  "$LIB_DIR/install-dezoomify-rs.sh"
 fi
 if [[ "$MACHINE" == laptop ]]; then
   "$LIB_DIR/install-gui.sh"

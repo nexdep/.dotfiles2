@@ -1,4 +1,20 @@
 # apt packages installed on laptop and wsl (extra tier), not on servers.
 # gomi is not packaged for apt; it is installed by lib/install-gomi.sh.
 # yazi is not packaged for apt; it is installed by lib/install-yazi.sh.
+biber # latex bibliography backend
+chafa # terminal image rendering (yazi previews)
+ffmpeg # yazi video previews (ffmpeg/ffprobe)
+imagemagick # yazi magick previewer (avif/heic/jxl/svg); see README caveat on IM6 vs IM7
+latexmk
+libxcb-cursor-dev # Qt GUI apps runtime helper
+p7zip-full # 7z: yazi archive preview/extract (old transitional p7zip lacked the 7z binary)
+pandoc # rga document search (docx etc.)
+poppler-utils # pdftoppm: yazi pdf previews
+qt6-wayland # Qt GUI apps on Wayland
+texlive-bibtex-extra
+texlive-extra-utils
+texlive-fonts-recommended
+texlive-latex-extra
 unzip # lib/install-yazi.sh unpacks yazi's release .zip
+zathura # pdf viewer
+zathura-pdf-poppler

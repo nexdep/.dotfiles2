@@ -34,4 +34,11 @@ for bin in yazi ya; do
   [[ -n "$binary" ]] || die "$bin binary not found in release archive"
   $SUDO install -m 0755 "$binary" "/usr/local/bin/$bin"
 done
+
+# zsh completions ship in the zip too; site-functions is on zsh's default fpath.
+for comp in _ya _yazi; do
+  file="$(find "$tmp" -type f -name "$comp" | head -n1)"
+  [[ -n "$file" ]] || die "$comp completion not found in release archive"
+  $SUDO install -D -m 0644 "$file" "/usr/local/share/zsh/site-functions/$comp"
+done
 log "installed $(yazi --version 2>/dev/null || echo yazi)"

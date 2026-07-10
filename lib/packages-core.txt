@@ -2,13 +2,31 @@
 # gopass comes from its own apt repo (registered by bootstrap.sh via
 # add_apt_repo) because Ubuntu 26.04 dropped it from universe.
 bat # yazi previews call `bat`; Ubuntu ships it as batcat, bootstrap.sh adds the shim
+btop # system monitor
+bubblewrap # bwrap: Claude Code's Linux sandbox
+build-essential # cc/make: nvim-treesitter compiles parsers, cargo builds
 ca-certificates
 curl
+eza # modern ls (plain universe pkg; old deb.gierens.de repo dropped)
+fastfetch # system info (plain universe pkg; old PPA dropped)
+fd-find # fd: LazyVim file finding; Ubuntu ships it as fdfind, bootstrap.sh adds the shim
+fuse3 # fusermount3 for sshfs mounts (~/.scripts/hetzner_mount)
 fzf # fuzzy finder: zshrc keybindings + yazi's fzf/fg plugins
+gh # GitHub CLI
 git
+git-lfs # ~/.gitconfig declares the lfs filter with required=true
 gnupg # gpg: gopass encryption + personal key import (lib/install-gpg-key.sh)
 gopass
+jq
+libsqlite3-dev # LazyVim: sqlite-backed plugins build against it
+luarocks # LazyVim rocks support
+npm # node for LazyVim: copilot.lua runtime; mason installs pyright/prettierd/markdownlint-cli2/json+yaml LSPs via npm
+openssh-server
+python3-venv # mason python tooling / venvs
+restic # ~/.scripts/restic_b2_backups runtime dep
 ripgrep # rg: yazi's fg plugin content search
+sqlite3
+sshfs # ~/.scripts/hetzner_mount runtime dep
 tmux
 vim-gtk3 # vim with +clipboard (needed by ~/.vimrc's clipboard=unnamedplus)
 zoxide # z/zi jump commands (cd untouched) + yazi's zoxide plugin

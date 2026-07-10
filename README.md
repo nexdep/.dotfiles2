@@ -10,9 +10,9 @@ Each tier is a superset of the one below it (laptop ⊃ wsl ⊃ server):
 
 | Tier  | Machines       | Programs                                          |
 |-------|----------------|---------------------------------------------------|
-| core  | all            | zsh (default shell), gopass (+ password store), gnupg (+ personal GPG key), starship, neovim (+ LazyVim config), vim-gtk3 (+ vimrc), tmux (+ config), ssh config, git (+ config), prompts, ripgrep, fzf, bat, zoxide, curl, chezmoi |
-| extra | laptop, wsl    | gomi, conda (miniforge), yazi (+ config)          |
-| gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS), Google Chrome, Slack, Zoom, ParaView, VLC, Zotero, Clockify |
+| core  | all            | zsh (default shell), gopass (+ password store), gnupg (+ personal GPG key), starship, neovim (+ LazyVim config and its toolchain: build-essential, npm, luarocks, sqlite3, fd, tree-sitter via rust), vim-gtk3 (+ vimrc), tmux (+ config), ssh config, git (+ config), git-lfs, gh, lazygit, prompts, ripgrep, fzf, bat, zoxide, eza, fastfetch, jq, btop, restic, sshfs (+ fuse3), openssh-server, tailscale, rclone, Claude Code (+ bubblewrap), Codex CLI, uv, curl, chezmoi |
+| extra | laptop, wsl    | gomi, conda (miniforge), yazi (+ config, previews: imagemagick, ffmpeg, poppler, chafa, 7z), rga (+ pandoc), dezoomify-rs, LaTeX (texlive + biber + latexmk), zathura, qt6-wayland |
+| gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS), Google Chrome, Slack, Zoom, ParaView, VLC, Zotero, Clockify, libfuse2t64 (AppImage support) |
 
 The `.zshrc` is layered the same way: a core fragment for every machine, a
 workstation fragment for laptop/wsl, and a server fragment for servers. The
@@ -98,9 +98,18 @@ lib/install-neovim.sh        Neovim from the official release tarball into /opt 
 lib/install-gpg-key.sh       imports the personal GPG key from gpg/ (all machines, TTY only)
 lib/install-gopass-store.sh  clones the gopass password store from GitHub (all machines)
 gpg/private-key.asc.gpg      passphrase-encrypted backup of the personal GPG key
+lib/install-tailscale.sh     tailscale via its official script (all machines)
+lib/install-rclone.sh        rclone via its official script (all machines)
+lib/install-rust.sh          rustup + cargo-built tree-sitter-cli, user-level (all machines)
+lib/install-claude-code.sh   Claude Code, user-level ~/.local/bin (all machines)
+lib/install-codex.sh         Codex CLI, user-level ~/.local/bin (all machines)
+lib/install-uv.sh            uv, user-level ~/.local/bin (all machines)
+lib/install-lazygit.sh       lazygit from GitHub release binaries (all machines)
 lib/install-gomi.sh          gomi from GitHub release binaries (laptop+wsl)
 lib/install-conda.sh         Miniforge3 from the official installer script (laptop+wsl)
-lib/install-yazi.sh          yazi + ya from GitHub release binaries (laptop+wsl)
+lib/install-yazi.sh          yazi + ya + zsh completions from GitHub release binaries (laptop+wsl)
+lib/install-rga.sh           ripgrep-all from GitHub release binaries (laptop+wsl)
+lib/install-dezoomify-rs.sh  dezoomify-rs from GitHub release binaries (laptop+wsl)
 lib/install-gui.sh           all laptop GUI apps (apt repos, tarballs, .debs)
 home/                        chezmoi source directory (via .chezmoiroot)
 home/dot_scripts/            non-bootstrap scripts deployed to ~/.scripts/ (gpg, hetzner_mount, openmc_scripts, restic_b2_backups)
@@ -157,12 +166,42 @@ pulls in ibus and mesa extras).
 - **starship**: prebuilt binary from GitHub releases into `/usr/local/bin`,
   same pattern as gomi. Config (`home/dot_config/starship.toml`) is the same
   on every machine and just disables the battery module.
-- **bat**: plain Ubuntu apt package, but Ubuntu names the binary `batcat`;
-  `bootstrap.sh` symlinks it as `bat` in `/usr/local/bin` so scripts that
-  call `bat` by its upstream name (yazi's fg plugin previews) work.
+- **bat / fd**: plain Ubuntu apt packages (`bat`, `fd-find`), but Ubuntu names
+  the binaries `batcat` and `fdfind`; `bootstrap.sh` symlinks them as `bat`
+  and `fd` in `/usr/local/bin` so tools that call them by their upstream
+  names (yazi's fg plugin previews, LazyVim's file finding) work.
+- **rust / tree-sitter**: rustup via its official installer with
+  `--no-modify-path` (so it never edits the chezmoi-managed shell profiles —
+  `~/.cargo/bin` is added to PATH by the core zshrc fragment instead), then
+  `cargo install --locked tree-sitter-cli` builds tree-sitter from source
+  (needed by nvim-treesitter). Both live user-level under `~/.cargo`.
+- **tailscale**: official install script, which registers tailscale's own apt
+  repo, so it updates with `apt upgrade`. Joining the tailnet
+  (`tailscale up`) stays manual.
+- **rclone**: official install script into `/usr/bin`; no apt repo, so
+  re-running `bootstrap.sh` only reinstalls if the command is missing.
+- **lazygit**: prebuilt binary from GitHub releases into `/usr/local/bin`.
+  Assets embed the version, which is resolved from the `releases/latest`
+  redirect (no GitHub API).
+- **ripgrep-all (rga)**: prebuilt binaries (`rga`, `rga-fzf`, `rga-preproc`)
+  from GitHub releases into `/usr/local/bin`, version resolved like lazygit;
+  `pandoc` (apt, extra tier) enables document search.
+- **dezoomify-rs**: prebuilt binary from GitHub releases (fixed-name linux
+  asset) into `/usr/local/bin`; x86_64 only.
+- **Claude Code / Codex CLI / uv**: official install scripts, user-level into
+  `~/.local/bin` (Claude Code self-updates there; `bubblewrap` from core apt
+  provides its Linux sandbox). Re-running `bootstrap.sh` only reinstalls if
+  the command is missing.
+- **imagemagick caveat**: if Ubuntu still ships ImageMagick 6 there is no
+  `magick` binary, so yazi's `magick`-based previews (avif/heic/jxl/svg)
+  won't run; the common image/video/pdf previews use their own previewers
+  (image/ffmpeg/pdftoppm) and work regardless.
 - **yazi**: prebuilt `yazi` + `ya` binaries from the GitHub release zip
-  (fixed-name assets, unpacked with `unzip`) into `/usr/local/bin`, same
-  pattern as gomi. The config (`home/dot_config/yazi/`) deploys on
+  (fixed-name assets, unpacked with `unzip`) into `/usr/local/bin`, plus the
+  `_ya`/`_yazi` zsh completions into `/usr/local/share/zsh/site-functions`,
+  same pattern as gomi. The preview/archive helpers it calls (imagemagick,
+  ffmpeg, poppler-utils, chafa, 7z from p7zip-full) come from the extra-tier
+  package list. The config (`home/dot_config/yazi/`) deploys on
   laptop+wsl only (gated in `home/.chezmoiignore`); `yazi.toml` is a
   template because the "open" opener differs per machine — Windows
   Explorer via WSL interop on wsl, `xdg-open` on the laptop. Plugins are
@@ -244,6 +283,15 @@ pulls in ibus and mesa extras).
   resolve), per the instructions at clockify.me/linux-time-tracking. No
   apt repo is published, so re-running `bootstrap.sh` only reinstalls if
   the `clockify` command is missing.
+
+Deliberately **not** ported from the old pre-chezmoi setup scripts: stow
+(replaced by chezmoi), the apt upgrade step (not bootstrap's job), the
+fastfetch PPA and eza third-party repo (both are plain universe packages
+now), rng-tools (obsolete), libclang-common-21-dev (version-pinned, gone
+from apt), fzf-from-git and zoxide-via-curl (both apt now), and the
+`zsh_wsl_neutronics` shell fragment (superseded by the zshrc fragments and
+the `~/.zsh` drop-in dir; its OpenMC exports pointed at a nonexistent
+endfb-viii.1 data dir).
 
 ## CI
 

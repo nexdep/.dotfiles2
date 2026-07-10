@@ -12,3 +12,6 @@ evolution-ews
 
 # VLC media player, also a plain Ubuntu universe package.
 vlc
+
+# Legacy FUSE2 library: AppImage-packaged apps need it to run.
+libfuse2t64
