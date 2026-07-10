@@ -10,7 +10,7 @@ Each tier is a superset of the one below it (laptop ⊃ wsl ⊃ server):
 
 | Tier  | Machines       | Programs                                          |
 |-------|----------------|---------------------------------------------------|
-| core  | all            | zsh (default shell), gopass (+ password store), gnupg (+ personal GPG key), starship, neovim (+ LazyVim config), vim-gtk3 (+ vimrc), tmux (+ config), ssh config, ripgrep, fzf, bat, zoxide, git, curl, chezmoi |
+| core  | all            | zsh (default shell), gopass (+ password store), gnupg (+ personal GPG key), starship, neovim (+ LazyVim config), vim-gtk3 (+ vimrc), tmux (+ config), ssh config, git (+ config), ripgrep, fzf, bat, zoxide, curl, chezmoi |
 | extra | laptop, wsl    | gomi, conda (miniforge), yazi (+ config)          |
 | gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS), Google Chrome, Slack, Zoom, ParaView, VLC, Zotero, Clockify |
 
@@ -30,6 +30,19 @@ user's home as `.ssh/config_dotfiles` and prepends
 missing), so Windows-side tools resolve the same host aliases while
 Windows-only hosts stay in the Windows file. The script no-ops when WSL
 interop is unavailable (as in CI containers).
+
+The git config is deployed on every machine from `home/dot_gitconfig`,
+`home/dot_gitconfig_nexdep`, `home/dot_gitconfig_marco` and
+`home/dot_gitignore_global` — plain static files, identical everywhere. The
+top-level `~/.gitconfig` picks a per-account identity file with
+`includeIf "hasconfig:remote.*.url:…"`, so a repo whose remote is under
+`nexdep/**` uses `~/.gitconfig_nexdep` and one under `marco-de-pietri/**` uses
+`~/.gitconfig_marco` (each sets its own name/email and a `core.sshCommand`
+selecting that account's key). Only config is versioned, never the
+`~/.ssh/marco-dev-*` keys those `sshCommand`s point at (same policy as the SSH
+config). An ephemeral VS Code dev-container credential helper that had been
+injected into the marco identity was intentionally dropped, since its path
+only exists inside that throwaway container.
 
 A few empty quiet-login markers (`~/.hushlogin`, `~/.motd_shown`,
 `~/.sudo_as_admin_successful`) are deployed **only on wsl**, gated by

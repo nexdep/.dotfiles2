@@ -97,6 +97,14 @@ check "nvim lazy-lock deployed" test -f "$HOME/.config/nvim/lazy-lock.json"
 check "tmux config deployed" test -f "$HOME/.config/tmux/tmux.conf"
 check "vimrc deployed" test -f "$HOME/.vimrc"
 check "ssh config deployed" test -f "$HOME/.ssh/config"
+check "gitconfig deployed" test -f "$HOME/.gitconfig"
+check "gitconfig_nexdep deployed" test -f "$HOME/.gitconfig_nexdep"
+check "gitconfig_marco deployed" test -f "$HOME/.gitconfig_marco"
+check "gitignore_global deployed" test -f "$HOME/.gitignore_global"
+# git parses the deployed config and the global excludesFile is wired up
+check "gitconfig excludesFile set" eval '[[ "$(git config --file "$HOME/.gitconfig" --get core.excludesFile)" == *".gitignore_global" ]]'
+# the ephemeral devcontainer credential helper must not have shipped
+check "no ephemeral credential helper" eval '! grep -q vscode-remote-containers "$HOME/.gitconfig_marco"'
 check "zshrc initializes starship" grep -q "starship init zsh" "$zshrc"
 check "zshrc initializes zoxide" grep -q "zoxide init zsh" "$zshrc"
 check "zshrc initializes fzf" grep -q "fzf --zsh" "$zshrc"

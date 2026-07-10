@@ -1,0 +1,13 @@
+[user]
+	name = nexdep
+	email = marco.depietri90@gmail.com
+[init]
+    defaultBranch = main
+[merge]
+    tool = vimdiff
+[mergetool]
+    prompt = false
+[core]
+    sshCommand = "ssh -i ~/.ssh/marco-dev-2 -o IdentitiesOnly=yes"
+
+

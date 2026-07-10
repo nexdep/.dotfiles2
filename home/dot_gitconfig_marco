@@ -1,0 +1,11 @@
+[user]
+	name = marco-de-pietri
+	email = marco.deppo@hotmail.it
+[init]
+    defaultBranch = main
+[merge]
+    tool = vimdiff
+[mergetool]
+    prompt = false
+[core]
+    sshCommand = "ssh -i ~/.ssh/marco-dev-1 -o IdentitiesOnly=yes"

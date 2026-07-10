@@ -1,0 +1,18 @@
+[includeIf "hasconfig:remote.*.url:git@github.com:nexdep/**"]
+  path = ~/.gitconfig_nexdep
+
+[includeIf "hasconfig:remote.*.url:https://github.com/nexdep/**"]
+  path = ~/.gitconfig_nexdep
+
+[includeIf "hasconfig:remote.*.url:git@github.com:marco-de-pietri/**"]
+  path = ~/.gitconfig_marco
+
+[includeIf "hasconfig:remote.*.url:https://github.com/marco-de-pietri/**"]
+  path = ~/.gitconfig_marco
+[core]
+    excludesFile = ~/.gitignore_global
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
