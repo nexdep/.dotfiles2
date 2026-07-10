@@ -105,6 +105,7 @@ check "gitignore_global deployed" test -f "$HOME/.gitignore_global"
 check "gitconfig excludesFile set" eval '[[ "$(git config --file "$HOME/.gitconfig" --get core.excludesFile)" == *".gitignore_global" ]]'
 check "prompts folder deployed" test -d "$HOME/.prompts/shared"
 check "prompts folder has all files" eval '[[ $(find "$HOME/.prompts/shared" -maxdepth 1 -name "*.md" | wc -l) -eq 8 ]]'
+check "gpg backup script deployed" test -x "$HOME/.scripts/gpg/generate-gpg-backup.sh"
 # the ephemeral devcontainer credential helper must not have shipped
 check "no ephemeral credential helper" eval '! grep -q vscode-remote-containers "$HOME/.gitconfig_marco"'
 check "zshrc initializes starship" grep -q "starship init zsh" "$zshrc"

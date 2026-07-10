@@ -78,9 +78,9 @@ page (see slack, paraview) with a loud `die` if the scrape comes back empty.
 
 ## Before pushing
 
-- `shellcheck bootstrap.sh lib/*.sh tests/*.sh` must be clean (CI runs it;
-  note the runner's shellcheck may use different codes for the same
-  finding — disable both, e.g. `SC2317,SC2329`).
+- `shellcheck bootstrap.sh lib/*.sh tests/*.sh $(find home/dot_scripts -type f -name '*.sh')`
+  must be clean (CI runs it; note the runner's shellcheck may use different
+  codes for the same finding — disable both, e.g. `SC2317,SC2329`).
 - Render the dotfiles for all three machine types and syntax-check:
   `HOME=$(mktemp -d) MACHINE_TYPE=<m> chezmoi init --apply --source $PWD`
   then `zsh -n $HOME/.zshrc`.

@@ -49,6 +49,12 @@ machine — personal reference prompts for research reading/writing (paper
 proofreading, replication, summarization, etc.), plain static markdown
 files with no associated program.
 
+`home/dot_scripts/` deploys to `~/.scripts/` on every machine — handy
+standalone scripts that are **not** used by `bootstrap.sh`, organized into
+category subfolders (e.g. `gpg/generate-gpg-backup.sh`). Unlike the
+`lib/` install scripts they are self-contained and do not source
+`lib/common.sh`, since they run from `~/.scripts/` rather than the repo.
+
 A few empty quiet-login markers (`~/.hushlogin`, `~/.motd_shown`,
 `~/.sudo_as_admin_successful`) are deployed **only on wsl**, gated by
 `home/.chezmoiignore` (which ignores them on server/laptop). They carry the
@@ -80,13 +86,13 @@ lib/install-starship.sh      starship from GitHub release binaries (all machines
 lib/install-neovim.sh        Neovim from the official release tarball into /opt (all machines)
 lib/install-gpg-key.sh       imports the personal GPG key from gpg/ (all machines, TTY only)
 lib/install-gopass-store.sh  clones the gopass password store from GitHub (all machines)
-lib/generate-gpg-backup.sh   manual tool: re-export the key into gpg/ (never run by bootstrap)
 gpg/private-key.asc.gpg      passphrase-encrypted backup of the personal GPG key
 lib/install-gomi.sh          gomi from GitHub release binaries (laptop+wsl)
 lib/install-conda.sh         Miniforge3 from the official installer script (laptop+wsl)
 lib/install-yazi.sh          yazi + ya from GitHub release binaries (laptop+wsl)
 lib/install-gui.sh           all laptop GUI apps (apt repos, tarballs, .debs)
 home/                        chezmoi source directory (via .chezmoiroot)
+home/dot_scripts/            non-bootstrap scripts deployed to ~/.scripts/ (e.g. gpg/ backup tool)
 home/.chezmoiscripts/        chezmoi run scripts (Windows-side ssh config, yazi plugins)
 home/.chezmoiignore          per-machine deploy filter (quiet-login markers, yazi config)
 tests/verify.sh              tier-aware assertions (data-driven app table), used by CI
@@ -121,9 +127,11 @@ pulls in ibus and mesa extras).
   CI never imports it (`tests/verify.sh` asserts this). The public key and
   ownertrust are derived from the private key on import, so the backup is a
   single file. To rotate or refresh the backup, run
-  `lib/generate-gpg-backup.sh` on a machine that has the key and commit the
-  new blob; the key id is pinned in both scripts (override with
-  `GPG_KEY_ID`).
+  `~/.scripts/gpg/generate-gpg-backup.sh` (deployed by chezmoi) from the repo
+  root on a machine that has the key, then commit the new blob — it writes the
+  encrypted export to `./gpg/private-key.asc.gpg` (override the destination
+  with `GPG_BACKUP_OUT`). The key id is pinned in both this script and
+  `lib/install-gpg-key.sh` (override with `GPG_KEY_ID`).
 - **gopass store**: the password store itself is the public repo
   `github.com/nexdep/.gopass`, cloned keylessly over HTTPS by
   `lib/install-gopass-store.sh` (every tier, CI included) into gopass's
