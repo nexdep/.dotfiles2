@@ -287,8 +287,9 @@ pulls in ibus and mesa extras).
 Deliberately **not** ported from the old pre-chezmoi setup scripts: stow
 (replaced by chezmoi), the apt upgrade step (not bootstrap's job), the
 fastfetch PPA and eza third-party repo (both are plain universe packages
-now), rng-tools (obsolete), libclang-common-21-dev (version-pinned, gone
-from apt), fzf-from-git and zoxide-via-curl (both apt now), and the
+now), rng-tools (obsolete), the version-pinned libclang-common-21-dev
+(replaced by unversioned `libclang-dev`, which bindgen needs to build
+tree-sitter-cli), fzf-from-git and zoxide-via-curl (both apt now), and the
 `zsh_wsl_neutronics` shell fragment (superseded by the zshrc fragments and
 the `~/.zsh` drop-in dir; its OpenMC exports pointed at a nonexistent
 endfb-viii.1 data dir).

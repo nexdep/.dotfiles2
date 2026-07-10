@@ -18,6 +18,7 @@ git-lfs # ~/.gitconfig declares the lfs filter with required=true
 gnupg # gpg: gopass encryption + personal key import (lib/install-gpg-key.sh)
 gopass
 jq
+libclang-dev # bindgen needs libclang to build tree-sitter-cli (rquickjs-sys) in lib/install-rust.sh
 libsqlite3-dev # LazyVim: sqlite-backed plugins build against it
 luarocks # LazyVim rocks support
 npm # node for LazyVim: copilot.lua runtime; mason installs pyright/prettierd/markdownlint-cli2/json+yaml LSPs via npm
