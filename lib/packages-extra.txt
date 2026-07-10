@@ -1,2 +1,4 @@
 # apt packages installed on laptop and wsl (extra tier), not on servers.
 # gomi is not packaged for apt; it is installed by lib/install-gomi.sh.
+# yazi is not packaged for apt; it is installed by lib/install-yazi.sh.
+unzip # lib/install-yazi.sh unpacks yazi's release .zip

@@ -4,3 +4,8 @@
 .motd_shown
 .sudo_as_admin_successful
 {{ end -}}
+
+{{/* yazi is extra-tier (laptop/wsl); don't deploy its config on servers. */}}
+{{ if eq .machine "server" }}
+.config/yazi
+{{ end -}}

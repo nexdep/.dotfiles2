@@ -10,8 +10,8 @@ Each tier is a superset of the one below it (laptop ⊃ wsl ⊃ server):
 
 | Tier  | Machines       | Programs                                          |
 |-------|----------------|---------------------------------------------------|
-| core  | all            | zsh (default shell), gopass (+ password store), gnupg (+ personal GPG key), starship, neovim (+ LazyVim config), vim-gtk3 (+ vimrc), tmux (+ config), ssh config, git, curl, chezmoi |
-| extra | laptop, wsl    | gomi, conda (miniforge)                           |
+| core  | all            | zsh (default shell), gopass (+ password store), gnupg (+ personal GPG key), starship, neovim (+ LazyVim config), vim-gtk3 (+ vimrc), tmux (+ config), ssh config, ripgrep, fzf, bat, zoxide, git, curl, chezmoi |
+| extra | laptop, wsl    | gomi, conda (miniforge), yazi (+ config)          |
 | gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS), Google Chrome, Slack, Zoom, ParaView, VLC, Zotero, Clockify |
 
 The `.zshrc` is layered the same way: a core fragment for every machine, a
@@ -66,10 +66,11 @@ lib/generate-gpg-backup.sh   manual tool: re-export the key into gpg/ (never run
 gpg/private-key.asc.gpg      passphrase-encrypted backup of the personal GPG key
 lib/install-gomi.sh          gomi from GitHub release binaries (laptop+wsl)
 lib/install-conda.sh         Miniforge3 from the official installer script (laptop+wsl)
+lib/install-yazi.sh          yazi + ya from GitHub release binaries (laptop+wsl)
 lib/install-gui.sh           all laptop GUI apps (apt repos, tarballs, .debs)
 home/                        chezmoi source directory (via .chezmoiroot)
-home/.chezmoiscripts/        chezmoi run scripts (Windows-side ssh config on wsl)
-home/.chezmoiignore          per-machine deploy filter (wsl-only quiet-login markers)
+home/.chezmoiscripts/        chezmoi run scripts (Windows-side ssh config, yazi plugins)
+home/.chezmoiignore          per-machine deploy filter (quiet-login markers, yazi config)
 tests/verify.sh              tier-aware assertions (data-driven app table), used by CI
 .github/workflows/ci.yml     lint + full bootstrap of all 3 machine types
 ```
@@ -119,6 +120,26 @@ pulls in ibus and mesa extras).
 - **starship**: prebuilt binary from GitHub releases into `/usr/local/bin`,
   same pattern as gomi. Config (`home/dot_config/starship.toml`) is the same
   on every machine and just disables the battery module.
+- **bat**: plain Ubuntu apt package, but Ubuntu names the binary `batcat`;
+  `bootstrap.sh` symlinks it as `bat` in `/usr/local/bin` so scripts that
+  call `bat` by its upstream name (yazi's fg plugin previews) work.
+- **yazi**: prebuilt `yazi` + `ya` binaries from the GitHub release zip
+  (fixed-name assets, unpacked with `unzip`) into `/usr/local/bin`, same
+  pattern as gomi. The config (`home/dot_config/yazi/`) deploys on
+  laptop+wsl only (gated in `home/.chezmoiignore`); `yazi.toml` is a
+  template because the "open" opener differs per machine — Windows
+  Explorer via WSL interop on wsl, `xdg-open` on the laptop. Plugins are
+  pinned in `package.toml` and installed/updated by a chezmoi
+  `run_onchange` script that runs `ya pkg install` whenever the pin list
+  changes; the plugin code itself (`~/.config/yazi/plugins/`) is not
+  versioned here. `ya pkg` rewrites `~/.config/yazi/package.toml` in its
+  own normalized form (array-of-tables, `hash` field, comments stripped),
+  so the committed file must be exactly that form or every
+  `chezmoi apply` would flag it as drifted — to change pins, edit the
+  target file with `ya pkg add`/`ya pkg install` and
+  `chezmoi re-add ~/.config/yazi/package.toml`. The `y` cd-on-quit wrapper lives in the workstation
+  zshrc fragment; the plugins additionally rely on ripgrep, fzf, bat and
+  zoxide from the core tier.
 - **neovim**: official tarball from the latest GitHub release
   (fixed-name assets for x86_64 and arm64) into `/opt/nvim`, symlinked as
   `nvim` in `/usr/local/bin` — Ubuntu's apt package lags far behind

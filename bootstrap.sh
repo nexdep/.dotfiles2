@@ -57,6 +57,13 @@ log "installing apt packages: ${packages[*]}"
 $SUDO apt-get update
 $SUDO apt-get install -y --no-install-recommends "${packages[@]}"
 
+# Ubuntu ships bat's binary as batcat; expose the upstream name for scripts
+# that call `bat` (e.g. yazi's fg plugin previews).
+if command -v batcat >/dev/null 2>&1 && ! command -v bat >/dev/null 2>&1; then
+  log "symlinking bat -> batcat"
+  $SUDO ln -s "$(command -v batcat)" /usr/local/bin/bat
+fi
+
 # --- non-apt installers per tier ----------------------------------------------
 "$LIB_DIR/install-starship.sh"
 "$LIB_DIR/install-neovim.sh"
@@ -65,6 +72,7 @@ $SUDO apt-get install -y --no-install-recommends "${packages[@]}"
 if [[ "$MACHINE" != server ]]; then
   "$LIB_DIR/install-gomi.sh"
   "$LIB_DIR/install-conda.sh"
+  "$LIB_DIR/install-yazi.sh"
 fi
 if [[ "$MACHINE" == laptop ]]; then
   "$LIB_DIR/install-gui.sh"

@@ -1,0 +1,11 @@
+{{ if ne .machine "server" -}}
+#!/bin/sh
+# Install the yazi plugins pinned in ~/.config/yazi/package.toml with
+# `ya pkg`. Re-runs when the pin list changes:
+# package.toml hash: {{ include "dot_config/yazi/package.toml" | sha256sum }}
+set -eu
+
+command -v ya >/dev/null 2>&1 || exit 0
+ya pkg install
+echo "yazi plugins installed"
+{{ end -}}

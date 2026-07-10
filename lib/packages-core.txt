@@ -1,11 +1,15 @@
 # apt packages installed on every machine (core tier).
 # gopass comes from its own apt repo (registered by bootstrap.sh via
 # add_apt_repo) because Ubuntu 26.04 dropped it from universe.
+bat # yazi previews call `bat`; Ubuntu ships it as batcat, bootstrap.sh adds the shim
 ca-certificates
 curl
+fzf # fuzzy finder: zshrc keybindings + yazi's fzf/fg plugins
 git
 gnupg # gpg: gopass encryption + personal key import (lib/install-gpg-key.sh)
 gopass
+ripgrep # rg: yazi's fg plugin content search
 tmux
 vim-gtk3 # vim with +clipboard (needed by ~/.vimrc's clipboard=unnamedplus)
+zoxide # z/zi jump commands (cd untouched) + yazi's zoxide plugin
 zsh

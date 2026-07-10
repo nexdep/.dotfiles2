@@ -1,8 +1,16 @@
 # --- workstation (laptop/wsl) ---
 
-# gomi: send files to the trash instead of deleting them outright
-if command -v gomi >/dev/null 2>&1; then
-  alias rm='gomi'
+# yazi: `y` opens the file manager and cd's to where you quit
+if command -v yazi >/dev/null 2>&1; then
+  function y() {
+    local tmp cwd
+    tmp="$(mktemp -t yazi-cwd.XXXXXX)"
+    yazi "$@" --cwd-file="$tmp"
+    if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+      builtin cd -- "$cwd"
+    fi
+    rm -f -- "$tmp"
+  }
 fi
 
 # conda (miniforge): base env auto-activated, PROMPT untouched (changeps1:

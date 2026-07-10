@@ -52,8 +52,13 @@ apps=(
   'core|neovim|/usr/local/bin/nvim --version'
   'core|tmux|command -v tmux'
   'core|vim-gtk3|command -v vim'
+  'core|ripgrep|command -v rg'
+  'core|fzf|command -v fzf'
+  'core|bat|command -v bat' # also proves bootstrap's bat -> batcat shim
+  'core|zoxide|command -v zoxide'
   'extra|gomi|command -v gomi'
   'extra|conda|test -x "$HOME/miniforge3/bin/conda"|test ! -e "$HOME/miniforge3"'
+  'extra|yazi|command -v yazi && command -v ya|! command -v yazi && ! command -v ya'
   'gui|firefox-devedition|firefox-devedition --version'
   'gui|thunderbird-beta|/usr/local/bin/thunderbird-beta --version|test ! -e /usr/local/bin/thunderbird-beta'
   'gui|wezterm|wezterm --version'
@@ -93,6 +98,8 @@ check "tmux config deployed" test -f "$HOME/.config/tmux/tmux.conf"
 check "vimrc deployed" test -f "$HOME/.vimrc"
 check "ssh config deployed" test -f "$HOME/.ssh/config"
 check "zshrc initializes starship" grep -q "starship init zsh" "$zshrc"
+check "zshrc initializes zoxide" grep -q "zoxide init zsh" "$zshrc"
+check "zshrc initializes fzf" grep -q "fzf --zsh" "$zshrc"
 check "login shell is zsh" test "$(getent passwd "$(id -un)" | cut -d: -f7)" = "$(command -v zsh)"
 # install-gpg-key.sh must skip the personal key import when there is no TTY
 # (as in CI), so no secret key may exist here.
@@ -107,9 +114,22 @@ if [[ "$machine" != server ]]; then
   check "zshrc initializes conda" grep -q "miniforge3/etc/profile.d/conda.sh" "$zshrc"
   check "workstation zshrc fragment" grep -q -- "--- workstation (laptop/wsl)" "$zshrc"
   check "no server zshrc fragment" eval '! grep -q -- "--- server ---" "$zshrc"'
+  check "zshrc defines y wrapper" grep -q "function y()" "$zshrc"
+  check "yazi config deployed" test -f "$HOME/.config/yazi/yazi.toml"
+  # proves the ya pkg run script installed the plugins pinned in package.toml
+  check "yazi fg plugin installed" test -d "$HOME/.config/yazi/plugins/fg.yazi"
 else
   check "server zshrc fragment" grep -q -- "--- server ---" "$zshrc"
   check "no workstation zshrc fragment" eval '! grep -q -- "--- workstation (laptop/wsl)" "$zshrc"'
+  check "yazi config absent" test ! -e "$HOME/.config/yazi"
+fi
+
+# The yazi "open" opener is templated per machine: explorer.exe (via WSL
+# interop) on wsl, xdg-open on the laptop.
+if [[ "$machine" == wsl ]]; then
+  check "yazi opener uses explorer.exe" grep -q "explorer.exe" "$HOME/.config/yazi/yazi.toml"
+elif [[ "$machine" == laptop ]]; then
+  check "yazi opener uses xdg-open" grep -q 'xdg-open "\$1"' "$HOME/.config/yazi/yazi.toml"
 fi
 
 # WSL-only quiet-login markers (deployed via home/.chezmoiignore). Present on

@@ -21,6 +21,13 @@ export PATH
 # prompt
 command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
 
+# zoxide: adds the z/zi jump commands and tracks visited directories
+# (also feeds yazi's zoxide plugin); cd itself is left untouched
+command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init zsh)"
+
+# fzf: ctrl-r history / ctrl-t file / alt-c cd keybindings and completion
+command -v fzf >/dev/null 2>&1 && source <(fzf --zsh)
+
 # aliases
 alias ll='ls -lah --color=auto'
 alias grep='grep --color=auto'
