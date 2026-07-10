@@ -188,10 +188,14 @@ pulls in ibus and mesa extras).
   `pandoc` (apt, extra tier) enables document search.
 - **dezoomify-rs**: prebuilt binary from GitHub releases (fixed-name linux
   asset) into `/usr/local/bin`; x86_64 only.
-- **Claude Code / Codex CLI / uv**: official install scripts, user-level into
+- **Claude Code / uv**: official install scripts, user-level into
   `~/.local/bin` (Claude Code self-updates there; `bubblewrap` from core apt
   provides its Linux sandbox). Re-running `bootstrap.sh` only reinstalls if
   the command is missing.
+- **Codex CLI**: prebuilt binary from the GitHub release assets (fixed
+  names, fetched via the `releases/latest` redirect) into `~/.local/bin` —
+  the official install script resolves versions through the GitHub API,
+  which gets rate-limited in CI.
 - **imagemagick caveat**: if Ubuntu still ships ImageMagick 6 there is no
   `magick` binary, so yazi's `magick`-based previews (avif/heic/jxl/svg)
   won't run; the common image/video/pdf previews use their own previewers
