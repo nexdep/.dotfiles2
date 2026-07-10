@@ -10,7 +10,7 @@ Each tier is a superset of the one below it (laptop ⊃ wsl ⊃ server):
 
 | Tier  | Machines       | Programs                                          |
 |-------|----------------|---------------------------------------------------|
-| core  | all            | zsh (default shell), gopass (+ password store), gnupg (+ personal GPG key), starship, neovim (+ LazyVim config), vim-gtk3 (+ vimrc), tmux (+ config), ssh config, git (+ config), ripgrep, fzf, bat, zoxide, curl, chezmoi |
+| core  | all            | zsh (default shell), gopass (+ password store), gnupg (+ personal GPG key), starship, neovim (+ LazyVim config), vim-gtk3 (+ vimrc), tmux (+ config), ssh config, git (+ config), prompts, ripgrep, fzf, bat, zoxide, curl, chezmoi |
 | extra | laptop, wsl    | gomi, conda (miniforge), yazi (+ config)          |
 | gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS), Google Chrome, Slack, Zoom, ParaView, VLC, Zotero, Clockify |
 
@@ -43,6 +43,11 @@ selecting that account's key). Only config is versioned, never the
 config). An ephemeral VS Code dev-container credential helper that had been
 injected into the marco identity was intentionally dropped, since its path
 only exists inside that throwaway container.
+
+`home/dot_prompts/shared/` deploys to `~/.prompts/shared/` on every
+machine — personal reference prompts for research reading/writing (paper
+proofreading, replication, summarization, etc.), plain static markdown
+files with no associated program.
 
 A few empty quiet-login markers (`~/.hushlogin`, `~/.motd_shown`,
 `~/.sudo_as_admin_successful`) are deployed **only on wsl**, gated by
