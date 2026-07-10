@@ -10,7 +10,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Install tools
         run: |
           sudo apt-get update
@@ -37,7 +37,7 @@ jobs:
     # snap-free by construction (no snapd in containers).
     container: ubuntu:26.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Bootstrap (${{ matrix.machine }})
         run: ./bootstrap.sh ${{ matrix.machine }}
       - name: Verify (${{ matrix.machine }})
