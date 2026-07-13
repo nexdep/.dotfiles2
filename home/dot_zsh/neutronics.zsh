@@ -13,6 +13,3 @@ fi
 export OPENMC_CROSS_SECTIONS="$HOME/openmc_data/endfb-viii.0-hdf5/cross_sections.xml"
 export OPENMC_CHAIN_FILE="$HOME/openmc_data/chain_endfb81_fast/chain_endfb81_fast.xml"
 export ENDFB81_XS="$OPENMC_CROSS_SECTIONS"
-
-# open MCNP input files in nvim by suffix (foo.i, foo.mpi)
-alias -s {i,mpi}=nvim

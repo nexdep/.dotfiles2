@@ -40,9 +40,9 @@ frecency-jumping somewhere unexpected.
 
 The core zshrc also sources every file in `~/.zsh/`, a machine-local
 drop-in dir that chezmoi leaves unmanaged — with one exception:
-`~/.zsh/neutronics.zsh` (OpenFOAM lazy-loader, OpenMC data paths, MCNP
-suffix aliases) is deployed by chezmoi on laptop and wsl (not servers),
-gated in `home/.chezmoiignore`. A guarded `~/.config/secrets.env` is sourced too,
+`~/.zsh/neutronics.zsh` (OpenFOAM lazy-loader, OpenMC data paths) is
+deployed by chezmoi on laptop and wsl (not servers), gated in
+`home/.chezmoiignore`. A guarded `~/.config/secrets.env` is sourced too,
 for machine-local secrets that never enter the repo.
 
 The SSH client config (`home/private_dot_ssh/config`) is deployed to
