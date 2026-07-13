@@ -68,12 +68,27 @@ export PATH
 command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
 
 # zoxide: adds the z/zi jump commands and tracks visited directories
-# (also feeds yazi's zoxide plugin); cd itself is left untouched
-command -v zoxide >/dev/null 2>&1 && eval "$(zoxide init zsh)"
+# (also feeds yazi's zoxide plugin)
+if command -v zoxide >/dev/null 2>&1; then
+  eval "$(zoxide init zsh)"
+  # cd: frecency-jump via zoxide in interactive TTY shells only; scripts and
+  # coding agents get the plain builtin (a mistyped path must fail loudly,
+  # not jump to some other frecent directory)
+  cd() {
+    if [[ -o interactive && -t 1 ]]; then
+      __zoxide_z "$@"
+    else
+      builtin cd "$@"
+    fi
+  }
+fi
 
 # fzf: ctrl-r history / ctrl-t file / alt-c cd keybindings and completion
-# (binds into the vi keymaps set up above)
-command -v fzf >/dev/null 2>&1 && source <(fzf --zsh)
+# (binds into the vi keymaps set up above; pointless without a TTY, and
+# sourcing it in TTY-less shells just prints zle warnings)
+if command -v fzf >/dev/null 2>&1 && [[ -t 1 ]]; then
+  source <(fzf --zsh)
+fi
 
 # keybindings: ctrl-x clears the screen; ctrl-l/ctrl-h and the alt-h/l pairs
 # are disabled (terminal-quirk guards)
@@ -100,8 +115,13 @@ alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
 if command -v eza >/dev/null 2>&1; then
   alias ll='eza -ahlF --git --git-repos'
-  # show the directory contents after cd'ing into it
-  chpwd() { eza -ahlF --git --git-repos; }
+  # show the directory contents after cd'ing into it — interactive TTY
+  # shells only, so scripts, pipes and coding agents' shells don't get the
+  # listing (or hang on eza) after every cd
+  chpwd() {
+    [[ -o interactive && -t 1 ]] || return 0
+    eza -ahlF --git --git-repos
+  }
 else
   alias ll='ls -lah --color=auto'
 fi

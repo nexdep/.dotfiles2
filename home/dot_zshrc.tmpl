@@ -15,9 +15,11 @@
 
 # --- tmux autostart (keep last) ---
 # Attach/create the "main" session for local interactive terminals only.
-# Skips: already in tmux, non-interactive, SSH sessions, VS Code, nvim terminals.
+# Skips: already in tmux, non-interactive or no TTY (scripts, coding agents),
+# SSH sessions, VS Code, nvim terminals.
 if [[ -z "$TMUX" \
-   && -n "$PS1" \
+   && -o interactive \
+   && -t 0 \
    && -z "$SSH_CONNECTION" \
    && "$TERM_PROGRAM" != "vscode" \
    && -z "$NVIM" ]]; then

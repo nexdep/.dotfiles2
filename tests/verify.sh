@@ -151,6 +151,8 @@ check "zshrc sources ~/.zsh drop-ins" grep -q 'HOME/.zsh' "$zshrc"
 check "no ephemeral credential helper" eval '! grep -q vscode-remote-containers "$HOME/.gitconfig_marco"'
 check "zshrc initializes starship" grep -q "starship init zsh" "$zshrc"
 check "zshrc initializes zoxide" grep -q "zoxide init zsh" "$zshrc"
+# the zoxide cd wrapper must keep the builtin for scripts and coding agents
+check "zshrc cd wrapper falls back to builtin" grep -q 'builtin cd "$@"' "$zshrc"
 check "zshrc initializes fzf" grep -q "fzf --zsh" "$zshrc"
 check "zshrc enables vi mode" grep -q "bindkey -v" "$zshrc"
 check "zshrc sets EDITOR=nvim" grep -q "EDITOR=nvim" "$zshrc"

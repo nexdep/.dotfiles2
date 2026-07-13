@@ -16,17 +16,27 @@ Each tier is a superset of the one below it (laptop ⊃ wsl ⊃ server):
 
 The `.zshrc` is layered the same way: a core fragment for every machine
 (vi-mode line editing, EDITOR=nvim, completion styles + `~/.dircolors`,
-eza aliases with auto-listing on cd, the acp/mkcd/scroll/showpath/cf
-helpers, and a background autopull that ff-pulls `~/.dotfiles` at most
-every 12h — pull only, never an unattended `chezmoi apply`), a bitwarden
-fragment (bw_login / bw_fetch_ssh, kept separate so it's easy to retire),
-a wsl fragment (clip/start interop aliases, Windows VS Code on PATH), a
-workstation fragment for laptop/wsl, and a server fragment for servers.
-The fragments live in `home/.chezmoitemplates/` and are assembled by
+eza aliases with auto-listing on cd, a zoxide-backed `cd` (frecency
+jumps), the acp/mkcd/scroll/showpath/cf helpers, and a background
+autopull that ff-pulls `~/.dotfiles` at most every 12h — pull only,
+never an unattended `chezmoi apply`), a bitwarden fragment (bw_login /
+bw_fetch_ssh, kept separate so it's easy to retire), a wsl fragment
+(clip/start interop aliases, Windows VS Code on PATH), a workstation
+fragment for laptop/wsl, and a server fragment for servers. The
+fragments live in `home/.chezmoitemplates/` and are assembled by
 `home/dot_zshrc.tmpl` based on the machine type stored in chezmoi's data;
 the assembled file ends with a tmux autostart (attach/create session
 "main" in local interactive terminals only — skipped over SSH, in VS
 Code, in nvim terminals and inside tmux itself).
+
+The interactive sugar is deliberately kept harmless to scripts and
+coding agents (whose harnesses replay snapshotted functions into
+non-interactive shells): the zoxide `cd` wrapper and the eza auto-listing
+`chpwd` hook check `[[ -o interactive && -t 1 ]]` at call time and fall
+back to the plain builtin / a no-op, fzf keybindings only load with a
+TTY, and the tmux autostart additionally requires a TTY on stdin. A
+mistyped `cd` path in a script therefore fails loudly instead of
+frecency-jumping somewhere unexpected.
 
 The core zshrc also sources every file in `~/.zsh/`, a machine-local
 drop-in dir that chezmoi leaves unmanaged — with one exception:

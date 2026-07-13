@@ -31,5 +31,5 @@ sqlite3
 sshfs # ~/.scripts/hetzner_mount runtime dep
 tmux
 vim-gtk3 # vim with +clipboard (needed by ~/.vimrc's clipboard=unnamedplus)
-zoxide # z/zi jump commands (cd untouched) + yazi's zoxide plugin
+zoxide # z/zi commands + interactive-only cd wrapper + yazi's zoxide plugin
 zsh
