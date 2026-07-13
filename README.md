@@ -10,14 +10,30 @@ Each tier is a superset of the one below it (laptop ⊃ wsl ⊃ server):
 
 | Tier  | Machines       | Programs                                          |
 |-------|----------------|---------------------------------------------------|
-| core  | all            | zsh (default shell), gopass (+ password store), gnupg (+ personal GPG key), starship, neovim (+ LazyVim config and its toolchain: build-essential, npm, luarocks, sqlite3, fd, tree-sitter via rust), vim-gtk3 (+ vimrc), tmux (+ config), ssh config, git (+ config), git-lfs, gh, lazygit, prompts, ripgrep, fzf, bat, zoxide, eza, fastfetch, jq, btop, restic, sshfs (+ fuse3), openssh-server, tailscale, rclone, Claude Code (+ bubblewrap), Codex CLI, uv, curl, chezmoi |
+| core  | all            | zsh (default shell), gopass (+ password store), gnupg (+ personal GPG key), starship, neovim (+ LazyVim config and its toolchain: build-essential, npm, luarocks, sqlite3, fd, tree-sitter via rust), vim-gtk3 (+ vimrc), tmux (+ config), ssh config, git (+ config), git-lfs, gh, lazygit, prompts, ripgrep, fzf, bat, zoxide, eza, fastfetch, jq, btop, plocate, bw (bitwarden CLI), restic, sshfs (+ fuse3), openssh-server, tailscale, rclone, Claude Code (+ bubblewrap), Codex CLI, uv, curl, chezmoi |
 | extra | laptop, wsl    | gomi, conda (miniforge), yazi (+ config, previews: imagemagick, ffmpeg, poppler, chafa, 7z), rga (+ pandoc), dezoomify-rs, LaTeX (texlive + biber + latexmk), zathura, qt6-wayland |
 | gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS), Google Chrome, Slack, Zoom, ParaView, VLC, Zotero, Clockify, libfuse2t64 (AppImage support) |
 
-The `.zshrc` is layered the same way: a core fragment for every machine, a
-workstation fragment for laptop/wsl, and a server fragment for servers. The
-fragments live in `home/.chezmoitemplates/` and are assembled by
-`home/dot_zshrc.tmpl` based on the machine type stored in chezmoi's data.
+The `.zshrc` is layered the same way: a core fragment for every machine
+(vi-mode line editing, EDITOR=nvim, completion styles + `~/.dircolors`,
+eza aliases with auto-listing on cd, the acp/mkcd/scroll/showpath/cf
+helpers, and a background autopull that ff-pulls `~/.dotfiles` at most
+every 12h — pull only, never an unattended `chezmoi apply`), a bitwarden
+fragment (bw_login / bw_fetch_ssh, kept separate so it's easy to retire),
+a wsl fragment (clip/start interop aliases, Windows VS Code on PATH), a
+workstation fragment for laptop/wsl, and a server fragment for servers.
+The fragments live in `home/.chezmoitemplates/` and are assembled by
+`home/dot_zshrc.tmpl` based on the machine type stored in chezmoi's data;
+the assembled file ends with a tmux autostart (attach/create session
+"main" in local interactive terminals only — skipped over SSH, in VS
+Code, in nvim terminals and inside tmux itself).
+
+The core zshrc also sources every file in `~/.zsh/`, a machine-local
+drop-in dir that chezmoi leaves unmanaged — with one exception:
+`~/.zsh/neutronics.zsh` (OpenFOAM lazy-loader, OpenMC data paths, MCNP
+suffix aliases) is deployed by chezmoi on laptop and wsl (not servers),
+gated in `home/.chezmoiignore`. A guarded `~/.config/secrets.env` is sourced too,
+for machine-local secrets that never enter the repo.
 
 The SSH client config (`home/private_dot_ssh/config`) is deployed to
 `~/.ssh/config` on every machine — only the config (host aliases) is
@@ -105,6 +121,7 @@ lib/install-claude-code.sh   Claude Code, user-level ~/.local/bin (all machines)
 lib/install-codex.sh         Codex CLI, user-level ~/.local/bin (all machines)
 lib/install-uv.sh            uv, user-level ~/.local/bin (all machines)
 lib/install-lazygit.sh       lazygit from GitHub release binaries (all machines)
+lib/install-bw.sh            bitwarden CLI via npm -g (all machines)
 lib/install-gomi.sh          gomi from GitHub release binaries (laptop+wsl)
 lib/install-conda.sh         Miniforge3 from the official installer script (laptop+wsl)
 lib/install-yazi.sh          yazi + ya + zsh completions from GitHub release binaries (laptop+wsl)
@@ -196,6 +213,11 @@ pulls in ibus and mesa extras).
   names, fetched via the `releases/latest` redirect) into `~/.local/bin` —
   the official install script resolves versions through the GitHub API,
   which gets rate-limited in CI.
+- **bw (Bitwarden CLI)**: `npm install -g @bitwarden/cli` (npm is a core
+  package). No apt package exists, and the bitwarden/clients GitHub
+  releases mix per-product tags, so the redirect trick used elsewhere is
+  unreliable. Backs the zshrc `bw_login`/`bw_fetch_ssh` helpers; planned
+  for retirement once gopass fully replaces it.
 - **imagemagick caveat**: if Ubuntu still ships ImageMagick 6 there is no
   `magick` binary, so yazi's `magick`-based previews (avif/heic/jxl/svg)
   won't run; the common image/video/pdf previews use their own previewers
@@ -297,6 +319,14 @@ tree-sitter-cli), fzf-from-git and zoxide-via-curl (both apt now), and the
 `zsh_wsl_neutronics` shell fragment (superseded by the zshrc fragments and
 the `~/.zsh` drop-in dir; its OpenMC exports pointed at a nonexistent
 endfb-viii.1 data dir).
+
+Likewise dropped from the old `.zshrc` during its migration into the
+fragments: `prompt suse` (starship), the `/home/root/.local/bin` and
+`/opt/nvim/bin` PATH entries (stale / covered by the /usr/local/bin
+symlink), `export DISPLAY=:0.0` (WSL1-era hack that breaks WSLg), the
+`~/.fzf.zsh` legacy source, the nvm lazy-load shims (npm comes from apt
+now), the jupyter-notebook alias (no global jupyter install), and
+`HISTDUP=erase` (a bash-ism, not a zsh option).
 
 ## CI
 

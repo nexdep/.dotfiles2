@@ -9,3 +9,8 @@
 {{ if eq .machine "server" }}
 .config/yazi
 {{ end -}}
+
+{{/* neutronics drop-in for workstations (laptop/wsl); the rest of ~/.zsh stays unmanaged. */}}
+{{ if eq .machine "server" }}
+.zsh/neutronics.zsh
+{{ end -}}

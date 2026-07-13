@@ -2,9 +2,24 @@
 # Edit in the dotfiles repo, then run `chezmoi apply`.
 
 {{ template "zshrc-core.zsh" . }}
+{{ template "zshrc-bitwarden.zsh" . }}
+{{- if eq .machine "wsl" }}
+{{ template "zshrc-wsl.zsh" . }}
+{{- end }}
 {{- if ne .machine "server" }}
 {{ template "zshrc-workstation.zsh" . }}
 {{- end }}
 {{- if eq .machine "server" }}
 {{ template "zshrc-server.zsh" . }}
 {{- end }}
+
+# --- tmux autostart (keep last) ---
+# Attach/create the "main" session for local interactive terminals only.
+# Skips: already in tmux, non-interactive, SSH sessions, VS Code, nvim terminals.
+if [[ -z "$TMUX" \
+   && -n "$PS1" \
+   && -z "$SSH_CONNECTION" \
+   && "$TERM_PROGRAM" != "vscode" \
+   && -z "$NVIM" ]]; then
+  tmux attach-session -t main || tmux new-session -s main
+fi

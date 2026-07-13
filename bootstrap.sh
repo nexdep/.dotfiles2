@@ -82,6 +82,7 @@ fi
 "$LIB_DIR/install-codex.sh" # user-level, ~/.local/bin
 "$LIB_DIR/install-uv.sh" # user-level, ~/.local/bin
 "$LIB_DIR/install-lazygit.sh"
+"$LIB_DIR/install-bw.sh" # bitwarden CLI via npm
 if [[ "$MACHINE" != server ]]; then
   "$LIB_DIR/install-gomi.sh"
   "$LIB_DIR/install-conda.sh"

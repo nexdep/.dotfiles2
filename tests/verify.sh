@@ -79,6 +79,8 @@ apps=(
   'core|claude|test -x "$HOME/.local/bin/claude"'
   'core|codex|test -x "$HOME/.local/bin/codex"'
   'core|uv|test -x "$HOME/.local/bin/uv"'
+  'core|bw|command -v bw'
+  'core|plocate|command -v plocate'
   'extra|gomi|command -v gomi'
   'extra|conda|test -x "$HOME/miniforge3/bin/conda"|test ! -e "$HOME/miniforge3"'
   'extra|yazi|command -v yazi && command -v ya|! command -v yazi && ! command -v ya'
@@ -150,6 +152,13 @@ check "no ephemeral credential helper" eval '! grep -q vscode-remote-containers 
 check "zshrc initializes starship" grep -q "starship init zsh" "$zshrc"
 check "zshrc initializes zoxide" grep -q "zoxide init zsh" "$zshrc"
 check "zshrc initializes fzf" grep -q "fzf --zsh" "$zshrc"
+check "zshrc enables vi mode" grep -q "bindkey -v" "$zshrc"
+check "zshrc sets EDITOR=nvim" grep -q "EDITOR=nvim" "$zshrc"
+check "zshrc aliases ll to eza" grep -q "alias ll='eza" "$zshrc"
+check "zshrc has bitwarden helpers" grep -q "bw_login" "$zshrc"
+check "zshrc has dotfiles autopull" grep -q "dotfiles-last-pull" "$zshrc"
+check "zshrc autostarts tmux" grep -q "tmux attach-session" "$zshrc"
+check "dircolors deployed" test -f "$HOME/.dircolors"
 check "login shell is zsh" test "$(getent passwd "$(id -un)" | cut -d: -f7)" = "$(command -v zsh)"
 # install-gpg-key.sh must skip the personal key import when there is no TTY
 # (as in CI), so no secret key may exist here.
@@ -169,10 +178,12 @@ if [[ "$machine" != server ]]; then
   # proves the ya pkg run script installed the plugins pinned in package.toml
   check "yazi fg plugin installed" test -d "$HOME/.config/yazi/plugins/fg.yazi"
   check "yazi zsh completions installed" test -f /usr/local/share/zsh/site-functions/_yazi
+  check "neutronics drop-in deployed" test -f "$HOME/.zsh/neutronics.zsh"
 else
   check "server zshrc fragment" grep -q -- "--- server ---" "$zshrc"
   check "no workstation zshrc fragment" eval '! grep -q -- "--- workstation (laptop/wsl)" "$zshrc"'
   check "yazi config absent" test ! -e "$HOME/.config/yazi"
+  check "neutronics drop-in absent" test ! -e "$HOME/.zsh/neutronics.zsh"
 fi
 
 # The yazi "open" opener is templated per machine: explorer.exe (via WSL
@@ -192,5 +203,12 @@ for marker in .hushlogin .motd_shown .sudo_as_admin_successful; do
     check "wsl marker $marker absent" test ! -e "$HOME/$marker"
   fi
 done
+
+# WSL-only zshrc fragment.
+if [[ "$machine" == wsl ]]; then
+  check "zshrc has wsl clip alias" grep -q "clip.exe" "$zshrc"
+else
+  check "no wsl clip alias in zshrc" eval '! grep -q "clip.exe" "$zshrc"'
+fi
 
 exit "$fail"
