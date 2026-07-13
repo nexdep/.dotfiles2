@@ -137,6 +137,7 @@ lib/install-conda.sh         Miniforge3 from the official installer script (lapt
 lib/install-yazi.sh          yazi + ya + zsh completions from GitHub release binaries (laptop+wsl)
 lib/install-rga.sh           ripgrep-all from GitHub release binaries (laptop+wsl)
 lib/install-dezoomify-rs.sh  dezoomify-rs from GitHub release binaries (laptop+wsl)
+lib/install-onedrive-links.sh  symlinks Windows OneDrive folders into ~ (wsl only)
 lib/install-gui.sh           all laptop GUI apps (apt repos, tarballs, .debs)
 home/                        chezmoi source directory (via .chezmoiroot)
 home/dot_scripts/            non-bootstrap scripts deployed to ~/.scripts/ (gpg, hetzner_mount, openmc_scripts, restic_b2_backups)
@@ -319,6 +320,15 @@ pulls in ibus and mesa extras).
   resolve), per the instructions at clockify.me/linux-time-tracking. No
   apt repo is published, so re-running `bootstrap.sh` only reinstalls if
   the `clockify` command is missing.
+- **OneDrive links** (wsl only): `lib/install-onedrive-links.sh` resolves
+  the logged-in Windows profile via cmd.exe interop (falling back to
+  scanning `/mnt/c/Users`) and symlinks each `OneDrive*` folder into the
+  home directory: personal `OneDrive` → `~/onedrive`, business
+  `OneDrive - <Org>` → `~/onedrive_<org-initials>` (e.g. "Massachusetts
+  Institute of Technology" → `~/onedrive_mit`). It only manages those
+  canonical names — it never clobbers a real file/dir, repoints stale
+  managed symlinks, leaves symlinks under other names alone, and
+  self-skips where there is no Windows mount (CI).
 
 Deliberately **not** ported from the old pre-chezmoi setup scripts: stow
 (replaced by chezmoi), the apt upgrade step (not bootstrap's job), the

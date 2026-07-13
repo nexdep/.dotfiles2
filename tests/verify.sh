@@ -213,4 +213,18 @@ else
   check "no wsl clip alias in zshrc" eval '! grep -q "clip.exe" "$zshrc"'
 fi
 
+# OneDrive symlinks (lib/install-onedrive-links.sh). Real WSL machines have a
+# Windows profile under /mnt/c/Users with OneDrive folders; the CI wsl leg
+# (plain ubuntu container, no /mnt/c) must have self-skipped and created
+# nothing at the managed ~/onedrive* names.
+if [[ "$machine" == wsl ]]; then
+  onedrive_dirs=(/mnt/c/Users/*/OneDrive*/)
+  if [[ -d "${onedrive_dirs[0]:-}" ]]; then
+    check "onedrive symlink(s) created" eval 'find "$HOME" -maxdepth 1 -name "onedrive*" -type l | grep -q .'
+    check "onedrive symlinks resolve" eval '! find "$HOME" -maxdepth 1 -name "onedrive*" -type l ! -exec test -d {}/. \; -print | grep -q .'
+  else
+    check "onedrive links skipped (no /mnt/c)" eval '! find "$HOME" -maxdepth 1 -name "onedrive*" | grep -q .'
+  fi
+fi
+
 exit "$fail"

@@ -90,6 +90,9 @@ if [[ "$MACHINE" != server ]]; then
   "$LIB_DIR/install-rga.sh"
   "$LIB_DIR/install-dezoomify-rs.sh"
 fi
+if [[ "$MACHINE" == wsl ]]; then
+  "$LIB_DIR/install-onedrive-links.sh" # symlink Windows OneDrive folders into ~; self-skips without /mnt/c
+fi
 if [[ "$MACHINE" == laptop ]]; then
   "$LIB_DIR/install-gui.sh"
 fi
