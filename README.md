@@ -10,7 +10,7 @@ Each tier is a superset of the one below it (laptop ⊃ wsl ⊃ server):
 
 | Tier  | Machines       | Programs                                          |
 |-------|----------------|---------------------------------------------------|
-| core  | all            | zsh (default shell), gopass (+ password store), gnupg (+ personal GPG key), starship, neovim (+ LazyVim config and its toolchain: build-essential, npm, luarocks, sqlite3, fd, tree-sitter via rust), vim-gtk3 (+ vimrc), tmux (+ config), ssh config, git (+ config), git-lfs, gh, lazygit, prompts, ripgrep, fzf, bat, zoxide, eza, fastfetch, jq, btop, plocate, bw (bitwarden CLI), restic, sshfs (+ fuse3), openssh-server, tailscale, rclone, Claude Code (+ bubblewrap), Codex CLI, uv, curl, chezmoi |
+| core  | all            | zsh (default shell), gopass (+ password store), gnupg (+ personal GPG key), starship, neovim (+ LazyVim config and its toolchain: build-essential, npm, luarocks, sqlite3, fd, tree-sitter via rust), vim-gtk3 (+ vimrc), tmux (+ config), ssh config, git (+ config), git-lfs, gh, lazygit, prompts, ripgrep, fzf, bat, zoxide, eza, fastfetch, jq, btop, plocate, bw (bitwarden CLI), restic, sshfs (+ fuse3), openssh-server, tailscale, rclone, Claude Code (+ bubblewrap), Codex CLI, Cursor Agent CLI, GitHub Copilot CLI, Pi CLI, uv, curl, chezmoi |
 | extra | laptop, wsl    | gomi, conda (miniforge), yazi (+ config, previews: imagemagick, ffmpeg, poppler, chafa, 7z), rga (+ pandoc), dezoomify-rs, LaTeX (texlive + biber + latexmk), zathura, qt6-wayland |
 | gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS), Google Chrome, Slack, Zoom, ParaView, VLC, Zotero, Clockify, libfuse2t64 (AppImage support) |
 
@@ -129,6 +129,9 @@ lib/install-rclone.sh        rclone via its official script (all machines)
 lib/install-rust.sh          rustup + cargo-built tree-sitter-cli, user-level (all machines)
 lib/install-claude-code.sh   Claude Code, user-level ~/.local/bin (all machines)
 lib/install-codex.sh         Codex CLI, user-level ~/.local/bin (all machines)
+lib/install-cursor-agent.sh  Cursor Agent, user-level ~/.local/bin (all machines)
+lib/install-copilot.sh       GitHub Copilot CLI via npm -g (all machines)
+lib/install-pi.sh            Pi (pi.dev) coding agent via npm -g (all machines)
 lib/install-uv.sh            uv, user-level ~/.local/bin (all machines)
 lib/install-lazygit.sh       lazygit from GitHub release binaries (all machines)
 lib/install-bw.sh            bitwarden CLI via npm -g (all machines)
@@ -224,6 +227,15 @@ pulls in ibus and mesa extras).
   names, fetched via the `releases/latest` redirect) into `~/.local/bin` —
   the official install script resolves versions through the GitHub API,
   which gets rate-limited in CI.
+- **Cursor Agent CLI**: official installer script (`cursor.com/install`),
+  user-level into `~/.local/bin` (symlinks both `cursor-agent` and `agent`;
+  self-updates via `cursor-agent update`). The installer downloads from the
+  Cursor CDN, not the GitHub API, so it is CI-safe.
+- **GitHub Copilot CLI / Pi**: `npm install -g` (npm is a core package),
+  matching bw. Copilot from `@github/copilot` (needs Node 22+, satisfied by
+  the core `nodejs` package); Pi (pi.dev) from
+  `@earendil-works/pi-coding-agent` with `--ignore-scripts` — its `curl | sh`
+  installer is an interactive TUI unsuitable for a non-interactive bootstrap.
 - **bw (Bitwarden CLI)**: `npm install -g @bitwarden/cli` (npm is a core
   package). No apt package exists, and the bitwarden/clients GitHub
   releases mix per-product tags, so the redirect trick used elsewhere is
