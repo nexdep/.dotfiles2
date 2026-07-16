@@ -10,7 +10,7 @@ Each tier is a superset of the one below it (laptop ⊃ wsl ⊃ server):
 
 | Tier  | Machines       | Programs                                          |
 |-------|----------------|---------------------------------------------------|
-| core  | all            | zsh (default shell), gopass (+ password store), gnupg (+ personal GPG key), starship, neovim (+ LazyVim config and its toolchain: build-essential, npm, luarocks, sqlite3, fd, tree-sitter via rust), vim-gtk3 (+ vimrc), tmux (+ config), ssh config, git (+ config), git-lfs, gh, lazygit, prompts, ripgrep, fzf, bat, zoxide, eza, fastfetch, jq, btop, plocate, bw (bitwarden CLI), restic, sshfs (+ fuse3), openssh-server, tailscale, rclone, Claude Code (+ bubblewrap), Codex CLI, Cursor Agent CLI, GitHub Copilot CLI, Pi CLI, uv, curl, chezmoi |
+| core  | all            | zsh (default shell), gopass (+ password store), gnupg (+ personal GPG key), starship, neovim (+ LazyVim config and its toolchain: build-essential, npm, luarocks, sqlite3, fd, tree-sitter via rust), vim-gtk3 (+ vimrc), tmux (+ config), ssh config, git (+ config), git-lfs, gh, lazygit, prompts, ripgrep, fzf, bat, zoxide, eza, fastfetch, jq, btop, plocate, bw (bitwarden CLI), restic, sshfs (+ fuse3), openssh-server, tailscale, rclone, Claude Code (+ bubblewrap), Codex CLI, Cursor Agent CLI, GitHub Copilot CLI, Pi CLI, opencode, uv, curl, chezmoi |
 | extra | laptop, wsl    | gomi, conda (miniforge), yazi (+ config, previews: imagemagick, ffmpeg, poppler, chafa, 7z), rga (+ pandoc), dezoomify-rs, LaTeX (texlive + biber + latexmk), zathura, qt6-wayland |
 | gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS), Google Chrome, Slack, Zoom, ParaView, VLC, Zotero, Clockify, libfuse2t64 (AppImage support) |
 
@@ -132,6 +132,7 @@ lib/install-codex.sh         Codex CLI, user-level ~/.local/bin (all machines)
 lib/install-cursor-agent.sh  Cursor Agent, user-level ~/.local/bin (all machines)
 lib/install-copilot.sh       GitHub Copilot CLI via npm -g (all machines)
 lib/install-pi.sh            Pi (pi.dev) coding agent via npm -g (all machines)
+lib/install-opencode.sh      opencode agent from GitHub release binaries (all machines)
 lib/install-uv.sh            uv, user-level ~/.local/bin (all machines)
 lib/install-lazygit.sh       lazygit from GitHub release binaries (all machines)
 lib/install-bw.sh            bitwarden CLI via npm -g (all machines)
@@ -236,6 +237,13 @@ pulls in ibus and mesa extras).
   the core `nodejs` package); Pi (pi.dev) from
   `@earendil-works/pi-coding-agent` with `--ignore-scripts` — its `curl | sh`
   installer is an interactive TUI unsuitable for a non-interactive bootstrap.
+- **opencode**: prebuilt binary from the GitHub release assets (fixed-name
+  `opencode-linux-<arch>.tar.gz`, fetched via the `releases/latest` redirect)
+  into `/usr/local/bin`. The official installer (`opencode.ai/install`) is
+  avoided: it unpacks into `~/.opencode/bin` and appends a PATH export to the
+  shell rc file, which the chezmoi-managed `.zshrc` would overwrite.
+  `opencode --version` hangs without a TTY, so bootstrap logs no version and
+  verify only checks PATH presence.
 - **bw (Bitwarden CLI)**: `npm install -g @bitwarden/cli` (npm is a core
   package). No apt package exists, and the bitwarden/clients GitHub
   releases mix per-product tags, so the redirect trick used elsewhere is

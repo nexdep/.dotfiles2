@@ -42,6 +42,8 @@ rank() {
 #  - obsidian/slack/zoom/clockify/paraview/vlc/zotero: running --version is
 #    not safe or meaningful headless as root (obsidian launches the full app
 #    and hangs, vlc exits 1 with no output), so only PATH presence is checked.
+#  - opencode: same story headless — `opencode --version` produces no output
+#    and hangs without a TTY, so only PATH presence is checked.
 #  - evolution-ews is a backend module with no executable, hence dpkg -s.
 apps=(
   'core|zsh|command -v zsh'
@@ -81,6 +83,7 @@ apps=(
   'core|cursor-agent|test -x "$HOME/.local/bin/cursor-agent"'
   'core|copilot|command -v copilot'
   'core|pi|command -v pi'
+  'core|opencode|command -v opencode'
   'core|uv|test -x "$HOME/.local/bin/uv"'
   'core|bw|command -v bw'
   'core|plocate|command -v plocate'

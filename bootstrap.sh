@@ -83,6 +83,7 @@ fi
 "$LIB_DIR/install-cursor-agent.sh" # user-level, ~/.local/bin
 "$LIB_DIR/install-copilot.sh" # GitHub Copilot CLI via npm -g
 "$LIB_DIR/install-pi.sh" # pi.dev coding agent via npm -g
+"$LIB_DIR/install-opencode.sh" # opencode agent from GitHub release binaries
 "$LIB_DIR/install-uv.sh" # user-level, ~/.local/bin
 "$LIB_DIR/install-lazygit.sh"
 "$LIB_DIR/install-bw.sh" # bitwarden CLI via npm
