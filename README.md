@@ -80,7 +80,8 @@ standalone scripts that are **not** used by `bootstrap.sh`, organized into
 category subfolders: `gpg/` (the GPG backup tool), `hetzner_mount/` (SSHFS
 Storage Box user-systemd mount), `openmc_scripts/` (conda/OpenMC build +
 neutronics tooling + data fetcher), and `restic_b2_backups/`
-(restic→Backblaze systemd backup). Unlike the `lib/` install scripts they are
+(restic→Backblaze systemd backup, plus a restore script for pulling a
+backed-up folder back after redeploying a system). Unlike the `lib/` install scripts they are
 self-contained and do not source `lib/common.sh`, since they run from
 `~/.scripts/` rather than the repo. Secrets are never committed — the restic
 scripts only write `CHANGE_ME` placeholders into `/etc/restic`.
