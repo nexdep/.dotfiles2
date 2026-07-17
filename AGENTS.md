@@ -71,6 +71,13 @@ page (see slack, paraview) with a loud `die` if the scrape comes back empty.
   privileged commands; never bare `sudo`.
 - **No snap**: CI runs in containers without snapd, so snap-based installs
   can't be tested and are not used.
+- **No daemon auto-start during install**: `bootstrap.sh` installs a
+  `policy-rc.d` (exit 101) via `block_daemon_starts` for the whole run so apt
+  postinsts don't start services through the systemd bus — on WSL that bus is
+  often unavailable and a failed start would abort bootstrap under `set -e`.
+  Units are still *enabled* (they start on next boot); ssh is best-effort
+  started at the end. The guard is removed on exit and self-skips where no
+  systemd is present (CI containers).
 - **Recommends policy**: package-list installs use
   `--no-install-recommends`; GUI app installs deliberately keep apt's
   default Recommends handling (see docs/install-methods.md).

@@ -6,6 +6,13 @@ the GUI apps below (both repo- and .deb-based) deliberately keep apt's
 default Recommends handling — desktop apps often rely on them (e.g. Zoom
 pulls in ibus and mesa extras).
 
+Note on service startup: for the duration of the run `bootstrap.sh` installs a
+`policy-rc.d` (exit 101) so package postinst scripts don't start their daemons
+via the systemd bus — on WSL that bus is often unavailable and a failed start
+would abort bootstrap. Services are still *enabled* and start on next boot;
+`ssh` is best-effort started at the end so it works without a restart, and
+tailscale is left for its manual `tailscale up`.
+
 - **Firefox Developer Edition**: Mozilla's official apt repo
   (packages.mozilla.org), pinned above Ubuntu's snap-transition stubs, so it
   updates with `apt upgrade`.

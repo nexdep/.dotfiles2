@@ -14,6 +14,25 @@ die() {
   exit 1
 }
 
+POLICY_RC_D=/usr/sbin/policy-rc.d
+# Stop package postinst scripts from starting their daemons during apt: on a
+# systemd host deb-systemd-invoke/invoke-rc.d honor a policy-rc.d that exits
+# 101 and skip the start (the unit is still enabled, so it starts on next
+# boot). On WSL the systemd D-Bus bus is often unavailable, so a start attempt
+# fails and aborts bootstrap under `set -e`; this sidesteps it. Idempotent, and
+# records whether we created the file so the matching remove only deletes our
+# own (a pre-existing environment policy-rc.d is left untouched).
+block_daemon_starts() {
+  if [[ -e "$POLICY_RC_D" ]]; then _CREATED_POLICY_RC_D=0; return; fi
+  printf '#!/bin/sh\nexit 101\n' | $SUDO tee "$POLICY_RC_D" >/dev/null
+  $SUDO chmod 0755 "$POLICY_RC_D"
+  _CREATED_POLICY_RC_D=1
+}
+# shellcheck disable=SC2317,SC2329  # invoked via `trap ... EXIT` in bootstrap.sh
+unblock_daemon_starts() {
+  [[ "${_CREATED_POLICY_RC_D:-0}" == 1 ]] && $SUDO rm -f "$POLICY_RC_D"
+}
+
 # add_apt_repo <name> <key_url> <options> <repo-and-suites>
 # Writes the signing key to /etc/apt/keyrings/<name>.{asc,gpg} and the source
 # to /etc/apt/sources.list.d/<name>.list. apt decides armored-vs-binary key

@@ -32,6 +32,12 @@ if [[ "$(id -u)" -ne 0 ]]; then
   command -v sudo >/dev/null 2>&1 || die "not root and sudo is not available"
 fi
 
+# Keep apt postinst scripts from starting daemons via the systemd bus (flaky on
+# WSL); armed before the first apt-get so it covers the whole run, removed on
+# exit even if bootstrap fails. See lib/common.sh.
+block_daemon_starts
+trap unblock_daemon_starts EXIT
+
 read_packages() { sed -e 's/#.*//' -e 's/[[:space:]]*$//' "$1" | grep -vE '^$' || true; }
 
 # --- apt packages per tier ---------------------------------------------------
@@ -116,6 +122,17 @@ current_shell="$(getent passwd "$(id -un)" | cut -d: -f7)"
 if [[ "$current_shell" != "$zsh_path" ]]; then
   log "setting default shell to $zsh_path"
   $SUDO chsh -s "$zsh_path" "$(id -un)"
+fi
+
+# --- start ssh in this session ---------------------------------------------------
+# Daemon auto-start was suppressed during install, so ssh.socket is enabled but
+# not yet running; start it now so ssh works without a reboot. Best effort —
+# never fatal, and a no-op where systemd isn't the init (CI containers).
+if [[ -d /run/systemd/system ]] && command -v systemctl >/dev/null 2>&1; then
+  log "starting ssh (best effort)"
+  $SUDO systemctl start ssh.socket 2>/dev/null \
+    || $SUDO systemctl start ssh.service 2>/dev/null \
+    || log "could not start ssh now; it will start on next boot"
 fi
 
 log "cleaning apt cache"
