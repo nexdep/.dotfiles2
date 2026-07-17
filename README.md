@@ -37,9 +37,9 @@ everything is idempotent; re-run `./bootstrap.sh` to pick up newly added
 programs.
 
 Bootstrap itself is fully non-interactive. The one manual follow-up is the
-personal GPG key: run `~/.scripts/gpg/import-gpg-key.sh` from the repo root
-(it prompts for the backup passphrase) to unlock the gopass store — see the
-"Personal GPG key" note in
+personal GPG key: run `~/.scripts/gpg/import-gpg-key.sh` (works from
+anywhere; it prompts for the backup passphrase) to unlock the gopass store —
+see the "Personal GPG key" note in
 [docs/install-methods.md](docs/install-methods.md).
 
 ### Day-to-day with chezmoi

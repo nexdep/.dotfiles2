@@ -137,7 +137,7 @@ fi
 # The personal GPG key is imported manually, not by bootstrap (the decrypt
 # prompt is interactive); just point at the script when the key is missing.
 if ! gpg --list-secret-keys --with-colons 2>/dev/null | grep -q '^sec'; then
-  log "personal GPG key not imported; run ~/.scripts/gpg/import-gpg-key.sh from the repo root to unlock the gopass store"
+  log "personal GPG key not imported; run ~/.scripts/gpg/import-gpg-key.sh to unlock the gopass store"
 fi
 
 log "cleaning apt cache"

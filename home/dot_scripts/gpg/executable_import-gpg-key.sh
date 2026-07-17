@@ -9,8 +9,9 @@
 # bootstrap).
 #
 # Self-contained on purpose (no lib/common.sh) since it lives outside the repo
-# once deployed. Run it from the repo root: it reads the backup from ./gpg/
-# (override the source with GPG_BACKUP_FILE).
+# once deployed (~/.scripts/gpg/). It can run from anywhere: the backup is
+# found in ./gpg/ when the cwd is the repo root, otherwise via
+# `chezmoi source-path` (override the source with GPG_BACKUP_FILE).
 set -euo pipefail
 
 log() { printf '\033[1;34m[gpg-import]\033[0m %s\n' "$*"; }
@@ -28,17 +29,28 @@ if gpg --list-secret-keys "$KEY_ID" >/dev/null 2>&1; then
   exit 0
 fi
 
-# The backup lives in this repo's gpg/ dir. Default to ./gpg/ under the
-# current directory (run this from the repo root); override with
-# GPG_BACKUP_FILE.
+# The backup lives in the dotfiles repo's gpg/ dir, but this script is
+# deployed outside the repo, so locate it: GPG_BACKUP_FILE override, then the
+# cwd (running from the repo root), then wherever chezmoi says the source is.
+# `chezmoi source-path` returns the source dir, which thanks to .chezmoiroot
+# may be the repo root or <repo>/home — check both it and its parent.
+BACKUP_FILE=""
 if [[ -n "${GPG_BACKUP_FILE:-}" ]]; then
   BACKUP_FILE="$GPG_BACKUP_FILE"
-else
-  [[ -f "gpg/private-key.asc.gpg" ]] ||
-    die "no ./gpg/private-key.asc.gpg here; run from the dotfiles repo root or set GPG_BACKUP_FILE"
+elif [[ -f "gpg/private-key.asc.gpg" ]]; then
   BACKUP_FILE="$PWD/gpg/private-key.asc.gpg"
+elif command -v chezmoi >/dev/null 2>&1 && src="$(chezmoi source-path 2>/dev/null)"; then
+  for dir in "$src" "$(dirname "$src")"; do
+    if [[ -f "$dir/gpg/private-key.asc.gpg" ]]; then
+      BACKUP_FILE="$dir/gpg/private-key.asc.gpg"
+      break
+    fi
+  done
 fi
+[[ -n "$BACKUP_FILE" ]] ||
+  die "cannot locate the encrypted key backup (gpg/private-key.asc.gpg): run from the dotfiles repo root, set GPG_BACKUP_FILE, or bootstrap first so chezmoi knows the source dir"
 [[ -f "$BACKUP_FILE" ]] || die "encrypted key backup not found: $BACKUP_FILE"
+log "using key backup $BACKUP_FILE"
 
 [[ -t 0 ]] || die "no TTY: this script prompts for the backup passphrase"
 
