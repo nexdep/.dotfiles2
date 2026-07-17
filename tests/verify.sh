@@ -156,6 +156,7 @@ check "gitconfig excludesFile set" eval '[[ "$(git config --file "$HOME/.gitconf
 check "prompts folder deployed" test -d "$HOME/.prompts/shared"
 check "prompts folder has all files" eval '[[ $(find "$HOME/.prompts/shared" -maxdepth 1 -name "*.md" | wc -l) -eq 8 ]]'
 check "gpg backup script deployed" test -x "$HOME/.scripts/gpg/generate-gpg-backup.sh"
+check "gpg import script deployed" test -x "$HOME/.scripts/gpg/import-gpg-key.sh"
 check "hetzner scripts deployed" test -x "$HOME/.scripts/hetzner_mount/setup_hetzner_storagebox_systemd.sh"
 check "openmc scripts deployed" test -x "$HOME/.scripts/openmc_scripts/openmc_data_fetcher.sh"
 check "restic scripts deployed" test -x "$HOME/.scripts/restic_b2_backups/setup-restic-systemd-backup.sh"
@@ -175,9 +176,9 @@ check "zshrc has dotfiles autopull" grep -q "dotfiles-last-pull" "$zshrc"
 check "zshrc autostarts tmux" grep -q "tmux attach-session" "$zshrc"
 check "dircolors deployed" test -f "$HOME/.dircolors"
 check "login shell is zsh" test "$(getent passwd "$(id -un)" | cut -d: -f7)" = "$(command -v zsh)"
-# install-gpg-key.sh must skip the personal key import when there is no TTY
-# (as in CI), so no secret key may exist here.
-check "gpg key import skipped (no TTY)" eval '! gpg --list-secret-keys --with-colons 2>/dev/null | grep -q "^sec"'
+# bootstrap never imports the personal GPG key (that's the manual
+# ~/.scripts/gpg/import-gpg-key.sh), so no secret key may exist here.
+check "no gpg secret key imported by bootstrap" eval '! gpg --list-secret-keys --with-colons 2>/dev/null | grep -q "^sec"'
 # The gopass store is a public repo cloned keylessly on every tier; the push
 # URL must have been switched to SSH.
 check "gopass store cloned" test -d "$HOME/.local/share/gopass/stores/root/.git"

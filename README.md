@@ -36,10 +36,11 @@ passed via the argument), so later commands don't need it. Re-running is safe â€
 everything is idempotent; re-run `./bootstrap.sh` to pick up newly added
 programs.
 
-On an interactive first run, bootstrap also asks for one passphrase to
-decrypt and import the personal GPG key (see the "Personal GPG key" note in
-[docs/install-methods.md](docs/install-methods.md)); unattended runs (CI, no
-TTY) skip that step automatically.
+Bootstrap itself is fully non-interactive. The one manual follow-up is the
+personal GPG key: run `~/.scripts/gpg/import-gpg-key.sh` from the repo root
+(it prompts for the backup passphrase) to unlock the gopass store â€” see the
+"Personal GPG key" note in
+[docs/install-methods.md](docs/install-methods.md).
 
 ### Day-to-day with chezmoi
 
@@ -90,7 +91,6 @@ lib/common.sh                shared helpers: SUDO/log/die, add_apt_repo, install
 lib/packages-*.txt           apt package lists per tier
 lib/install-starship.sh      starship from GitHub release binaries (all machines)
 lib/install-neovim.sh        Neovim from the official release tarball into /opt (all machines)
-lib/install-gpg-key.sh       imports the personal GPG key from gpg/ (all machines, TTY only)
 lib/install-gopass-store.sh  clones the gopass password store from GitHub (all machines)
 gpg/private-key.asc.gpg      passphrase-encrypted backup of the personal GPG key
 lib/install-tailscale.sh     tailscale via its official script (all machines)

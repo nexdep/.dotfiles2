@@ -3,7 +3,8 @@
 # path. The GitHub repo is public, so the clone is keyless over HTTPS and
 # safe to run unattended (CI included); the push URL is switched to SSH so
 # `gopass sync` can push once an SSH key is set up. Decrypting the secrets
-# needs the personal GPG key (lib/install-gpg-key.sh), imported separately.
+# needs the personal GPG key (~/.scripts/gpg/import-gpg-key.sh), imported
+# manually after bootstrap.
 set -euo pipefail
 
 LOG_TAG=gopass-store

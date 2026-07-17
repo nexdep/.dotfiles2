@@ -27,17 +27,22 @@ tailscale is left for its manual `tailscale up`.
 - **Personal GPG key**: the key the gopass store is encrypted to lives in
   the repo as `gpg/private-key.asc.gpg` — a symmetric, passphrase-encrypted
   (AES256) export of the private key; its security rests entirely on that
-  passphrase. `lib/install-gpg-key.sh` (called by `bootstrap.sh` on every
-  tier) decrypts it, imports it, and marks it ultimately trusted. It skips
-  itself when the key is already in the keyring or when there is no TTY, so
-  CI never imports it (`tests/verify.sh` asserts this). The public key and
+  passphrase. Importing it is deliberately **not** part of `bootstrap.sh`
+  (the decrypt prompt is interactive, and gpg-agent's pinentry is unreliable
+  on WSL): run `~/.scripts/gpg/import-gpg-key.sh` (deployed by chezmoi)
+  manually from the repo root after bootstrap. It decrypts the backup,
+  imports the key, and marks it ultimately trusted; it skips itself when the
+  key is already in the keyring, reads the backup passphrase itself and hands
+  it to gpg over a pipe with `--pinentry-mode loopback` (no pinentry has to
+  render; 3 attempts for typos), and CI never imports it (`tests/verify.sh`
+  asserts no secret key exists after bootstrap). The public key and
   ownertrust are derived from the private key on import, so the backup is a
   single file. To rotate or refresh the backup, run
-  `~/.scripts/gpg/generate-gpg-backup.sh` (deployed by chezmoi) from the repo
-  root on a machine that has the key, then commit the new blob — it writes the
-  encrypted export to `./gpg/private-key.asc.gpg` (override the destination
-  with `GPG_BACKUP_OUT`). The key id is pinned in both this script and
-  `lib/install-gpg-key.sh` (override with `GPG_KEY_ID`).
+  `~/.scripts/gpg/generate-gpg-backup.sh` from the repo root on a machine
+  that has the key, then commit the new blob — it writes the encrypted
+  export to `./gpg/private-key.asc.gpg` (override the destination with
+  `GPG_BACKUP_OUT`; the import source with `GPG_BACKUP_FILE`). The key id is
+  pinned in both scripts (override with `GPG_KEY_ID`).
 - **gopass store**: the password store itself is the public repo
   `github.com/nexdep/.gopass`, cloned keylessly over HTTPS by
   `lib/install-gopass-store.sh` (every tier, CI included) into gopass's

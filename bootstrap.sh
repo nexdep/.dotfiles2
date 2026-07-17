@@ -79,7 +79,6 @@ fi
 # --- non-apt installers per tier ----------------------------------------------
 "$LIB_DIR/install-starship.sh"
 "$LIB_DIR/install-neovim.sh"
-"$LIB_DIR/install-gpg-key.sh" # personal key for gopass; self-skips without a TTY
 "$LIB_DIR/install-gopass-store.sh" # personal password store (public repo, keyless clone)
 "$LIB_DIR/install-tailscale.sh"
 "$LIB_DIR/install-rclone.sh"
@@ -133,6 +132,12 @@ if [[ -d /run/systemd/system ]] && command -v systemctl >/dev/null 2>&1; then
   $SUDO systemctl start ssh.socket 2>/dev/null \
     || $SUDO systemctl start ssh.service 2>/dev/null \
     || log "could not start ssh now; it will start on next boot"
+fi
+
+# The personal GPG key is imported manually, not by bootstrap (the decrypt
+# prompt is interactive); just point at the script when the key is missing.
+if ! gpg --list-secret-keys --with-colons 2>/dev/null | grep -q '^sec'; then
+  log "personal GPG key not imported; run ~/.scripts/gpg/import-gpg-key.sh from the repo root to unlock the gopass store"
 fi
 
 log "cleaning apt cache"

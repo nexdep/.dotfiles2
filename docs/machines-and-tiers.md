@@ -71,7 +71,7 @@ files with no associated program.
 
 `home/dot_scripts/` deploys to `~/.scripts/` on every machine — handy
 standalone scripts that are **not** used by `bootstrap.sh`, organized into
-category subfolders: `gpg/` (the GPG backup tool), `hetzner_mount/` (SSHFS
+category subfolders: `gpg/` (GPG key backup/import tools), `hetzner_mount/` (SSHFS
 Storage Box user-systemd mount), `openmc_scripts/` (conda/OpenMC build +
 neutronics tooling + data fetcher), and `restic_b2_backups/`
 (restic→Backblaze systemd backup, plus a restore script for pulling a

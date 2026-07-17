@@ -15,7 +15,7 @@ fzf # fuzzy finder: zshrc keybindings + yazi's fzf/fg plugins
 gh # GitHub CLI
 git
 git-lfs # ~/.gitconfig declares the lfs filter with required=true
-gnupg # gpg: gopass encryption + personal key import (lib/install-gpg-key.sh)
+gnupg # gpg: gopass encryption + personal key import (~/.scripts/gpg/import-gpg-key.sh)
 gopass
 jq
 libclang-dev # bindgen needs libclang to build tree-sitter-cli (rquickjs-sys) in lib/install-rust.sh
