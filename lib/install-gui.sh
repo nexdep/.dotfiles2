@@ -9,6 +9,8 @@
 #     (apt.fury.io/wez), a flat Gemfury repo (Codename/Component both "*").
 #   - VS Code Insiders (code-insiders) from Microsoft's official apt
 #     repository (packages.microsoft.com/repos/code).
+#   - Spotify (spotify-client) from Spotify's official apt repository
+#     (repository.spotify.com), which publishes amd64 only.
 #   - Zotero via the community apt repo's own install script, exactly as
 #     documented at https://zotero.retorque.re/file/apt-package-archive/
 #     (zotero.org itself only distributes a tarball; this repo is the
@@ -46,6 +48,9 @@ add_apt_repo wezterm https://apt.fury.io/wez/gpg.key \
 add_apt_repo vscode https://packages.microsoft.com/keys/microsoft.asc \
   "arch=amd64,arm64,armhf" "https://packages.microsoft.com/repos/code stable main"
 
+add_apt_repo spotify https://download.spotify.com/debian/pubkey_5384CE82BA52C83A.asc \
+  "arch=amd64" "https://repository.spotify.com stable non-free"
+
 # Zotero's repo ships its own installer that writes zotero.list plus the
 # keyring; use it as documented. It calls `sudo` internally regardless of
 # how it's invoked, so make sure sudo exists even when already root (bare
@@ -58,8 +63,14 @@ fi
 
 # --- apt-installed GUI apps ------------------------------------------------------
 $SUDO apt-get update
-log "installing firefox-devedition, wezterm-nightly, code-insiders, zotero"
-$SUDO apt-get install -y firefox-devedition wezterm-nightly code-insiders zotero
+log "installing firefox-devedition, wezterm-nightly, code-insiders, zotero, spotify-client"
+# libasound2t64 is named explicitly for spotify-client's sake: spotify depends
+# on the pre-t64 name `libasound2`, which two packages provide — libasound2t64
+# (real ALSA) and liboss4-salsa-asound2 (an OSS4 shim that Conflicts with it).
+# apt picks the OSS4 shim when nothing has pulled ALSA in yet, so pin the real
+# one rather than rely on an earlier package list having done it.
+$SUDO apt-get install -y firefox-devedition wezterm-nightly code-insiders zotero \
+  libasound2t64 spotify-client
 
 # --- Thunderbird Beta (Mozilla tarball) ---------------------------------------
 if [[ -x /opt/thunderbird-beta/thunderbird ]]; then

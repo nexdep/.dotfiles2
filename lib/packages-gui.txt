@@ -15,3 +15,14 @@ vlc
 
 # Legacy FUSE2 library: AppImage-packaged apps need it to run.
 libfuse2t64
+
+# LibreOffice office suite + offline English help. The apps themselves
+# (Writer/Calc/Impress/Draw/Math/Base) are hard Depends of the metapackage,
+# but --no-install-recommends drops the desktop integration and the
+# metric-compatible fonts, so those are named explicitly.
+libreoffice
+libreoffice-help-en-us
+libreoffice-gnome        # native GTK file dialogs + theming
+fonts-crosextra-caladea  # Cambria-metric
+fonts-crosextra-carlito  # Calibri-metric
+fonts-liberation         # Arial/Times/Courier-metric

@@ -12,7 +12,7 @@ Each tier is a superset of the one below it (laptop ⊃ wsl ⊃ server):
 |-------|----------------|---------------------------------------------------|
 | core  | all            | zsh (default shell), gopass (+ password store), gnupg (+ personal GPG key), starship, neovim (+ LazyVim config and its toolchain: build-essential, npm, luarocks, sqlite3, fd, tree-sitter via rust), vim-gtk3 (+ vimrc), tmux (+ config), ssh config, git (+ config), git-lfs, gh, lazygit, prompts, ripgrep, fzf, bat, zoxide, eza, fastfetch, jq, btop, plocate, bw (bitwarden CLI), restic, sshfs (+ fuse3), openssh-server, tailscale, rclone, Claude Code (+ bubblewrap), Codex CLI, Cursor Agent CLI, GitHub Copilot CLI, Pi CLI, opencode, uv, curl, chezmoi |
 | extra | laptop, wsl    | gomi, conda (miniforge), yazi (+ config, previews: imagemagick, ffmpeg, poppler, chafa, 7z), rga (+ pandoc), dezoomify-rs, LaTeX (texlive + biber + latexmk), zathura, qt6-wayland |
-| gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS), Google Chrome, Slack, Zoom, ParaView, VLC, Zotero, Clockify, libfuse2t64 (AppImage support) |
+| gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS), Google Chrome, Slack, Zoom, ParaView, VLC, Zotero, Clockify, LibreOffice (+ en-US help), Spotify, libfuse2t64 (AppImage support) |
 
 The `.zshrc` is layered the same way: a core fragment for every machine
 (vi-mode line editing, EDITOR=nvim, completion styles + `~/.dircolors`,
@@ -340,6 +340,33 @@ pulls in ibus and mesa extras).
   resolve), per the instructions at clockify.me/linux-time-tracking. No
   apt repo is published, so re-running `bootstrap.sh` only reinstalls if
   the `clockify` command is missing.
+- **LibreOffice**: plain Ubuntu archive packages, listed in
+  `lib/packages-gui.txt` like Evolution and VLC — no extra repo needed.
+  `libreoffice-help-en-us` adds the offline English help (a data package
+  with no executable). Because that list is installed with
+  `--no-install-recommends` (see the Recommends note above), three things
+  LibreOffice only *recommends* are named explicitly rather than lost:
+  `libreoffice-gnome` (native GTK file dialogs and theming — without it the
+  suite falls back to its generic backend and looks out of place) and
+  `fonts-crosextra-caladea` / `fonts-crosextra-carlito` / `fonts-liberation`
+  (metric-compatible replacements for Cambria, Calibri and
+  Arial/Times/Courier, so `.docx` files keep their layout). The rest of
+  LibreOffice's Recommends — the Noto font set, the Java stack, the
+  mysql/postgresql SDBC drivers — are deliberately skipped.
+- **Spotify**: `spotify-client` from Spotify's official apt repo
+  (repository.spotify.com, signed by `pubkey_5384CE82BA52C83A`), so it
+  updates with `apt upgrade`. The repo publishes amd64 (and i386) only —
+  no arm64 — hence the `arch=amd64` option on the source line. Its
+  dependencies still use the pre-t64 library names (`libasound2`,
+  `libgtk-3-0`, `libglib2.0-0`, `libatk-bridge2.0-0`); these resolve
+  through the `Provides:` on Ubuntu's `*t64` packages. One exception is
+  pinned deliberately: `libasound2` is provided both by `libasound2t64`
+  (real ALSA) and by `liboss4-salsa-asound2` (an OSS4 compatibility shim
+  that `Conflicts` with it), and apt picks the *shim* when nothing has
+  already pulled ALSA in. The bootstrap order hides this — the gui package
+  list installs vlc, which pulls real ALSA, before `install-gui.sh` runs —
+  so `libasound2t64` is listed explicitly in that `apt-get install` to make
+  the choice deterministic instead of a side effect of vlc.
 - **OneDrive links** (wsl only): `lib/install-onedrive-links.sh` resolves
   the logged-in Windows profile via cmd.exe interop (falling back to
   scanning `/mnt/c/Users`) and symlinks each `OneDrive*` folder into the

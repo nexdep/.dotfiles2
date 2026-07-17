@@ -39,12 +39,16 @@ rank() {
 #  - code-insiders: Electron refuses to run as root (this CI container)
 #    without --no-sandbox and an explicit --user-data-dir; both flags are
 #    harmless for normal (non-root) use on the real machine.
-#  - obsidian/slack/zoom/clockify/paraview/vlc/zotero: running --version is
-#    not safe or meaningful headless as root (obsidian launches the full app
-#    and hangs, vlc exits 1 with no output), so only PATH presence is checked.
+#  - obsidian/slack/zoom/clockify/paraview/vlc/zotero/spotify/libreoffice:
+#    running --version is not safe or meaningful headless as root (obsidian
+#    launches the full app and hangs, vlc exits 1 with no output), so only
+#    PATH presence is checked.
 #  - opencode: same story headless — `opencode --version` produces no output
 #    and hangs without a TTY, so only PATH presence is checked.
-#  - evolution-ews is a backend module with no executable, hence dpkg -s.
+#  - evolution-ews, libreoffice-help-en-us and libreoffice-gnome have no
+#    executable of their own, hence dpkg -s.
+#  - the spotify row is named after its binary, not its package
+#    (spotify-client), so the derived absent check asserts something.
 apps=(
   'core|zsh|command -v zsh'
   'core|gnupg|command -v gpg'
@@ -116,6 +120,10 @@ apps=(
   'gui|zotero|command -v zotero'
   'gui|clockify|command -v clockify'
   'gui|libfuse2t64|dpkg -s libfuse2t64|! dpkg -s libfuse2t64'
+  'gui|libreoffice|command -v libreoffice'
+  'gui|libreoffice-help-en-us|dpkg -s libreoffice-help-en-us|! dpkg -s libreoffice-help-en-us'
+  'gui|libreoffice-gnome|dpkg -s libreoffice-gnome|! dpkg -s libreoffice-gnome'
+  'gui|spotify|command -v spotify'
 )
 
 echo "== verify machine=$machine =="
