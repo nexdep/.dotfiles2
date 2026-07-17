@@ -90,7 +90,6 @@ apps=(
   'core|opencode|command -v opencode'
   'core|uv|test -x "$HOME/.local/bin/uv"'
   'core|bw|command -v bw'
-  'core|plocate|command -v plocate'
   'extra|gomi|command -v gomi'
   'extra|conda|test -x "$HOME/miniforge3/bin/conda"|test ! -e "$HOME/miniforge3"'
   'extra|yazi|command -v yazi && command -v ya|! command -v yazi && ! command -v ya'

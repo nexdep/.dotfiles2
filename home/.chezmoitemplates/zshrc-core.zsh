@@ -192,23 +192,6 @@ function showpath() {
     fi
 }
 
-# cf: fuzzy cd from anywhere via locate + fzf (plocate from the core packages)
-cf() {
-  local file
-
-  file="$(locate -Ai -0 $@ | grep -z -vE '~$' | fzf --read0 -0 -1)"
-
-  if [[ -n $file ]]
-  then
-     if [[ -d $file ]]
-     then
-        cd -- $file
-     else
-        cd -- ${file:h}
-     fi
-  fi
-}
-
 # gopass
 if command -v gopass >/dev/null 2>&1; then
   source <(gopass completion zsh)

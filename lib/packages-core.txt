@@ -23,7 +23,6 @@ libsqlite3-dev # LazyVim: sqlite-backed plugins build against it
 luarocks # LazyVim rocks support
 npm # node for LazyVim: copilot.lua runtime; mason installs pyright/prettierd/markdownlint-cli2/json+yaml LSPs via npm
 openssh-server
-plocate # locate: the zshrc cf() fuzzy-cd helper
 python3-venv # mason python tooling / venvs
 restic # ~/.scripts/restic_b2_backups runtime dep
 ripgrep # rg: yazi's fg plugin content search
