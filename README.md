@@ -21,19 +21,66 @@ drop-in dir, quiet-login markers) live in
 
 ## Usage
 
+### First run
+
 ```sh
 git clone https://github.com/marco-de-pietri/dotfiles2.git
 cd dotfiles2
 ./bootstrap.sh laptop   # or: server | wsl (wsl is auto-detected if omitted)
 ```
 
-Re-running is safe; everything is idempotent. After the first run the machine
-type is remembered by chezmoi, so config changes are just `chezmoi apply`.
+`bootstrap.sh` installs the tier's programs, installs chezmoi if missing, and
+runs `chezmoi init --apply` with **this clone as the source directory**. The
+machine type is stored in chezmoi's data on first run (prompted once if not
+passed via the argument), so later commands don't need it. Re-running is safe —
+everything is idempotent; re-run `./bootstrap.sh` to pick up newly added
+programs.
 
 On an interactive first run, bootstrap also asks for one passphrase to
 decrypt and import the personal GPG key (see the "Personal GPG key" note in
 [docs/install-methods.md](docs/install-methods.md)); unattended runs (CI, no
 TTY) skip that step automatically.
+
+### Day-to-day with chezmoi
+
+The chezmoi source directory *is* this git clone (that's what `chezmoi init
+--source` points at), so the repo and chezmoi's source are the same tree —
+`chezmoi cd` drops you into it and `chezmoi source-path` prints its location.
+
+**Deploy source changes to the machine** — after editing the tracked files
+under `home/`, preview and apply them to your home directory:
+
+```sh
+chezmoi diff            # preview what would change in ~
+chezmoi apply           # write the changes into ~
+chezmoi status          # list managed files that differ from the source
+```
+
+**Capture a local change back into the source** — when you edited a real
+config file in `~` directly and want to record it in the repo:
+
+```sh
+chezmoi re-add ~/.config/foo   # update an already-managed file from ~
+chezmoi add    ~/.config/bar   # start managing a new file
+chezmoi edit   ~/.zshrc        # edit a target's source in $EDITOR, then apply
+```
+
+Then commit and push from the clone as usual (`git add … && git commit && git
+push`). A few managed files are templates or get rewritten by their own tool
+and have a specific re-add note — see
+[docs/install-methods.md](docs/install-methods.md) (e.g. yazi `package.toml`,
+nvim `lazy-lock.json`).
+
+**Pull updates from the remote** — sync the source with GitHub and apply in one
+step:
+
+```sh
+chezmoi update          # git pull in the source dir, then chezmoi apply
+```
+
+That is equivalent to `git -C "$(chezmoi source-path)" pull && chezmoi apply`.
+Interactive shells additionally ff-pull `~/.dotfiles` in the background at most
+every 12h — pull only, never an unattended `chezmoi apply`.
 
 ## Layout
 
