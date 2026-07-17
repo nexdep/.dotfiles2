@@ -4,7 +4,7 @@
 biber # latex bibliography backend
 chafa # terminal image rendering (yazi previews)
 ffmpeg # yazi video previews (ffmpeg/ffprobe)
-imagemagick # yazi magick previewer (avif/heic/jxl/svg); see README caveat on IM6 vs IM7
+imagemagick # yazi magick previewer (avif/heic/jxl/svg); see docs/install-methods.md caveat on IM6 vs IM7
 latexmk
 libxcb-cursor-dev # Qt GUI apps runtime helper
 p7zip-full # 7z: yazi archive preview/extract (old transitional p7zip lacked the 7z binary)

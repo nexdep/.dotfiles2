@@ -57,9 +57,10 @@ page (see slack, paraview) with a loud `die` if the scrape comes back empty.
      launches the full app and hangs; vlc exits 1 silently; Electron
      needs `--no-sandbox --user-data-dir`). This was learned the hard
      way — don't rediscover it.
-2. **`README.md`**: the tier table row and, for anything that isn't a
-   plain archive package, a bullet under "Install method notes" saying
-   where it comes from and how it updates.
+2. **`docs/machines-and-tiers.md`**: the tier table row (the program table
+   under "Machines and tiers"). And, for anything that isn't a plain
+   archive package, a bullet in **`docs/install-methods.md`** saying where
+   it comes from and how it updates.
 
 ## Invariants
 
@@ -72,7 +73,7 @@ page (see slack, paraview) with a loud `die` if the scrape comes back empty.
   can't be tested and are not used.
 - **Recommends policy**: package-list installs use
   `--no-install-recommends`; GUI app installs deliberately keep apt's
-  default Recommends handling (see README).
+  default Recommends handling (see docs/install-methods.md).
 - **Boilerplate lives in `lib/common.sh`** (`LOG_TAG=<name>` then
   `source .../common.sh`); don't re-declare `log`/`die`/`SUDO`.
 
