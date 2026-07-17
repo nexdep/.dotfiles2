@@ -30,7 +30,13 @@ block_daemon_starts() {
 }
 # shellcheck disable=SC2317,SC2329  # invoked via `trap ... EXIT` in bootstrap.sh
 unblock_daemon_starts() {
-  [[ "${_CREATED_POLICY_RC_D:-0}" == 1 ]] && $SUDO rm -f "$POLICY_RC_D"
+  # An `if` (not `&&`) so the function returns 0 when we didn't create the file
+  # — otherwise a false test would be the last command and, as an EXIT trap,
+  # would make bootstrap exit non-zero (the ubuntu container ships its own
+  # policy-rc.d, so this path is hit there).
+  if [[ "${_CREATED_POLICY_RC_D:-0}" == 1 ]]; then
+    $SUDO rm -f "$POLICY_RC_D"
+  fi
 }
 
 # add_apt_repo <name> <key_url> <options> <repo-and-suites>
