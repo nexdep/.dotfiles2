@@ -21,10 +21,21 @@ return {
       servers = {
         ltex_plus = {
           cmd = { "ltex-ls-plus" },
-          filetypes = { "tex", "bib", "markdown", "text" },
+          filetypes = { "tex", "bib", "markdown" },
 
           on_attach = function(_, bufnr)
             require("ltex-utils").on_attach(bufnr)
+
+            local group = vim.api.nvim_create_augroup("LTeXUtilsSaveOnWrite", { clear = false })
+            vim.api.nvim_clear_autocmds({ group = group, buffer = bufnr })
+            vim.api.nvim_create_autocmd("BufWritePost", {
+              group = group,
+              buffer = bufnr,
+              callback = function(args)
+                require("ltex-utils").write_settings_to_file(args.buf)
+              end,
+              desc = "Save ltex settings on file write",
+            })
           end,
 
           settings = {
@@ -33,6 +44,14 @@ return {
               checkFrequency = "save",
               diagnosticSeverity = "information",
               completionEnabled = false,
+
+              latex = {
+                commands = {
+                  ["\\texttt{}"] = "dummy",
+                  ["\\refeq{}"] = "dummy",
+                  ["\\newacro{}"] = "dummy",
+                },
+              },
 
               dictionary = {
                 ["en-US"] = {},

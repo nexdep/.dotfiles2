@@ -14,3 +14,22 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.opt_local.spell = false
   end,
 })
+
+-- paragraph formatting for tex files
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "tex",
+  callback = function()
+    vim.opt_local.textwidth = 88
+    vim.opt_local.formatoptions:append("t")
+    vim.opt_local.formatexpr = ""
+    vim.opt_local.formatprg = ""
+  end,
+})
+
+-- conceal function for tex files
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "tex",
+  callback = function()
+    vim.opt_local.conceallevel = 2
+  end,
+})

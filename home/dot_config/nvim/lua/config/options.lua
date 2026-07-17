@@ -2,6 +2,10 @@
 -- Default options that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/options.lua
 -- Add any additional options here
 
+-- Keep formatting manual for every filetype. LazyVim's manual format command
+-- uses `force = true`, so `<leader>cf` continues to work.
+vim.g.autoformat = false
+
 -- Enable Windows clipboard when running in WSL
 
 if vim.fn.has("wsl") == 1 then
@@ -19,5 +23,17 @@ if vim.fn.has("wsl") == 1 then
   }
 end
 
--- set line length marker at 100 characters
-vim.opt.textwidth = 100
+-- conceal labels in LaTeX documents
+vim.g.vimtex_syntax_conceal = {
+  labels = 1,
+
+  refs = 0,
+  cites = 0,
+  math_bounds = 0,
+  math_delimiters = 0,
+  math_fracs = 0,
+  math_super_sub = 0,
+  math_symbols = 0,
+  sections = 0,
+  styles = 0,
+}

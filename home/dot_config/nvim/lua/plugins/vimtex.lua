@@ -11,5 +11,11 @@ return {
       -- [[Overfull \\hbox]], -- (optional) hide overfull hbox warnings too
       -- [[Underfull \\vbox]], -- (optional) hide underfull vbox warnings too
     }
+    vim.g.vimtex_syntax_custom_cmds = {
+      {
+        name = "texttt",
+        argspell = false,
+      },
+    }
   end,
 }
