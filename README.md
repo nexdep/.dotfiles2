@@ -66,11 +66,18 @@ chezmoi add    ~/.config/bar   # start managing a new file
 chezmoi edit   ~/.zshrc        # edit a target's source in $EDITOR, then apply
 ```
 
+`chezmoi re-add` with no target at all re-adds **every** managed file that
+has drifted from its source, not just one — it only touches files chezmoi
+already manages (it won't discover new ones; that's `chezmoi add`), but it
+sweeps up all of them in one shot, so prefer passing an explicit target
+unless a full sync back is actually what you want.
+
 Then commit and push from the clone as usual (`git add … && git commit && git
 push`). A few managed files are templates or get rewritten by their own tool
 and have a specific re-add note — see
 [docs/install-methods.md](docs/install-methods.md) (e.g. yazi `package.toml`,
-nvim `lazy-lock.json`).
+nvim `lazy-lock.json`); a bare `chezmoi re-add` would pull in whatever state
+those happen to be in at the time.
 
 **Pull updates from the remote** — sync the source with GitHub and apply in one
 step:
