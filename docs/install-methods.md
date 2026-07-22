@@ -55,7 +55,10 @@ tailscale is left for its manual `tailscale up`.
   and git history; the contents are encrypted to the personal GPG key, so
   they are unreadable without it (as in CI, where the key import is
   skipped).
-- **gomi**: prebuilt binary from GitHub releases into `/usr/local/bin`.
+- **gomi**: prebuilt binary from GitHub releases into `/usr/local/bin`. Config
+  ships as `home/dot_config/gomi/config.yaml.tmpl` (templated only for the
+  absolute `gomi_dir` path) and is ignored on servers, where gomi isn't
+  installed.
 - **starship**: prebuilt binary from GitHub releases into `/usr/local/bin`,
   same pattern as gomi. Config (`home/dot_config/starship.toml`) is the same
   on every machine and just disables the battery module.

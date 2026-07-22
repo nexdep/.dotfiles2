@@ -114,7 +114,7 @@ lib/install-dezoomify-rs.sh  dezoomify-rs from GitHub release binaries (laptop+w
 lib/install-onedrive-links.sh  symlinks Windows OneDrive folders into ~ (wsl only)
 lib/install-gui.sh           all laptop GUI apps (apt repos, tarballs, .debs)
 home/                        chezmoi source directory (via .chezmoiroot)
-home/dot_scripts/            non-bootstrap scripts deployed to ~/.scripts/ (gpg, hetzner_mount, openmc_scripts, restic_b2_backups)
+home/dot_scripts/            non-bootstrap scripts deployed to ~/.scripts/ (gpg, hetzner_mount, openmc_scripts, restic_b2_backups, deploy_api)
 home/.chezmoiscripts/        chezmoi run scripts (Windows-side ssh config, yazi plugins)
 home/.chezmoiignore          per-machine deploy filter (quiet-login markers, yazi config)
 tests/verify.sh              tier-aware assertions (data-driven app table), used by CI

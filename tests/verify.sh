@@ -160,6 +160,7 @@ check "gpg import script deployed" test -x "$HOME/.scripts/gpg/import-gpg-key.sh
 check "hetzner scripts deployed" test -x "$HOME/.scripts/hetzner_mount/setup_hetzner_storagebox_systemd.sh"
 check "openmc scripts deployed" test -x "$HOME/.scripts/openmc_scripts/openmc_data_fetcher.sh"
 check "restic scripts deployed" test -x "$HOME/.scripts/restic_b2_backups/setup-restic-systemd-backup.sh"
+check "hermes script deployed" test -x "$HOME/.scripts/deploy_api/hermes_openrouter.sh"
 check "zshrc sources ~/.zsh drop-ins" grep -q 'HOME/.zsh' "$zshrc"
 # the ephemeral devcontainer credential helper must not have shipped
 check "no ephemeral credential helper" eval '! grep -q vscode-remote-containers "$HOME/.gitconfig_marco"'
@@ -195,11 +196,13 @@ if [[ "$machine" != server ]]; then
   check "yazi fg plugin installed" test -d "$HOME/.config/yazi/plugins/fg.yazi"
   check "yazi zsh completions installed" test -f /usr/local/share/zsh/site-functions/_yazi
   check "neutronics drop-in deployed" test -f "$HOME/.zsh/neutronics.zsh"
+  check "gomi config deployed" test -f "$HOME/.config/gomi/config.yaml"
 else
   check "server zshrc fragment" grep -q -- "--- server ---" "$zshrc"
   check "no workstation zshrc fragment" eval '! grep -q -- "--- workstation (laptop/wsl)" "$zshrc"'
   check "yazi config absent" test ! -e "$HOME/.config/yazi"
   check "neutronics drop-in absent" test ! -e "$HOME/.zsh/neutronics.zsh"
+  check "gomi config absent" test ! -e "$HOME/.config/gomi"
 fi
 
 # The yazi "open" opener is templated per machine: explorer.exe (via WSL

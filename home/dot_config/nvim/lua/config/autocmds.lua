@@ -7,6 +7,14 @@
 -- Or remove existing autocmds by their group name (which is prefixed with `lazyvim_` for the defaults)
 -- e.g. vim.api.nvim_del_augroup_by_name("lazyvim_wrap_spell")
 
+-- Keep soft wrapping disabled after filetype-specific defaults are applied.
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "*",
+  callback = function()
+    vim.opt_local.wrap = false
+  end,
+})
+
 -- set no spelling in markdown files
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "markdown", "markdown.mdx" },

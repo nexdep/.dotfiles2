@@ -5,7 +5,7 @@ Each tier is a superset of the one below it (laptop ⊃ wsl ⊃ server):
 | Tier  | Machines       | Programs                                          |
 |-------|----------------|---------------------------------------------------|
 | core  | all            | zsh (default shell), gopass (+ password store), gnupg (+ personal GPG key), starship, neovim (+ LazyVim config and its toolchain: build-essential, npm, luarocks, sqlite3, fd, tree-sitter via rust), vim-gtk3 (+ vimrc), tmux (+ config), ssh config, git (+ config), git-lfs, gh, lazygit, prompts, ripgrep, fzf, bat, zoxide, eza, fastfetch, jq, btop, bw (bitwarden CLI), restic, sshfs (+ fuse3), openssh-server, tailscale, rclone, Claude Code (+ bubblewrap), Codex CLI, Cursor Agent CLI, GitHub Copilot CLI, Pi CLI, opencode, uv, curl, chezmoi |
-| extra | laptop, wsl    | gomi, conda (miniforge), yazi (+ config, previews: imagemagick, ffmpeg, poppler, chafa, 7z), rga (+ pandoc), dezoomify-rs, LaTeX (texlive + biber + latexmk), zathura, qt6-wayland |
+| extra | laptop, wsl    | gomi (+ config), conda (miniforge), yazi (+ config, previews: imagemagick, ffmpeg, poppler, chafa, 7z), rga (+ pandoc), dezoomify-rs, LaTeX (texlive + biber + latexmk), zathura, qt6-wayland |
 | gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS), Google Chrome, Slack, Zoom, ParaView, VLC, Zotero, Clockify, LibreOffice (+ en-US help), Spotify, libfuse2t64 (AppImage support) |
 
 The `.zshrc` is layered the same way: a core fragment for every machine
@@ -73,9 +73,11 @@ files with no associated program.
 standalone scripts that are **not** used by `bootstrap.sh`, organized into
 category subfolders: `gpg/` (GPG key backup/import tools), `hetzner_mount/` (SSHFS
 Storage Box user-systemd mount), `openmc_scripts/` (conda/OpenMC build +
-neutronics tooling + data fetcher), and `restic_b2_backups/`
+neutronics tooling + data fetcher), `restic_b2_backups/`
 (restic→Backblaze systemd backup, plus a restore script for pulling a
-backed-up folder back after redeploying a system). Unlike the `lib/` install scripts they are
+backed-up folder back after redeploying a system), and `deploy_api/` (writes
+API-key env files from gopass secrets, e.g. `~/.hermes/.env`).
+Unlike the `lib/` install scripts they are
 self-contained and do not source `lib/common.sh`, since they run from
 `~/.scripts/` rather than the repo. Secrets are never committed — the restic
 scripts only write `CHANGE_ME` placeholders into `/etc/restic`.

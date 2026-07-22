@@ -5,9 +5,10 @@
 .sudo_as_admin_successful
 {{ end -}}
 
-{{/* yazi is extra-tier (laptop/wsl); don't deploy its config on servers. */}}
+{{/* yazi and gomi are extra-tier (laptop/wsl); don't deploy their configs on servers. */}}
 {{ if eq .machine "server" }}
 .config/yazi
+.config/gomi
 {{ end -}}
 
 {{/* neutronics drop-in for workstations (laptop/wsl); the rest of ~/.zsh stays unmanaged. */}}
