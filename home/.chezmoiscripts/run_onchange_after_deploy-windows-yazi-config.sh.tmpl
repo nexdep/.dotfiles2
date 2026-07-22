@@ -1,0 +1,28 @@
+{{ if eq .machine "wsl" -}}
+#!/bin/sh
+# Mirror the managed Yazi config files into the Windows config directory so
+# native Windows Yazi uses the same settings. Windows-only files and installed
+# plugins in that directory are left untouched.
+# yazi.toml hash: {{ include "dot_config/yazi/yazi.toml.tmpl" | sha256sum }}
+# keymap.toml hash: {{ include "dot_config/yazi/keymap.toml" | sha256sum }}
+# theme.toml hash: {{ include "dot_config/yazi/theme.toml" | sha256sum }}
+# package.toml hash: {{ include "dot_config/yazi/package.toml" | sha256sum }}
+set -eu
+
+# No WSL interop (e.g. CI containers): nothing to do.
+[ -e /proc/sys/fs/binfmt_misc/WSLInterop ] || exit 0
+command -v cmd.exe >/dev/null 2>&1 || exit 0
+
+# cd to a Windows filesystem path first: cmd.exe warns on UNC/Linux cwd.
+winappdata="$(cd /mnt/c && wslpath "$(cmd.exe /c 'echo %APPDATA%' 2>/dev/null | tr -d '\r')")"
+[ -d "$winappdata" ] || exit 0
+
+winconfig="$winappdata/yazi/config"
+mkdir -p "$winconfig"
+
+for config in yazi.toml keymap.toml theme.toml package.toml; do
+  cp "$HOME/.config/yazi/$config" "$winconfig/$config"
+done
+
+echo "windows yazi config updated in $winconfig"
+{{ end -}}

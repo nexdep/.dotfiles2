@@ -1,0 +1,21 @@
+{{ if eq .machine "wsl" -}}
+#!/bin/sh
+# Mirror the shared WezTerm config into the Windows user's home so native
+# Windows WezTerm uses the same settings.
+# config hash: {{ include "dot_wezterm.lua" | sha256sum }}
+set -eu
+
+# No WSL interop (e.g. CI containers): nothing to do.
+[ -e /proc/sys/fs/binfmt_misc/WSLInterop ] || exit 0
+command -v cmd.exe >/dev/null 2>&1 || exit 0
+
+# cd to a Windows filesystem path first: cmd.exe warns on UNC/Linux cwd.
+winhome="$(cd /mnt/c && wslpath "$(cmd.exe /c 'echo %USERPROFILE%' 2>/dev/null | tr -d '\r')")"
+[ -d "$winhome" ] || exit 0
+
+# Replace atomically because WezTerm watches its config for changes.
+cp "$HOME/.wezterm.lua" "$winhome/.wezterm.lua.tmp"
+mv "$winhome/.wezterm.lua.tmp" "$winhome/.wezterm.lua"
+
+echo "windows wezterm config updated in $winhome/.wezterm.lua"
+{{ end -}}

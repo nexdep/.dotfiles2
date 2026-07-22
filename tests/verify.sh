@@ -205,12 +205,18 @@ if [[ "$machine" != server ]]; then
   check "yazi zsh completions installed" test -f /usr/local/share/zsh/site-functions/_yazi
   check "neutronics drop-in deployed" test -f "$HOME/.zsh/neutronics.zsh"
   check "gomi config deployed" test -f "$HOME/.config/gomi/config.yaml"
+  check "wezterm config deployed" test -f "$HOME/.wezterm.lua"
 else
   check "server zshrc fragment" grep -q -- "--- server ---" "$zshrc"
   check "no workstation zshrc fragment" eval '! grep -q -- "--- workstation (laptop/wsl)" "$zshrc"'
   check "yazi config absent" test ! -e "$HOME/.config/yazi"
   check "neutronics drop-in absent" test ! -e "$HOME/.zsh/neutronics.zsh"
   check "gomi config absent" test ! -e "$HOME/.config/gomi"
+  check "wezterm config absent" test ! -e "$HOME/.wezterm.lua"
+fi
+
+if [[ "$machine" == laptop ]]; then
+  check "wezterm config parses" wezterm --config-file "$HOME/.wezterm.lua" show-keys
 fi
 
 # The yazi "open" opener is templated per machine: explorer.exe (via WSL

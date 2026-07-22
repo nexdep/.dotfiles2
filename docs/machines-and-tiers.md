@@ -5,7 +5,7 @@ Each tier is a superset of the one below it (laptop ⊃ wsl ⊃ server):
 | Tier  | Machines       | Programs                                          |
 |-------|----------------|---------------------------------------------------|
 | core  | all            | zsh (default shell), gopass (+ password store), gnupg (+ personal GPG key), starship, Ubuntu Mono Nerd Font (+ fontconfig, xz-utils), neovim (+ LazyVim config and its toolchain: build-essential, npm, luarocks, sqlite3, fd, tree-sitter via rust), vim-gtk3 (+ vimrc), tmux (+ config), ssh config, git (+ config), git-lfs, gh, lazygit, prompts, ripgrep, fzf, bat, zoxide, eza, fastfetch, jq, btop, bw (bitwarden CLI), restic, sshfs (+ fuse3), openssh-server, tailscale, rclone, Claude Code (+ bubblewrap), Codex CLI, Cursor Agent CLI, GitHub Copilot CLI, Pi CLI, opencode, uv, curl, chezmoi |
-| extra | laptop, wsl    | gomi (+ config), conda (miniforge), yazi (+ config, previews: imagemagick, ffmpeg, poppler, chafa, 7z), rga (+ pandoc), dezoomify-rs, LaTeX (texlive + biber + latexmk), zathura, qt6-wayland |
+| extra | laptop, wsl    | gomi (+ config), conda (miniforge), yazi (+ config, previews: imagemagick, ffmpeg, poppler, chafa, 7z), WezTerm config, rga (+ pandoc), dezoomify-rs, LaTeX (texlive + biber + latexmk), zathura, qt6-wayland |
 | gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS), Google Chrome, Slack, Zoom, ParaView, VLC, Zotero, Clockify, LibreOffice (+ en-US help), Spotify, libfuse2t64 (AppImage support) |
 
 The `.zshrc` is layered the same way: a core fragment for every machine
@@ -50,6 +50,19 @@ user's home as `.ssh/config_dotfiles` and prepends
 missing), so Windows-side tools resolve the same host aliases while
 Windows-only hosts stay in the Windows file. The script no-ops when WSL
 interop is unavailable (as in CI containers).
+
+The Yazi config is also mirrored from WSL into the Windows host by a
+`run_onchange` script. It copies the four managed TOML files to
+`%AppData%\yazi\config`, overwriting those files when their dotfile sources
+change while leaving Windows-side plugins and unrelated files untouched. The
+script does not install plugins for Windows and no-ops without WSL interop.
+
+The shared WezTerm config (`home/dot_wezterm.lua`) deploys to `~/.wezterm.lua`
+on laptop and wsl. It selects Gnome- or Windows-style integrated title buttons
+at runtime; native Linux uses its login shell, while Windows defaults to WSL
+and offers WSL and PowerShell launchers. On WSL, another `run_onchange` script
+atomically mirrors the file to `%USERPROFILE%\.wezterm.lua`. It owns that
+Windows file and no-ops when WSL interop is unavailable.
 
 The git config is deployed on every machine from `home/dot_gitconfig`,
 `home/dot_gitconfig_nexdep`, `home/dot_gitconfig_marco` and

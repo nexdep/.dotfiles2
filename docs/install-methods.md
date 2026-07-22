@@ -132,8 +132,11 @@ tailscale is left for its manual `tailscale up`.
   package list. The config (`home/dot_config/yazi/`) deploys on
   laptop+wsl only (gated in `home/.chezmoiignore`); `yazi.toml` is a
   template because the "open" opener differs per machine — Windows
-  Explorer via WSL interop on wsl, `xdg-open` on the laptop. Plugins are
-  pinned in `package.toml` and installed/updated by a chezmoi
+  Explorer via WSL interop on wsl, `xdg-open` on the laptop. On WSL, a
+  separate `run_onchange` script copies the four managed TOML files into
+  `%AppData%\yazi\config` for native Windows Yazi; it preserves unrelated
+  Windows files and plugins and does not install Windows plugins. Plugins are
+  pinned in `package.toml` and installed/updated on Linux by a chezmoi
   `run_onchange` script that runs `ya pkg install` whenever the pin list
   changes; the plugin code itself (`~/.config/yazi/plugins/`) is not
   versioned here. `ya pkg` rewrites `~/.config/yazi/package.toml` in its
@@ -166,7 +169,13 @@ tailscale is left for its manual `tailscale up`.
   Base env is auto-activated in every shell by the workstation zshrc
   fragment, matching the current system's `auto_activate_base: true`.
 - **WezTerm**: `wezterm-nightly` apt package from WezTerm's official Fury
-  repo (apt.fury.io/wez), so it updates with `apt upgrade`.
+  repo (apt.fury.io/wez), so it updates with `apt upgrade`. The shared
+  `~/.wezterm.lua` config deploys on laptop+wsl and detects the runtime platform:
+  Linux uses Gnome-style integrated buttons and its default login shell, while
+  Windows uses Windows-style buttons, starts WSL by default, and offers WSL and
+  PowerShell launchers. A WSL-only chezmoi `run_onchange` script atomically
+  mirrors the config to `%USERPROFILE%\.wezterm.lua` for a separately installed
+  Windows WezTerm.
 - **VS Code Insiders**: `code-insiders` apt package from Microsoft's
   official repo (packages.microsoft.com/repos/code), so it updates with
   `apt upgrade`.
