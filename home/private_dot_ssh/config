@@ -26,3 +26,7 @@ Host github-nexdep
   User git
   IdentityFile ~/.ssh/marco-dev-2
 
+Host test
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/marco-dev-2
