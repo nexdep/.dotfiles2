@@ -8,6 +8,7 @@
 {{-   fail (printf "invalid machine type %q (expected wsl, server or laptop)" $machine) -}}
 {{- end -}}
 
+umask = 0o022
 sourceDir = {{ .chezmoi.workingTree | quote }}
 
 [data]

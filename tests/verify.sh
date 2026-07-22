@@ -142,6 +142,7 @@ done
 check ".zshrc deployed" test -f "$zshrc"
 check ".zshrc parses" zsh -n "$zshrc"
 check "chezmoi source directory persisted" eval '[[ "$(chezmoi dump-config --format json | jq -r .sourceDir)" == "$repo_dir" ]]'
+check "chezmoi umask persisted" eval '[[ "$(chezmoi dump-config --format json | jq -r .umask)" == "18" ]]'
 check "core zshrc fragment" grep -q -- "--- core (all machines)" "$zshrc"
 check "starship config deployed" test -f "$HOME/.config/starship.toml"
 check "nvim config deployed" test -f "$HOME/.config/nvim/init.lua"
