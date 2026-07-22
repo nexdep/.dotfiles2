@@ -44,9 +44,10 @@ see the "Personal GPG key" note in
 
 ### Day-to-day with chezmoi
 
-The chezmoi source directory *is* this git clone (that's what `chezmoi init
---source` points at), so the repo and chezmoi's source are the same tree —
-`chezmoi cd` drops you into it and `chezmoi source-path` prints its location.
+The chezmoi source directory is configured to use this git clone (that's what
+`chezmoi init --source` initializes). `chezmoi cd` drops you into the clone;
+because `.chezmoiroot` keeps the managed source state under `home/`, `chezmoi
+source-path` prints the clone's `home/` directory.
 
 **Deploy source changes to the machine** — after editing the tracked files
 under `home/`, preview and apply them to your home directory:

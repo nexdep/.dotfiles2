@@ -8,5 +8,7 @@
 {{-   fail (printf "invalid machine type %q (expected wsl, server or laptop)" $machine) -}}
 {{- end -}}
 
+sourceDir = {{ .chezmoi.workingTree | quote }}
+
 [data]
     machine = {{ $machine | quote }}

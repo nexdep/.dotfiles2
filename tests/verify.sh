@@ -8,6 +8,7 @@
 set -uo pipefail
 
 machine="${1:?usage: $0 <wsl|server|laptop>}"
+repo_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 zshrc="$HOME/.zshrc"
 fail=0
 
@@ -140,6 +141,7 @@ done
 # --- configuration checks (not simple present/absent pairs) --------------------
 check ".zshrc deployed" test -f "$zshrc"
 check ".zshrc parses" zsh -n "$zshrc"
+check "chezmoi source directory persisted" eval '[[ "$(chezmoi dump-config --format json | jq -r .sourceDir)" == "$repo_dir" ]]'
 check "core zshrc fragment" grep -q -- "--- core (all machines)" "$zshrc"
 check "starship config deployed" test -f "$HOME/.config/starship.toml"
 check "nvim config deployed" test -f "$HOME/.config/nvim/init.lua"
