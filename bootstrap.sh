@@ -78,6 +78,7 @@ fi
 
 # --- non-apt installers per tier ----------------------------------------------
 "$LIB_DIR/install-starship.sh"
+"$LIB_DIR/install-ubuntu-mono-nerd-font.sh"
 "$LIB_DIR/install-neovim.sh"
 "$LIB_DIR/install-gopass-store.sh" # personal password store (public repo, keyless clone)
 "$LIB_DIR/install-tailscale.sh"

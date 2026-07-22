@@ -8,6 +8,8 @@
 set -uo pipefail
 
 machine="${1:?usage: $0 <wsl|server|laptop>}"
+# Used by the eval-based chezmoi source-directory check below.
+# shellcheck disable=SC2034
 repo_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 zshrc="$HOME/.zshrc"
 fail=0
@@ -56,6 +58,9 @@ apps=(
   'core|gopass|command -v gopass'
   'core|chezmoi|command -v chezmoi'
   'core|starship|command -v starship'
+  'core|fontconfig|command -v fc-cache'
+  'core|xz-utils|command -v xz'
+  'core|ubuntu-mono-nerd-font|test -f /usr/local/share/fonts/UbuntuMonoNerdFont/UbuntuMonoNerdFont-Regular.ttf'
   'core|neovim|/usr/local/bin/nvim --version'
   'core|tmux|command -v tmux'
   'core|vim-gtk3|command -v vim'

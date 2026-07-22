@@ -62,6 +62,13 @@ tailscale is left for its manual `tailscale up`.
 - **starship**: prebuilt binary from GitHub releases into `/usr/local/bin`,
   same pattern as gomi. Config (`home/dot_config/starship.toml`) is the same
   on every machine and just disables the battery module.
+- **Ubuntu Mono Nerd Font**: all TTF variants from the official Nerd Fonts
+  `UbuntuMono.tar.xz` release archive, installed system-wide under
+  `/usr/local/share/fonts/UbuntuMonoNerdFont` on every machine. The fixed-name
+  asset follows the latest GitHub release without using the API; re-running
+  `bootstrap.sh` only reinstalls if `UbuntuMonoNerdFont-Regular.ttf` is
+  missing. Core packages `xz-utils` and `fontconfig` provide archive extraction
+  and the font-cache refresh performed after installation.
 - **bat / fd**: plain Ubuntu apt packages (`bat`, `fd-find`), but Ubuntu names
   the binaries `batcat` and `fdfind`; `bootstrap.sh` symlinks them as `bat`
   and `fd` in `/usr/local/bin` so tools that call them by their upstream

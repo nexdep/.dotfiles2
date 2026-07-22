@@ -10,6 +10,7 @@ curl
 eza # modern ls (plain universe pkg; old deb.gierens.de repo dropped)
 fastfetch # system info (plain universe pkg; old PPA dropped)
 fd-find # fd: LazyVim file finding; Ubuntu ships it as fdfind, bootstrap.sh adds the shim
+fontconfig # fc-cache: register Ubuntu Mono Nerd Font after its system-wide install
 fuse3 # fusermount3 for sshfs mounts (~/.scripts/hetzner_mount)
 fzf # fuzzy finder: zshrc keybindings + yazi's fzf/fg plugins
 gh # GitHub CLI
@@ -30,5 +31,6 @@ sqlite3
 sshfs # ~/.scripts/hetzner_mount runtime dep
 tmux
 vim-gtk3 # vim with +clipboard (needed by ~/.vimrc's clipboard=unnamedplus)
+xz-utils # xz: extract the Ubuntu Mono Nerd Font release archive
 zoxide # z/zi commands + interactive-only cd wrapper + yazi's zoxide plugin
 zsh
