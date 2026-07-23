@@ -9,7 +9,6 @@
 {{ if eq .machine "server" }}
 .config/yazi
 .config/gomi
-.wezterm.lua
 {{ end -}}
 
 {{/* neutronics drop-in for workstations (laptop/wsl); the rest of ~/.zsh stays unmanaged. */}}

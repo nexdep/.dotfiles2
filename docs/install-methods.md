@@ -170,7 +170,7 @@ tailscale is left for its manual `tailscale up`.
   fragment, matching the current system's `auto_activate_base: true`.
 - **WezTerm**: `wezterm-nightly` apt package from WezTerm's official Fury
   repo (apt.fury.io/wez), so it updates with `apt upgrade`. The shared
-  `~/.wezterm.lua` config deploys on laptop+wsl and detects the runtime platform:
+  `~/.wezterm.lua` config deploys on every machine and detects the runtime platform:
   Linux uses Gnome-style integrated buttons and its default login shell, while
   Windows uses Windows-style buttons, starts WSL by default, and offers WSL and
   PowerShell launchers. A WSL-only chezmoi `run_onchange` script atomically

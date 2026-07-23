@@ -192,6 +192,7 @@ check "no gpg secret key imported by bootstrap" eval '! gpg --list-secret-keys -
 # URL must have been switched to SSH.
 check "gopass store cloned" test -d "$HOME/.local/share/gopass/stores/root/.git"
 check "gopass store push url is ssh" eval '[[ "$(git -C "$HOME/.local/share/gopass/stores/root" remote get-url --push origin)" == git@* ]]'
+check "wezterm config deployed" test -f "$HOME/.wezterm.lua"
 
 if [[ "$machine" != server ]]; then
   check "condarc deployed" test -f "$HOME/.condarc"
@@ -205,14 +206,12 @@ if [[ "$machine" != server ]]; then
   check "yazi zsh completions installed" test -f /usr/local/share/zsh/site-functions/_yazi
   check "neutronics drop-in deployed" test -f "$HOME/.zsh/neutronics.zsh"
   check "gomi config deployed" test -f "$HOME/.config/gomi/config.yaml"
-  check "wezterm config deployed" test -f "$HOME/.wezterm.lua"
 else
   check "server zshrc fragment" grep -q -- "--- server ---" "$zshrc"
   check "no workstation zshrc fragment" eval '! grep -q -- "--- workstation (laptop/wsl)" "$zshrc"'
   check "yazi config absent" test ! -e "$HOME/.config/yazi"
   check "neutronics drop-in absent" test ! -e "$HOME/.zsh/neutronics.zsh"
   check "gomi config absent" test ! -e "$HOME/.config/gomi"
-  check "wezterm config absent" test ! -e "$HOME/.wezterm.lua"
 fi
 
 if [[ "$machine" == laptop ]]; then
