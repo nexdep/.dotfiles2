@@ -94,6 +94,7 @@ apps=(
   'core|copilot|command -v copilot'
   'core|pi|command -v pi'
   'core|opencode|command -v opencode'
+  'core|herdr|test -x "$HOME/.local/bin/herdr"'
   'core|uv|test -x "$HOME/.local/bin/uv"'
   'core|bw|command -v bw'
   'extra|gomi|command -v gomi'
@@ -150,6 +151,9 @@ check "chezmoi source directory persisted" eval '[[ "$(chezmoi dump-config --for
 check "chezmoi umask persisted" eval '[[ "$(chezmoi dump-config --format json | jq -r .umask)" == "18" ]]'
 check "core zshrc fragment" grep -q -- "--- core (all machines)" "$zshrc"
 check "starship config deployed" test -f "$HOME/.config/starship.toml"
+check "herdr config deployed" test -f "$HOME/.config/herdr/config.toml"
+check "herdr config disables onboarding" grep -q '^onboarding = false$' "$HOME/.config/herdr/config.toml"
+check "herdr config valid" env HERDR_CONFIG_PATH="$HOME/.config/herdr/config.toml" "$HOME/.local/bin/herdr" config check
 check "nvim config deployed" test -f "$HOME/.config/nvim/init.lua"
 check "nvim lazy-lock deployed" test -f "$HOME/.config/nvim/lazy-lock.json"
 check "tmux config deployed" test -f "$HOME/.config/tmux/tmux.conf"

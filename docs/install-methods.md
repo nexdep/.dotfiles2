@@ -115,6 +115,16 @@ tailscale is left for its manual `tailscale up`.
   shell rc file, which the chezmoi-managed `.zshrc` would overwrite.
   `opencode --version` hangs without a TTY, so bootstrap logs no version and
   verify only checks PATH presence.
+- **Herdr**: official installer (`herdr.dev/install.sh`), user-level into
+  `~/.local/bin` on every machine. The installer selects the current stable
+  Linux binary for x86_64 or arm64; Herdr-managed installs update with
+  `herdr update`. Re-running `bootstrap.sh` only reinstalls if the command is
+  missing. Its complete default config is tracked at
+  `home/dot_config/herdr/config.toml` and deployed on every tier, with the
+  sole deliberate override `onboarding = false` so first launch does not
+  modify the chezmoi-managed file. To refresh the snapshot after an upstream
+  update, regenerate it with `herdr --default-config`, restore that override,
+  and validate it with `herdr config check`.
 - **bw (Bitwarden CLI)**: `npm install -g @bitwarden/cli` (npm is a core
   package). No apt package exists, and the bitwarden/clients GitHub
   releases mix per-product tags, so the redirect trick used elsewhere is
