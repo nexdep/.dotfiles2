@@ -106,18 +106,45 @@ fi
 
 # --- ParaView (official Kitware tarball) -------------------------------------------
 # No .deb or apt repo exists; /opt + symlink like Thunderbird Beta. The
-# latest version is resolved from paraview.org's directory listing.
+# newest complete stable Linux build is resolved from paraview.org's directory
+# listing; newly created release directories may initially contain only RCs.
 if [[ -x /opt/paraview/bin/paraview ]]; then
   log "paraview already installed, skipping"
 else
   [[ "$(uname -m)" == x86_64 ]] || die "paraview: unsupported architecture $(uname -m) (only x86_64 builds are published)"
 
-  minor="$(curl -fsSL https://www.paraview.org/files/ |
-    grep -oE 'href="v[0-9]+\.[0-9]+/"' | sed -E 's/href="v(.*)\/"/\1/' | sort -V | tail -n1)"
-  filename="$(curl -fsSL "https://www.paraview.org/files/v${minor}/" |
-    grep -oE 'href="ParaView-[0-9.]+-MPI-Linux-Python3\.[0-9]+-x86_64\.tar\.gz"' |
-    sed -E 's/href="(.*)"/\1/' | sort -V | tail -n1)"
-  [[ -n "$minor" && -n "$filename" ]] || die "paraview: could not find the latest Linux build"
+  root_index="$(curl -fsSL https://www.paraview.org/files/)" ||
+    die "paraview: could not fetch the release index"
+  minor_versions=()
+  mapfile -t minor_versions < <(
+    printf '%s\n' "$root_index" |
+      grep -oE 'href="v[0-9]+\.[0-9]+/"' |
+      sed -E 's/^href="v([^"]+)\/"$/\1/' |
+      sort -Vr
+  )
+  ((${#minor_versions[@]} > 0)) ||
+    die "paraview: release index contains no version directories"
+
+  minor=
+  filename=
+  for candidate_minor in "${minor_versions[@]}"; do
+    release_index="$(curl -fsSL "https://www.paraview.org/files/v${candidate_minor}/")" ||
+      die "paraview: could not fetch the release index for v${candidate_minor}"
+    candidate_filenames=()
+    mapfile -t candidate_filenames < <(
+      printf '%s\n' "$release_index" |
+        grep -oE 'href="ParaView-[0-9]+(\.[0-9]+)+-MPI-Linux-Python3\.[0-9]+-x86_64\.tar\.gz"' |
+        sed -E 's/^href="([^"]+)"$/\1/' |
+        sort -V
+    )
+    if ((${#candidate_filenames[@]} > 0)); then
+      minor="$candidate_minor"
+      filename="${candidate_filenames[-1]}"
+      break
+    fi
+  done
+  [[ -n "$minor" && -n "$filename" ]] ||
+    die "paraview: could not find a stable Linux build"
 
   tmp="$(mktemp -d)"
   log "downloading paraview ($filename)"

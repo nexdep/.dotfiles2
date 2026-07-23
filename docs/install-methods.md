@@ -213,8 +213,10 @@ tailscale is left for its manual `tailscale up`.
   missing.
 - **ParaView**: official Kitware tarball in `/opt/paraview` (symlinked as
   `paraview`), same pattern as Thunderbird Beta — no `.deb` or apt repo is
-  published. The latest version is resolved from paraview.org's own
-  directory listing at `paraview.org/files/`.
+  published. The newest release directory containing a complete stable
+  Linux build is resolved from paraview.org's own directory listing at
+  `paraview.org/files/`; incomplete directories containing only release
+  candidates are skipped.
 - **VLC**: plain Ubuntu universe apt package, listed in
   `lib/packages-gui.txt` like Evolution — no extra repo needed.
 - **Zotero**: installed exactly per the community apt repo's own
