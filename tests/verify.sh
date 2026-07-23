@@ -25,6 +25,23 @@ check() {
   fi
 }
 
+# Invoked indirectly by check().
+# shellcheck disable=SC2317,SC2329
+no_ansi() {
+  ! LC_ALL=C grep -q $'\033' "$1"
+}
+
+bootstrap_log="$(
+  find "$HOME" -maxdepth 1 -type f -name 'bootstrap-*.log' -printf '%T@ %p\n' |
+    sort -nr |
+    head -n1 |
+    cut -d' ' -f2-
+)"
+check "bootstrap log created" test -n "$bootstrap_log"
+check "bootstrap log contains completion marker" grep -Fq '[bootstrap] done' "$bootstrap_log"
+check "bootstrap log contains child installer output" grep -Fq '[starship]' "$bootstrap_log"
+check "bootstrap log is plain text" no_ansi "$bootstrap_log"
+
 # Tiers and machines share a rank: an app is asserted present on machines at
 # or above its tier and absent below it (laptop ⊃ wsl ⊃ server).
 rank() {

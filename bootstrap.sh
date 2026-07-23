@@ -13,6 +13,44 @@ LOG_TAG=bootstrap
 # shellcheck source=lib/common.sh
 source "$LIB_DIR/common.sh"
 
+# Keep a complete transcript of every run while preserving the colored live
+# output. The logger reads from a FIFO so the EXIT trap can close the stream
+# and wait until the plain-text log is fully flushed before bootstrap returns.
+LOG_FILE="$(mktemp "$HOME/bootstrap-$(date '+%Y%m%d-%H%M%S')-XXXXXX.log")"
+LOG_PIPE_DIR="$(mktemp -d)"
+LOG_PIPE="$LOG_PIPE_DIR/output"
+mkfifo "$LOG_PIPE"
+exec 3>&1 4>&2
+tee /dev/fd/3 <"$LOG_PIPE" |
+  LC_ALL=C sed -u -E $'s/\033\\[[0-?]*[ -/]*[@-~]//g' >"$LOG_FILE" &
+LOG_WRITER_PID=$!
+exec >"$LOG_PIPE" 2>&1
+
+cleanup() {
+  local status=$?
+  trap - EXIT
+  set +e
+
+  if ((status != 0)); then
+    log "failed with exit status $status"
+  fi
+  unblock_daemon_starts || true
+
+  # Restoring stdout/stderr closes the FIFO writer. Wait for the logger before
+  # reporting the path so callers can read a complete log immediately.
+  exec 1>&3 2>&4
+  exec 3>&- 4>&-
+  wait "$LOG_WRITER_PID" || true
+  rm -f "$LOG_PIPE"
+  rmdir "$LOG_PIPE_DIR"
+  printf '[bootstrap] install log saved to %s\n' "$LOG_FILE"
+
+  exit "$status"
+}
+trap cleanup EXIT
+
+log "saving install log to $LOG_FILE"
+
 MACHINE="${1:-}"
 if [[ -z "$MACHINE" ]]; then
   if grep -qi microsoft /proc/version 2>/dev/null; then
@@ -36,7 +74,6 @@ fi
 # WSL); armed before the first apt-get so it covers the whole run, removed on
 # exit even if bootstrap fails. See lib/common.sh.
 block_daemon_starts
-trap unblock_daemon_starts EXIT
 
 read_packages() { sed -e 's/#.*//' -e 's/[[:space:]]*$//' "$1" | grep -vE '^$' || true; }
 

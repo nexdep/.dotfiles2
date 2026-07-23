@@ -36,6 +36,12 @@ passed via the argument), so later commands don't need it. Re-running is safe �
 everything is idempotent; re-run `./bootstrap.sh` to pick up newly added
 programs.
 
+Each run also writes a timestamped transcript such as
+`~/bootstrap-20260723-143012-a1B2c3.log`. Output continues to stream live in
+the terminal; the saved log combines stdout and stderr, removes terminal color
+codes, and is complete when `bootstrap.sh` returns. Logs are retained until
+removed manually, and bootstrap prints the exact path at the end of the run.
+
 Bootstrap itself is fully non-interactive. The one manual follow-up is the
 personal GPG key: run `~/.scripts/gpg/import-gpg-key.sh` (works from
 anywhere; it prompts for the backup passphrase) to unlock the gopass store —
@@ -136,7 +142,8 @@ is documented in [docs/install-methods.md](docs/install-methods.md).
 GitHub Actions runs on every push/PR:
 
 - **lint** — shellcheck on all scripts, plus a chezmoi render of `.zshrc` for
-  all three machine types (syntax-checked with `zsh -n`).
+  all three machine types (syntax-checked with `zsh -n`) and a focused
+  bootstrap logging smoke test.
 - **bootstrap** — a 3-leg matrix (`server`, `wsl`, `laptop`) that runs
   `bootstrap.sh` inside an `ubuntu:26.04` container and then
   `tests/verify.sh`, asserting each tier's programs are present (and the

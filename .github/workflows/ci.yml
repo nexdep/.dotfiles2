@@ -18,6 +18,8 @@ jobs:
           sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$RUNNER_TEMP/bin"
       - name: shellcheck
         run: shellcheck bootstrap.sh lib/*.sh tests/*.sh $(find home/dot_scripts -type f -name '*.sh')
+      - name: Bootstrap logging smoke test
+        run: bash tests/bootstrap-logging.sh
       - name: Render .zshrc for every machine type
         run: |
           for machine in wsl server laptop; do
