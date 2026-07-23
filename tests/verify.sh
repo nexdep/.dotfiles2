@@ -228,7 +228,7 @@ fi
 if [[ "$machine" == wsl ]]; then
   check "yazi opener uses explorer.exe" grep -q "explorer.exe" "$HOME/.config/yazi/yazi.toml"
 elif [[ "$machine" == laptop ]]; then
-  check "yazi opener uses xdg-open" grep -q 'xdg-open "\$1"' "$HOME/.config/yazi/yazi.toml"
+  check "yazi opener uses xdg-open" grep -Fq 'xdg-open %s1' "$HOME/.config/yazi/yazi.toml"
 fi
 
 # WSL-only quiet-login markers (deployed via home/.chezmoiignore). Present on
