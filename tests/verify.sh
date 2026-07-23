@@ -182,7 +182,7 @@ check "zshrc sets EDITOR=nvim" grep -q "EDITOR=nvim" "$zshrc"
 check "zshrc aliases ll to eza" grep -q "alias ll='eza" "$zshrc"
 check "zshrc has bitwarden helpers" grep -q "bw_login" "$zshrc"
 check "zshrc has dotfiles autopull" grep -q "dotfiles-last-pull" "$zshrc"
-check "zshrc autostarts tmux" grep -q "tmux attach-session" "$zshrc"
+check "zshrc does not autostart tmux" eval '! grep -q "tmux attach-session\\|tmux new-session" "$zshrc"'
 check "dircolors deployed" test -f "$HOME/.dircolors"
 check "login shell is zsh" test "$(getent passwd "$(id -un)" | cut -d: -f7)" = "$(command -v zsh)"
 # bootstrap never imports the personal GPG key (that's the manual
@@ -193,6 +193,11 @@ check "no gpg secret key imported by bootstrap" eval '! gpg --list-secret-keys -
 check "gopass store cloned" test -d "$HOME/.local/share/gopass/stores/root/.git"
 check "gopass store push url is ssh" eval '[[ "$(git -C "$HOME/.local/share/gopass/stores/root" remote get-url --push origin)" == git@* ]]'
 check "wezterm config deployed" test -f "$HOME/.wezterm.lua"
+check "wezterm uses Ctrl-a leader" grep -q 'config.leader = {' "$HOME/.wezterm.lua"
+check "wezterm has tmux-style splits" eval 'grep -q "act.SplitHorizontal" "$HOME/.wezterm.lua" && grep -q "act.SplitVertical" "$HOME/.wezterm.lua"'
+check "wezterm has tmux-style pane navigation" grep -q 'act.ActivatePaneDirection' "$HOME/.wezterm.lua"
+check "wezterm has tmux-style tab navigation" grep -q 'act.ActivateTabRelative' "$HOME/.wezterm.lua"
+check "wezterm has tmux-style copy mode" grep -q 'act.ActivateCopyMode' "$HOME/.wezterm.lua"
 
 if [[ "$machine" != server ]]; then
   check "condarc deployed" test -f "$HOME/.condarc"

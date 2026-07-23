@@ -12,16 +12,3 @@
 {{- if eq .machine "server" }}
 {{ template "zshrc-server.zsh" . }}
 {{- end }}
-
-# --- tmux autostart (keep last) ---
-# Attach/create the "main" session for local interactive terminals only.
-# Skips: already in tmux, non-interactive or no TTY (scripts, coding agents),
-# SSH sessions, VS Code, nvim terminals.
-if [[ -z "$TMUX" \
-   && -o interactive \
-   && -t 0 \
-   && -z "$SSH_CONNECTION" \
-   && "$TERM_PROGRAM" != "vscode" \
-   && -z "$NVIM" ]]; then
-  tmux attach-session -t main || tmux new-session -s main
-fi

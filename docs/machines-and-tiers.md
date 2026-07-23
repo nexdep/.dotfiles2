@@ -19,17 +19,15 @@ bw_fetch_ssh, kept separate so it's easy to retire), a wsl fragment
 fragment for laptop/wsl, and a server fragment for servers. The
 fragments live in `home/.chezmoitemplates/` and are assembled by
 `home/dot_zshrc.tmpl` based on the machine type stored in chezmoi's data;
-the assembled file ends with a tmux autostart (attach/create session
-"main" in local interactive terminals only — skipped over SSH, in VS
-Code, in nvim terminals and inside tmux itself).
+the assembled shell does not automatically start or attach to tmux. tmux
+remains installed and configured for manual use.
 
 The interactive sugar is deliberately kept harmless to scripts and
 coding agents (whose harnesses replay snapshotted functions into
 non-interactive shells): the zoxide `cd` wrapper and the eza auto-listing
 `chpwd` hook check `[[ -o interactive && -t 1 ]]` at call time and fall
-back to the plain builtin / a no-op, fzf keybindings only load with a
-TTY, and the tmux autostart additionally requires a TTY on stdin. A
-mistyped `cd` path in a script therefore fails loudly instead of
+back to the plain builtin / a no-op, and fzf keybindings only load with a
+TTY. A mistyped `cd` path in a script therefore fails loudly instead of
 frecency-jumping somewhere unexpected.
 
 The core zshrc also sources every file in `~/.zsh/`, a machine-local
@@ -63,7 +61,13 @@ script atomically mirrors it to `%USERPROFILE%\.wezterm.lua` for Windows
 WezTerm. The config selects Gnome- or Windows-style integrated title buttons
 at runtime; native Linux uses its login shell, while Windows defaults to WSL
 and offers WSL and PowerShell launchers. The mirror owns the Windows file and
-no-ops when WSL interop is unavailable.
+no-ops when WSL interop is unavailable. Its `Ctrl-a` leader mirrors the tmux
+pane and tab workflow: `|` / `-` split right/below, `Ctrl-h/j/k/l` navigate
+panes, `x` closes a pane, `r` reloads the config, `c` opens a tab at home,
+`v` opens one immediately to the right with the current working directory,
+and `[` enters vi-style copy mode. `Alt-h` / `Alt-l` switch tabs without the
+leader. tmux session/workspace navigation and the scrollback-in-nvim shortcut
+are intentionally not mapped.
 
 The git config is deployed on every machine from `home/dot_gitconfig`,
 `home/dot_gitconfig_nexdep`, `home/dot_gitconfig_marco` and

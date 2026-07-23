@@ -103,10 +103,144 @@ end
 -- standard key bindings.
 config.disable_default_key_bindings = false
 
+-- Match tmux's Ctrl-a prefix. Press Ctrl-a twice to send a literal Ctrl-a to
+-- the program in the active pane (including a manually launched tmux).
+config.leader = {
+  key = "a",
+  mods = "CTRL",
+  timeout_milliseconds = 1000,
+}
+
+-- tmux's Prefix+v inserts a window immediately after the current one. WezTerm
+-- normally appends new tabs, so remember the current index and move the newly
+-- spawned tab into the equivalent position.
+local spawn_tab_to_right = wezterm.action_callback(function(window, pane)
+  local active_index = 0
+
+  for _, tab_info in ipairs(window:mux_window():tabs_with_info()) do
+    if tab_info.is_active then
+      active_index = tab_info.index
+      break
+    end
+  end
+
+  window:perform_action(
+    act.Multiple({
+      act.SpawnTab("CurrentPaneDomain"),
+      act.MoveTab(active_index + 1),
+    }),
+    pane
+  )
+end)
+
+-- Prefix+c deliberately starts in the shell home, matching the final tmux
+-- binding. The Windows config launches the default WSL distribution, so ask
+-- wsl.exe to use the Linux home rather than the Windows user profile.
+local spawn_home_tab
+if is_windows then
+  spawn_home_tab = act.SpawnCommandInNewTab({
+    args = { "wsl.exe", "--cd", "~" },
+    domain = "CurrentPaneDomain",
+  })
+else
+  spawn_home_tab = act.SpawnCommandInNewTab({
+    cwd = wezterm.home_dir,
+    domain = "CurrentPaneDomain",
+  })
+end
+
 -- IMPORTANT:
 -- Define config.keys only once. Assigning another table to config.keys later
 -- replaces all of the bindings defined here.
 config.keys = {
+  -- --------------------------------------------------------------------------
+  -- tmux-style panes, tabs and copy mode
+  -- --------------------------------------------------------------------------
+
+  -- Send the leader key through to the active program.
+  {
+    key = "a",
+    mods = "LEADER|CTRL",
+    action = act.SendKey({ key = "a", mods = "CTRL" }),
+  },
+
+  -- Split right/below in the current pane's domain and working directory.
+  {
+    key = "|",
+    mods = "LEADER|SHIFT",
+    action = act.SplitHorizontal({ domain = "CurrentPaneDomain" }),
+  },
+  {
+    key = "-",
+    mods = "LEADER",
+    action = act.SplitVertical({ domain = "CurrentPaneDomain" }),
+  },
+
+  -- Navigate panes with the same Ctrl-a, Ctrl-h/j/k/l chords as tmux.
+  {
+    key = "h",
+    mods = "LEADER|CTRL",
+    action = act.ActivatePaneDirection("Left"),
+  },
+  {
+    key = "j",
+    mods = "LEADER|CTRL",
+    action = act.ActivatePaneDirection("Down"),
+  },
+  {
+    key = "k",
+    mods = "LEADER|CTRL",
+    action = act.ActivatePaneDirection("Up"),
+  },
+  {
+    key = "l",
+    mods = "LEADER|CTRL",
+    action = act.ActivatePaneDirection("Right"),
+  },
+
+  -- Close a pane without prompting and reload this configuration.
+  {
+    key = "x",
+    mods = "LEADER",
+    action = act.CloseCurrentPane({ confirm = false }),
+  },
+  {
+    key = "r",
+    mods = "LEADER",
+    action = act.ReloadConfiguration,
+  },
+
+  -- Create tabs using tmux's home/current-directory distinction.
+  {
+    key = "c",
+    mods = "LEADER",
+    action = spawn_home_tab,
+  },
+  {
+    key = "v",
+    mods = "LEADER",
+    action = spawn_tab_to_right,
+  },
+
+  -- Switch tabs without the leader, like tmux's Alt-h/Alt-l bindings.
+  {
+    key = "h",
+    mods = "ALT",
+    action = act.ActivateTabRelative(-1),
+  },
+  {
+    key = "l",
+    mods = "ALT",
+    action = act.ActivateTabRelative(1),
+  },
+
+  -- Enter WezTerm's vi-style copy mode using tmux's Prefix+[ chord.
+  {
+    key = "[",
+    mods = "LEADER",
+    action = act.ActivateCopyMode,
+  },
+
   -- --------------------------------------------------------------------------
   -- Clipboard
   -- --------------------------------------------------------------------------
@@ -152,6 +286,36 @@ config.keys = {
     }),
   },
 }
+
+-- WezTerm's default copy table already provides v for cell selection and y
+-- for copying the selection and exiting. Extend rather than replace it so the
+-- rest of the native vi-style controls remain available.
+if wezterm.gui then
+  local copy_mode = wezterm.gui.default_key_tables().copy_mode
+  local copy_current_line = act.Multiple({
+    act.CopyMode({ SetSelectionMode = "Line" }),
+    act.CopyTo("ClipboardAndPrimarySelection"),
+    act.CopyMode("MoveToScrollbackBottom"),
+    act.CopyMode("Close"),
+  })
+
+  -- Accept both representations emitted for Shift-y under the supported
+  -- keyboard mapping modes.
+  table.insert(copy_mode, {
+    key = "Y",
+    mods = "NONE",
+    action = copy_current_line,
+  })
+  table.insert(copy_mode, {
+    key = "Y",
+    mods = "SHIFT",
+    action = copy_current_line,
+  })
+
+  config.key_tables = {
+    copy_mode = copy_mode,
+  }
+end
 
 -- ============================================================================
 -- FINISH
