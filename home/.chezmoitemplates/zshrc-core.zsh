@@ -42,6 +42,10 @@ if command -v dircolors >/dev/null 2>&1; then
   fi
 fi
 
+# eza metadata colors are not supported by GNU dircolors. Keep permissions,
+# sizes, owners, and dates black while retaining the LS_COLORS file palette.
+export EZA_COLORS="${EZA_COLORS:+$EZA_COLORS:}oc=30:ur=30:uw=30:ux=30:ue=30:gr=30:gw=30:gx=30:tr=30:tw=30:tx=30:su=30:sf=30:xx=30:sn=30:sb=30:uu=30:uR=30:un=30:da=30"
+
 zstyle ':completion:*' auto-description 'specify: %d'
 zstyle ':completion:*' completer _my_number_completer _complete
 zstyle ':completion:*' format 'Completing %d'
@@ -114,13 +118,13 @@ alias grep='grep --color=auto'
 alias fgrep='fgrep --color=auto'
 alias egrep='egrep --color=auto'
 if command -v eza >/dev/null 2>&1; then
-  alias ll='eza -ahlF --git --git-repos'
+  alias ll='eza -ahloF --git --git-repos'
   # show the directory contents after cd'ing into it — interactive TTY
   # shells only, so scripts, pipes and coding agents' shells don't get the
   # listing (or hang on eza) after every cd
   chpwd() {
     [[ -o interactive && -t 1 ]] || return 0
-    eza -ahlF --git --git-repos
+    eza -aholF --git --git-repos
   }
 else
   alias ll='ls -lah --color=auto'
