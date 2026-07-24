@@ -62,7 +62,7 @@ if [[ ! -f /etc/apt/sources.list.d/zotero.list ]]; then
 fi
 
 # --- apt-installed GUI apps ------------------------------------------------------
-$SUDO apt-get update
+apt_update
 log "installing firefox-devedition, wezterm-nightly, code-insiders, zotero, spotify-client"
 # libasound2t64 is named explicitly for spotify-client's sake: spotify depends
 # on the pre-t64 name `libasound2`, which two packages provide — libasound2t64

@@ -14,6 +14,32 @@ die() {
   exit 1
 }
 
+# Run apt-get update with bounded retries. Acquire::Retries covers transient
+# download failures within one apt invocation; the outer loop starts a fresh
+# metadata transaction, which also recovers from repository publication races
+# where a new Release file briefly points at an older Packages index.
+apt_update() {
+  local attempt status delay
+  local max_attempts=4
+
+  for ((attempt = 1; attempt <= max_attempts; attempt++)); do
+    if $SUDO apt-get -o Acquire::Retries=3 update; then
+      return 0
+    else
+      status=$?
+    fi
+
+    if ((attempt == max_attempts)); then
+      log "apt-get update failed after $max_attempts attempts"
+      return "$status"
+    fi
+
+    delay=$((10 * (1 << (attempt - 1))))
+    log "apt-get update failed (attempt $attempt/$max_attempts); retrying in ${delay}s"
+    sleep "$delay"
+  done
+}
+
 POLICY_RC_D=/usr/sbin/policy-rc.d
 # Stop package postinst scripts from starting their daemons during apt: on a
 # systemd host deb-systemd-invoke/invoke-rc.d honor a policy-rc.d that exits

@@ -81,7 +81,7 @@ read_packages() { sed -e 's/#.*//' -e 's/[[:space:]]*$//' "$1" | grep -vE '^$' |
 # curl is needed to fetch third-party repo keys but isn't present in a bare
 # system, so install it (and ca-certificates) before adding repos; the
 # second update then picks up the new sources.
-$SUDO apt-get update
+apt_update
 $SUDO apt-get install -y --no-install-recommends curl ca-certificates
 
 add_apt_repo gopass https://packages.gopass.pw/repos/gopass/gopass-archive-keyring.gpg \
@@ -97,7 +97,7 @@ if [[ "$MACHINE" == laptop ]]; then
 fi
 
 log "installing apt packages: ${packages[*]}"
-$SUDO apt-get update
+apt_update
 $SUDO apt-get install -y --no-install-recommends "${packages[@]}"
 
 # Ubuntu ships bat's binary as batcat; expose the upstream name for scripts
