@@ -190,6 +190,7 @@ check "hetzner scripts deployed" test -x "$HOME/.scripts/hetzner_mount/setup_het
 check "openmc scripts deployed" test -x "$HOME/.scripts/openmc_scripts/openmc_data_fetcher.sh"
 check "restic scripts deployed" test -x "$HOME/.scripts/restic_b2_backups/setup-restic-systemd-backup.sh"
 check "hermes script deployed" test -x "$HOME/.scripts/deploy_secrets/hermes_openrouter.sh"
+check "openclaw script deployed" test -x "$HOME/.scripts/deploy_secrets/openclaw_openrouter.sh"
 check "gopass SSH fetch script deployed" test -x "$HOME/.scripts/deploy_secrets/fetch_ssh_keys.sh"
 check "zshrc sources ~/.zsh drop-ins" grep -q 'HOME/.zsh' "$zshrc"
 # the ephemeral devcontainer credential helper must not have shipped
