@@ -72,6 +72,7 @@ rank() {
 apps=(
   'core|zsh|command -v zsh'
   'core|gnupg|command -v gpg'
+  'core|scdaemon|test -x /usr/lib/gnupg/scdaemon'
   'core|gopass|command -v gopass'
   'core|chezmoi|command -v chezmoi'
   'core|starship|command -v starship'

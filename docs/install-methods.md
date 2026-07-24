@@ -29,10 +29,12 @@ tailscale is left for its manual `tailscale up`.
   (AES256) export of the private key; its security rests entirely on that
   passphrase. Importing it is deliberately **not** part of `bootstrap.sh`
   (the decrypt prompt is interactive, and gpg-agent's pinentry is unreliable
-  on WSL): run `~/.scripts/gpg/import-gpg-key.sh` (deployed by chezmoi)
-  manually after bootstrap — it works from anywhere, finding the backup in
-  the cwd or via `chezmoi source-path` (set `GPG_BACKUP_FILE` if chezmoi
-  isn't initialized yet). It decrypts the backup,
+  on WSL). The core package list includes Ubuntu's separate `scdaemon`
+  package because gpg-agent needs it to decrypt this store. Run
+  `~/.scripts/gpg/import-gpg-key.sh` (deployed by chezmoi) manually after
+  bootstrap — it works from anywhere, finding the backup in the cwd or via
+  `chezmoi source-path` (set `GPG_BACKUP_FILE` if chezmoi isn't initialized
+  yet). It decrypts the backup,
   imports the key, and marks it ultimately trusted; it skips itself when the
   key is already in the keyring, reads the backup passphrase itself and hands
   it to gpg over a pipe with `--pinentry-mode loopback` (no pinentry has to
