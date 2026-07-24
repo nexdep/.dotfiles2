@@ -121,15 +121,37 @@ load_restic_env() {
   set +a
 }
 
+validate_required_env_value() {
+  local variable_name="$1"
+  local variable_value="$2"
+
+  [[ -n "${variable_value}" ]] || die "${variable_name} is missing in ${RESTIC_ENV_FILE}"
+  [[ "${variable_value}" != *CHANGE_ME* ]] || die "${variable_name} still contains a CHANGE_ME placeholder in ${RESTIC_ENV_FILE}"
+}
+
+validate_restic_password_file() {
+  local password
+
+  [[ -f "${RESTIC_PASSWORD_FILE}" ]] || die "RESTIC_PASSWORD_FILE points to a missing file: ${RESTIC_PASSWORD_FILE}"
+  [[ -r "${RESTIC_PASSWORD_FILE}" ]] || die "RESTIC_PASSWORD_FILE is not readable: ${RESTIC_PASSWORD_FILE}"
+
+  password=""
+  IFS= read -r password < "${RESTIC_PASSWORD_FILE}" || true
+
+  [[ -n "${password}" ]] || die "Restic password file is empty: ${RESTIC_PASSWORD_FILE}"
+  [[ "${password}" != "CHANGE_ME_TO_A_LONG_RANDOM_RESTIC_REPOSITORY_PASSWORD" ]] \
+    || die "Restic password file still contains the generated placeholder: ${RESTIC_PASSWORD_FILE}"
+}
+
 validate_restic_env() {
   # These are required for the Backblaze B2 S3-compatible restic setup.
 
-  [[ -n "${AWS_ACCESS_KEY_ID:-}" ]] || die "AWS_ACCESS_KEY_ID is missing in ${RESTIC_ENV_FILE}"
-  [[ -n "${AWS_SECRET_ACCESS_KEY:-}" ]] || die "AWS_SECRET_ACCESS_KEY is missing in ${RESTIC_ENV_FILE}"
-  [[ -n "${RESTIC_REPOSITORY:-}" ]] || die "RESTIC_REPOSITORY is missing in ${RESTIC_ENV_FILE}"
+  validate_required_env_value "AWS_ACCESS_KEY_ID" "${AWS_ACCESS_KEY_ID:-}"
+  validate_required_env_value "AWS_SECRET_ACCESS_KEY" "${AWS_SECRET_ACCESS_KEY:-}"
+  validate_required_env_value "RESTIC_REPOSITORY" "${RESTIC_REPOSITORY:-}"
   [[ -n "${RESTIC_PASSWORD_FILE:-}" ]] || die "RESTIC_PASSWORD_FILE is missing in ${RESTIC_ENV_FILE}"
 
-  [[ -f "${RESTIC_PASSWORD_FILE}" ]] || die "RESTIC_PASSWORD_FILE points to a missing file: ${RESTIC_PASSWORD_FILE}"
+  validate_restic_password_file
 }
 
 ###############################################################################
@@ -144,10 +166,6 @@ command -v restic >/dev/null 2>&1 || die "restic is not installed or not in PATH
 
 check_required_file "${RESTIC_PASSWORD_FILE}"
 check_required_file "${RESTIC_ENV_FILE}"
-
-if grep -q "CHANGE_ME" "${RESTIC_PASSWORD_FILE}" "${RESTIC_ENV_FILE}"; then
-  die "Placeholder CHANGE_ME values found in ${RESTIC_PASSWORD_FILE} or ${RESTIC_ENV_FILE}. Replace them before running this script."
-fi
 
 load_restic_env
 validate_restic_env
