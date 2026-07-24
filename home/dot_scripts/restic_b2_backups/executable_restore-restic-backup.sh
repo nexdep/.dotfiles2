@@ -16,7 +16,7 @@ set -Eeuo pipefail
 #          /etc/restic/restic.env
 #
 #     3. Loads /etc/restic/restic.env.
-#     4. Lists the snapshots tagged with BACKUP_OPERATION_NAME.
+#     4. Uses BACKUP_OPERATION_NAME to select the repository and snapshots.
 #     5. Asks for confirmation.
 #     6. Restores the chosen snapshot and verifies the restored files.
 #
@@ -53,9 +53,9 @@ set -Eeuo pipefail
 # User-editable settings
 ###############################################################################
 
-# Must match the BACKUP_OPERATION_NAME used by the setup script.
-# Snapshots are selected by this tag.
-BACKUP_OPERATION_NAME="restic-backblaze-backup"
+# Set this to the backed-up folder name. It selects both the repository under
+# RESTIC_REPOSITORY_BASE and the snapshots carrying the matching tag.
+BACKUP_OPERATION_NAME="nice_folder"
 
 # Snapshot to restore: "latest", or a specific snapshot ID from the list
 # this script prints.
@@ -148,10 +148,15 @@ validate_restic_env() {
 
   validate_required_env_value "AWS_ACCESS_KEY_ID" "${AWS_ACCESS_KEY_ID:-}"
   validate_required_env_value "AWS_SECRET_ACCESS_KEY" "${AWS_SECRET_ACCESS_KEY:-}"
-  validate_required_env_value "RESTIC_REPOSITORY" "${RESTIC_REPOSITORY:-}"
+  validate_required_env_value "RESTIC_REPOSITORY_BASE" "${RESTIC_REPOSITORY_BASE:-}"
   [[ -n "${RESTIC_PASSWORD_FILE:-}" ]] || die "RESTIC_PASSWORD_FILE is missing in ${RESTIC_ENV_FILE}"
 
   validate_restic_password_file
+}
+
+configure_restic_repository() {
+  RESTIC_REPOSITORY="${RESTIC_REPOSITORY_BASE%/}/${BACKUP_OPERATION_NAME}"
+  export RESTIC_REPOSITORY
 }
 
 ###############################################################################
@@ -169,6 +174,7 @@ check_required_file "${RESTIC_ENV_FILE}"
 
 load_restic_env
 validate_restic_env
+configure_restic_repository
 
 ###############################################################################
 # Show the snapshots this tag has in the repository

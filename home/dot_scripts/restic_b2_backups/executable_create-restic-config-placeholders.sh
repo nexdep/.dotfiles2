@@ -66,25 +66,26 @@ write_env_file() {
   local file_path="$1"
 
   cat > "${file_path}" <<'EOF'
-# Restic environment file for Backblaze B2 using the S3-compatible API.
+# Shared Restic environment file for Backblaze B2 using the S3-compatible API.
 #
 # Replace all CHANGE_ME values before using the backup service.
 #
 # Backblaze example:
 #   AWS_ACCESS_KEY_ID=your_backblaze_key_id
 #   AWS_SECRET_ACCESS_KEY=your_backblaze_application_key
-#   RESTIC_REPOSITORY=s3:s3.eu-central-003.backblazeb2.com/my-bucket/my-server-repo
+#   RESTIC_REPOSITORY_BASE=s3:s3.eu-central-003.backblazeb2.com/my-bucket
 #   RESTIC_PASSWORD_FILE=/etc/restic/password
 #
 # Notes:
 #   AWS_ACCESS_KEY_ID is your Backblaze key ID.
 #   AWS_SECRET_ACCESS_KEY is your Backblaze application key.
-#   RESTIC_REPOSITORY is the restic repo location inside your bucket.
+#   RESTIC_REPOSITORY_BASE contains only the endpoint and bucket.
+#   The backup scripts append the backed-up folder name as the repository name.
 #   RESTIC_PASSWORD_FILE points to the local restic encryption password file.
 
 AWS_ACCESS_KEY_ID=CHANGE_ME_BACKBLAZE_KEY_ID
 AWS_SECRET_ACCESS_KEY=CHANGE_ME_BACKBLAZE_APPLICATION_KEY
-RESTIC_REPOSITORY=s3:CHANGE_ME_BACKBLAZE_S3_ENDPOINT/CHANGE_ME_BUCKET_NAME/CHANGE_ME_REPOSITORY_PREFIX
+RESTIC_REPOSITORY_BASE=s3:CHANGE_ME_BACKBLAZE_S3_ENDPOINT/CHANGE_ME_BUCKET_NAME
 RESTIC_PASSWORD_FILE=/etc/restic/password
 EOF
 }

@@ -37,7 +37,6 @@ set -Eeuo pipefail
 #   3. Edit the variables below in this script:
 #
 #        BACKUP_PATH
-#        BACKUP_OPERATION_NAME
 #        KEEP_DAILY
 #        KEEP_WEEKLY
 #        KEEP_MONTHLY
@@ -59,16 +58,7 @@ set -Eeuo pipefail
 
 # Folder to back up.
 # The script stops if this folder does not exist.
-BACKUP_PATH="/path/to/folder/to/backup"
-
-# Operation name.
-# This becomes:
-#
-#   /etc/systemd/system/<BACKUP_OPERATION_NAME>.service
-#   /etc/systemd/system/<BACKUP_OPERATION_NAME>.timer
-#
-# Use only letters, numbers, dots, underscores, @, and hyphens.
-BACKUP_OPERATION_NAME="restic-backblaze-backup"
+BACKUP_PATH="/path/to/nice_folder"
 
 # Restic retention policy.
 # These values are passed to:
@@ -89,6 +79,14 @@ RANDOMIZED_DELAY_SEC="1h"
 ###############################################################################
 # Internal paths
 ###############################################################################
+
+# The folder name is the single identity for this backup. For example,
+# /path/to/nice_folder becomes:
+#
+#   Repository: <RESTIC_REPOSITORY_BASE>/nice_folder
+#   Snapshot tag: nice_folder
+#   Systemd units: nice_folder.service and nice_folder.timer
+BACKUP_OPERATION_NAME="$(basename -- "${BACKUP_PATH}")"
 
 RESTIC_DIR="/etc/restic"
 RESTIC_PASSWORD_FILE="${RESTIC_DIR}/password"
@@ -185,10 +183,15 @@ validate_restic_env() {
 
   validate_required_env_value "AWS_ACCESS_KEY_ID" "${AWS_ACCESS_KEY_ID:-}"
   validate_required_env_value "AWS_SECRET_ACCESS_KEY" "${AWS_SECRET_ACCESS_KEY:-}"
-  validate_required_env_value "RESTIC_REPOSITORY" "${RESTIC_REPOSITORY:-}"
+  validate_required_env_value "RESTIC_REPOSITORY_BASE" "${RESTIC_REPOSITORY_BASE:-}"
   [[ -n "${RESTIC_PASSWORD_FILE:-}" ]] || die "RESTIC_PASSWORD_FILE is missing in ${RESTIC_ENV_FILE}"
 
   validate_restic_password_file
+}
+
+configure_restic_repository() {
+  RESTIC_REPOSITORY="${RESTIC_REPOSITORY_BASE%/}/${BACKUP_OPERATION_NAME}"
+  export RESTIC_REPOSITORY
 }
 
 repo_looks_uninitialized_error() {
@@ -248,7 +251,8 @@ command -v restic >/dev/null 2>&1 || die "restic is not installed or not in PATH
 
 [[ -d "${BACKUP_PATH}" ]] || die "Backup folder does not exist: ${BACKUP_PATH}"
 
-[[ "${BACKUP_OPERATION_NAME}" =~ ^[A-Za-z0-9_.@-]+$ ]] || die "BACKUP_OPERATION_NAME contains invalid characters."
+[[ "${BACKUP_OPERATION_NAME}" =~ ^[A-Za-z0-9_.@-]+$ ]] \
+  || die "Backup folder name '${BACKUP_OPERATION_NAME}' contains invalid characters. Use only letters, numbers, dots, underscores, @, and hyphens."
 
 [[ "${KEEP_DAILY}" =~ ^[0-9]+$ ]] || die "KEEP_DAILY must be a number."
 [[ "${KEEP_WEEKLY}" =~ ^[0-9]+$ ]] || die "KEEP_WEEKLY must be a number."
@@ -268,6 +272,7 @@ chmod 700 "${RESTIC_DIR}"
 
 load_restic_env
 validate_restic_env
+configure_restic_repository
 ensure_restic_repo_initialized
 
 ###############################################################################
@@ -309,6 +314,7 @@ fi
 
 BACKUP_PATH_ESCAPED="$(escape_systemd_env_value "${BACKUP_PATH}")"
 BACKUP_OPERATION_NAME_ESCAPED="$(escape_systemd_env_value "${BACKUP_OPERATION_NAME}")"
+RESTIC_REPOSITORY_ESCAPED="$(escape_systemd_env_value "${RESTIC_REPOSITORY}")"
 RESTIC_EXCLUDES_FILE_ESCAPED="$(escape_systemd_env_value "${RESTIC_EXCLUDES_FILE}")"
 
 cat > "${SERVICE_FILE}" <<EOF
@@ -326,6 +332,7 @@ EnvironmentFile=${RESTIC_ENV_FILE}
 # Backup-specific variables.
 Environment="BACKUP_PATH=${BACKUP_PATH_ESCAPED}"
 Environment="BACKUP_OPERATION_NAME=${BACKUP_OPERATION_NAME_ESCAPED}"
+Environment="RESTIC_REPOSITORY=${RESTIC_REPOSITORY_ESCAPED}"
 Environment="RESTIC_EXCLUDES_FILE=${RESTIC_EXCLUDES_FILE_ESCAPED}"
 Environment="KEEP_DAILY=${KEEP_DAILY}"
 Environment="KEEP_WEEKLY=${KEEP_WEEKLY}"
@@ -387,6 +394,9 @@ echo "  ${SERVICE_UNIT}"
 echo
 echo "Timer:"
 echo "  ${TIMER_UNIT}"
+echo
+echo "Repository:"
+echo "  ${RESTIC_REPOSITORY}"
 echo
 echo "Check timer:"
 echo "  systemctl list-timers ${TIMER_UNIT}"

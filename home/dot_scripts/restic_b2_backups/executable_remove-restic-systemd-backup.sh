@@ -31,8 +31,7 @@ set -Eeuo pipefail
 #   It also does NOT delete your Backblaze bucket or restic repository.
 #
 # Usage:
-#   1. Set BACKUP_OPERATION_NAME below to the same value used when creating
-#      the backup service.
+#   1. Set BACKUP_OPERATION_NAME below to the backed-up folder name.
 #
 #   2. Run:
 #
@@ -40,21 +39,22 @@ set -Eeuo pipefail
 #        sudo ./remove-restic-systemd-backup.sh
 #
 # Example:
-#   If your setup script used:
+#   If your setup script backed up:
 #
-#        BACKUP_OPERATION_NAME="restic-backblaze-backup"
+#        /path/to/nice_folder
 #
 #   then this script will remove:
 #
-#        /etc/systemd/system/restic-backblaze-backup.service
-#        /etc/systemd/system/restic-backblaze-backup.timer
+#        /etc/systemd/system/nice_folder.service
+#        /etc/systemd/system/nice_folder.timer
 ###############################################################################
 
 ###############################################################################
 # User-editable setting
 ###############################################################################
 
-BACKUP_OPERATION_NAME="restic-backblaze-backup"
+# This is the backed-up folder name and the operation name derived by setup.
+BACKUP_OPERATION_NAME="nice_folder"
 
 ###############################################################################
 # Internal paths
