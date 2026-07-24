@@ -17,7 +17,7 @@ Host hetzner-2
 
 Host github-work
   HostName github.com
-  User marco-de-pietri
+  User git
   IdentityFile ~/.ssh/marco-dev-1
   IdentitiesOnly yes
 
@@ -25,4 +25,5 @@ Host github-nexdep
   HostName github.com
   User git
   IdentityFile ~/.ssh/marco-dev-2
+  IdentitiesOnly yes
 
