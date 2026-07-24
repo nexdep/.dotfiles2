@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Write ~/.hermes/.env with the OpenRouter API key pulled from gopass.
-# Deployed to ~/.scripts/deploy_api/ but never run by bootstrap: run it manually
+# Deployed to ~/.scripts/deploy_secrets/ but never run by bootstrap: run it manually
 # whenever the key rotates or on a fresh machine. Needs an unlocked gopass store,
 # so run ~/.scripts/gpg/import-gpg-key.sh first if the personal GPG key isn't in
 # the keyring yet.

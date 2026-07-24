@@ -93,8 +93,9 @@ category subfolders: `gpg/` (GPG key backup/import tools), `hetzner_mount/` (SSH
 Storage Box user-systemd mount), `openmc_scripts/` (conda/OpenMC build +
 neutronics tooling + data fetcher), `restic_b2_backups/`
 (restic→Backblaze systemd backup, plus a restore script for pulling a
-backed-up folder back after redeploying a system), and `deploy_api/` (writes
-API-key env files from gopass secrets, e.g. `~/.hermes/.env`).
+backed-up folder back after redeploying a system), and `deploy_secrets/`
+(writes API-key env files from gopass secrets, e.g. `~/.hermes/.env`, and
+deploys multiline SSH private keys with matching derived public keys).
 Unlike the `lib/` install scripts they are
 self-contained and do not source `lib/common.sh`, since they run from
 `~/.scripts/` rather than the repo. Secrets are never committed — the restic
