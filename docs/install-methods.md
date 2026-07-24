@@ -114,9 +114,9 @@ tailscale is left for its manual `tailscale up`.
   user-level into `~/.local/bin` (symlinks both `cursor-agent` and `agent`;
   self-updates via `cursor-agent update`). The installer downloads from the
   Cursor CDN, not the GitHub API, so it is CI-safe.
-- **GitHub Copilot CLI / Pi**: `npm install -g` (npm is a core package),
-  matching bw. Copilot from `@github/copilot` (needs Node 22+, satisfied by
-  the core `nodejs` package); Pi (pi.dev) from
+- **GitHub Copilot CLI / Pi**: `npm install -g` (npm is a core package).
+  Copilot comes from `@github/copilot` (needs Node 22+, satisfied by the core
+  `nodejs` package); Pi (pi.dev) comes from
   `@earendil-works/pi-coding-agent` with `--ignore-scripts` — its `curl | sh`
   installer is an interactive TUI unsuitable for a non-interactive bootstrap.
 - **opencode**: prebuilt binary from the GitHub release assets (fixed-name
@@ -136,11 +136,6 @@ tailscale is left for its manual `tailscale up`.
   modify the chezmoi-managed file. To refresh the snapshot after an upstream
   update, regenerate it with `herdr --default-config`, restore that override,
   and validate it with `herdr config check`.
-- **bw (Bitwarden CLI)**: `npm install -g @bitwarden/cli` (npm is a core
-  package). No apt package exists, and the bitwarden/clients GitHub
-  releases mix per-product tags, so the redirect trick used elsewhere is
-  unreliable. Backs the zshrc `bw_login`/`bw_fetch_ssh` helpers; planned
-  for retirement once gopass fully replaces it.
 - **imagemagick caveat**: if Ubuntu still ships ImageMagick 6 there is no
   `magick` binary, so yazi's `magick`-based previews (avif/heic/jxl/svg)
   won't run; the common image/video/pdf previews use their own previewers

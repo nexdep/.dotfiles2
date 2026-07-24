@@ -2,7 +2,6 @@
 # Edit in the dotfiles repo, then run `chezmoi apply`.
 
 {{ template "zshrc-core.zsh" . }}
-{{ template "zshrc-bitwarden.zsh" . }}
 {{- if eq .machine "wsl" }}
 {{ template "zshrc-wsl.zsh" . }}
 {{- end }}

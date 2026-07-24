@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Install the GitHub Copilot CLI globally via npm (core apt package). There is
-# no apt package; npm-global is the vendor's documented primary method and
-# matches install-bw.sh. Requires Node.js 22+ (satisfied by the core `nodejs`
-# apt package). Command is `copilot`.
+# no apt package; npm-global is the vendor's documented primary method.
+# Requires Node.js 22+ (satisfied by the core `nodejs` apt package). Command is
+# `copilot`.
 set -euo pipefail
 
 LOG_TAG=copilot

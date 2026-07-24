@@ -116,7 +116,6 @@ apps=(
   'core|opencode|command -v opencode'
   'core|herdr|test -x "$HOME/.local/bin/herdr"'
   'core|uv|test -x "$HOME/.local/bin/uv"'
-  'core|bw|command -v bw'
   'docker-host|docker|dpkg -s docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin && command -v docker && command -v containerd && docker buildx version && docker compose version|! dpkg -s docker-ce && ! dpkg -s docker-ce-cli && ! dpkg -s containerd.io && ! dpkg -s docker-buildx-plugin && ! dpkg -s docker-compose-plugin'
   'extra|gomi|command -v gomi'
   'extra|conda|test -x "$HOME/miniforge3/bin/conda"|test ! -e "$HOME/miniforge3"'
@@ -218,7 +217,6 @@ check "zshrc initializes fzf" grep -q "fzf --zsh" "$zshrc"
 check "zshrc enables vi mode" grep -q "bindkey -v" "$zshrc"
 check "zshrc sets EDITOR=nvim" grep -q "EDITOR=nvim" "$zshrc"
 check "zshrc aliases ll to eza" grep -q "alias ll='eza" "$zshrc"
-check "zshrc has bitwarden helpers" grep -q "bw_login" "$zshrc"
 check "zshrc has dotfiles autopull" grep -q "dotfiles-last-pull" "$zshrc"
 check "zshrc does not autostart tmux" eval '! grep -q "tmux attach-session\\|tmux new-session" "$zshrc"'
 check "dircolors deployed" test -f "$HOME/.dircolors"
