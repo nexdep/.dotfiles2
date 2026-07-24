@@ -87,6 +87,17 @@ $SUDO apt-get install -y --no-install-recommends curl ca-certificates
 add_apt_repo gopass https://packages.gopass.pw/repos/gopass/gopass-archive-keyring.gpg \
   "" "https://packages.gopass.pw/repos/gopass stable main"
 
+if [[ "$MACHINE" == server || "$MACHINE" == laptop ]]; then
+  docker_arch="$(dpkg --print-architecture)"
+  docker_codename="$(
+    # shellcheck disable=SC1091
+    source /etc/os-release
+    printf '%s' "${UBUNTU_CODENAME:-$VERSION_CODENAME}"
+  )"
+  add_apt_repo docker https://download.docker.com/linux/ubuntu/gpg \
+    "arch=$docker_arch" "https://download.docker.com/linux/ubuntu $docker_codename stable"
+fi
+
 packages=()
 mapfile -t -O "${#packages[@]}" packages < <(read_packages "$LIB_DIR/packages-core.txt")
 if [[ "$MACHINE" != server ]]; then
@@ -94,6 +105,15 @@ if [[ "$MACHINE" != server ]]; then
 fi
 if [[ "$MACHINE" == laptop ]]; then
   mapfile -t -O "${#packages[@]}" packages < <(read_packages "$LIB_DIR/packages-gui.txt")
+fi
+if [[ "$MACHINE" == server || "$MACHINE" == laptop ]]; then
+  packages+=(
+    docker-ce
+    docker-ce-cli
+    containerd.io
+    docker-buildx-plugin
+    docker-compose-plugin
+  )
 fi
 
 log "installing apt packages: ${packages[*]}"

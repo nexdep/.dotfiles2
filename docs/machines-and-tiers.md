@@ -8,6 +8,15 @@ Each tier is a superset of the one below it (laptop ⊃ wsl ⊃ server):
 | extra | laptop, wsl    | gomi (+ config), conda (miniforge), yazi (+ config, previews: imagemagick, ffmpeg, poppler, chafa, 7z), rga (+ pandoc), dezoomify-rs, LaTeX (texlive + biber + latexmk), zathura, qt6-wayland |
 | gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS), Google Chrome, Slack, Zoom, ParaView, VLC, Zotero, Clockify, LibreOffice (+ en-US help), Spotify, libfuse2t64 (AppImage support) |
 
+Docker is a deliberate machine-specific exception to the tier hierarchy:
+
+| Machine selector | Machines       | Programs |
+|------------------|----------------|----------|
+| docker host      | server, laptop | Docker Engine and CLI, containerd, Buildx, Docker Compose |
+
+Docker is not installed on WSL, where containers are expected to be provided
+separately (for example by Docker Desktop's WSL integration).
+
 The `.zshrc` is layered the same way: a core fragment for every machine
 (vi-mode line editing, EDITOR=nvim, completion styles + `~/.dircolors`,
 eza aliases with auto-listing on cd, a zoxide-backed `cd` (frecency

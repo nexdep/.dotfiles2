@@ -24,6 +24,15 @@ tailscale is left for its manual `tailscale up`.
 - **gopass**: from its official apt repo (packages.gopass.pw, registered by
   `bootstrap.sh`) since Ubuntu 26.04 dropped it from universe; updates with
   `apt upgrade`.
+- **Docker** (server and laptop only): Docker Engine (`docker-ce`), its CLI,
+  containerd, Buildx and Docker Compose come from Docker's official Ubuntu apt
+  repository (`download.docker.com`) and update with `apt upgrade`. WSL is
+  deliberately excluded. Package postinst scripts cannot start the daemon
+  during bootstrap because of the repository-wide daemon-start guard, but the
+  enabled service starts on the next boot; start it sooner with
+  `sudo systemctl start docker`. Bootstrap does not add the user to the
+  root-equivalent `docker` group, so use `sudo docker` unless access is
+  configured separately.
 - **Personal GPG key**: the key the gopass store is encrypted to lives in
   the repo as `gpg/private-key.asc.gpg` — a symmetric, passphrase-encrypted
   (AES256) export of the private key; its security rests entirely on that

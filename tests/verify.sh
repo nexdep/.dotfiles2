@@ -53,7 +53,9 @@ rank() {
   esac
 }
 
-# One row per program: 'tier|name|present-check[|absent-check]'.
+# One row per program: 'scope|name|present-check[|absent-check]'.
+# A scope is normally a tier; docker-host is the explicit server+laptop
+# exception, which cannot be represented by the strict tier hierarchy.
 # Default absent check: the command is not on PATH.
 # Notes on the present checks:
 #  - code-insiders: Electron refuses to run as root (this CI container)
@@ -115,6 +117,7 @@ apps=(
   'core|herdr|test -x "$HOME/.local/bin/herdr"'
   'core|uv|test -x "$HOME/.local/bin/uv"'
   'core|bw|command -v bw'
+  'docker-host|docker|dpkg -s docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin && command -v docker && command -v containerd && docker buildx version && docker compose version|! dpkg -s docker-ce && ! dpkg -s docker-ce-cli && ! dpkg -s containerd.io && ! dpkg -s docker-buildx-plugin && ! dpkg -s docker-compose-plugin'
   'extra|gomi|command -v gomi'
   'extra|conda|test -x "$HOME/miniforge3/bin/conda"|test ! -e "$HOME/miniforge3"'
   'extra|yazi|command -v yazi && command -v ya|! command -v yazi && ! command -v ya'
@@ -154,8 +157,18 @@ echo "== verify machine=$machine =="
 machine_rank="$(rank "$machine")"
 
 for entry in "${apps[@]}"; do
-  IFS='|' read -r tier name present absent <<<"$entry"
-  if (( machine_rank >= $(rank "$tier") )); then
+  IFS='|' read -r scope name present absent <<<"$entry"
+  if [[ "$scope" == docker-host ]]; then
+    if [[ "$machine" == server || "$machine" == laptop ]]; then
+      expected=1
+    else
+      expected=0
+    fi
+  else
+    expected=$((machine_rank >= $(rank "$scope") ? 1 : 0))
+  fi
+
+  if ((expected)); then
     check "$name installed" eval "$present"
   else
     check "$name absent" eval "${absent:-! command -v $name}"
