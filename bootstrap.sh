@@ -174,11 +174,15 @@ log "applying dotfiles with chezmoi (machine=$MACHINE)"
 MACHINE_TYPE="$MACHINE" chezmoi init --apply --source "$REPO_DIR"
 
 # --- default shell ---------------------------------------------------------------
+login_user="$(id -un)"
 zsh_path="$(command -v zsh)"
-current_shell="$(getent passwd "$(id -un)" | cut -d: -f7)"
+current_shell="$(getent passwd "$login_user" | cut -d: -f7)"
 if [[ "$current_shell" != "$zsh_path" ]]; then
   log "setting default shell to $zsh_path"
-  $SUDO chsh -s "$zsh_path" "$(id -un)"
+  # Use the administrative account tool instead of chsh: chsh consults PAM
+  # and refuses the change when the account requires an immediate password
+  # update, even when invoked through sudo.
+  $SUDO usermod --shell "$zsh_path" "$login_user"
 fi
 
 # --- start ssh in this session ---------------------------------------------------
