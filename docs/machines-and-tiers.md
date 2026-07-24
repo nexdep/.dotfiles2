@@ -95,12 +95,15 @@ neutronics tooling + data fetcher), `restic_b2_backups/`
 (restic→Backblaze systemd backup, plus a restore script for pulling a
 backed-up folder back after redeploying a system), and `deploy_secrets/`
 (writes API-key env files from gopass secrets, e.g. `~/.hermes/.env` and
-`~/.openclaw/.env`, and deploys multiline SSH private keys with matching
+`~/.openclaw/.env`, deploys Restic/Backblaze credentials as root-owned files
+under `/etc/restic`, and deploys multiline SSH private keys with matching
 derived public keys).
 Unlike the `lib/` install scripts they are
 self-contained and do not source `lib/common.sh`, since they run from
-`~/.scripts/` rather than the repo. Secrets are never committed — the restic
-scripts only write `CHANGE_ME` placeholders into `/etc/restic`.
+`~/.scripts/` rather than the repo. Secrets are never committed — the Restic
+config creator writes only `CHANGE_ME` placeholders into `/etc/restic`, and
+the separately run `deploy_secrets/restic_b2.sh` replaces the credential
+files from the user's unlocked gopass store.
 
 The core `.zshrc` sources every file in `~/.zsh/` (a drop-in dir that is
 **not** chezmoi-managed): put machine-local shell snippets there instead of

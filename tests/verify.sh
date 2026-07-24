@@ -193,6 +193,7 @@ check "restic scripts deployed" test -x "$HOME/.scripts/restic_b2_backups/setup-
 check "hermes script deployed" test -x "$HOME/.scripts/deploy_secrets/hermes_openrouter.sh"
 check "openclaw script deployed" test -x "$HOME/.scripts/deploy_secrets/openclaw_openrouter.sh"
 check "gopass SSH fetch script deployed" test -x "$HOME/.scripts/deploy_secrets/fetch_ssh_keys.sh"
+check "Restic secret deploy script deployed" test -x "$HOME/.scripts/deploy_secrets/restic_b2.sh"
 check "zshrc sources ~/.zsh drop-ins" grep -q 'HOME/.zsh' "$zshrc"
 # the ephemeral devcontainer credential helper must not have shipped
 check "no ephemeral credential helper" eval '! grep -q vscode-remote-containers "$HOME/.gitconfig_marco"'
