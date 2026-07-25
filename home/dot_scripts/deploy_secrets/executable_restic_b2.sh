@@ -135,7 +135,15 @@ validate_env_value "RESTIC_REPOSITORY_BASE" "$RESTIC_REPOSITORY_BASE"
 printf '%s\n' "$RESTIC_REPOSITORY_PASSWORD" >"$PASSWORD_TMP"
 
 SUDO="sudo"
-$SUDO -v
+# Front-load the sudo prompt so the install steps below don't stop to ask
+# midway. `sudo -v` always authenticates interactively, even for a user who has
+# NOPASSWD for commands — and cloud images ship a locked account password, so
+# that prompt can never succeed there (it just burns three attempts and aborts).
+# Probe with a real, NOPASSWD-eligible command first; only fall back to
+# interactive validation when a password is genuinely required.
+if ! $SUDO -n true 2>/dev/null; then
+  $SUDO -v || die "sudo authentication failed; this script needs root to write ${RESTIC_DIR}"
+fi
 
 $SUDO test -d "$RESTIC_DIR" \
   || die "${RESTIC_DIR} is missing; run create-restic-config-placeholders.sh first"
