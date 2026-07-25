@@ -45,7 +45,9 @@ tailscale is left for its manual `tailscale up`.
   `chezmoi source-path` (set `GPG_BACKUP_FILE` if chezmoi isn't initialized
   yet). It decrypts the backup,
   imports the key, and marks it ultimately trusted; it skips itself when the
-  key is already in the keyring, reads the backup passphrase itself and hands
+  key is already fully in the keyring (a stubbed key from an interrupted
+  import is reported as an error with the fix, not skipped), reads the
+  backup passphrase itself and hands
   it to gpg over a pipe with `--pinentry-mode loopback` (no pinentry has to
   render; 3 attempts for typos), and CI never imports it (`tests/verify.sh`
   asserts no secret key exists after bootstrap). The public key and

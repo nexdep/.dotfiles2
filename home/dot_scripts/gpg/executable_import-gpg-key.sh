@@ -24,9 +24,22 @@ die() {
 # gopass stores must be initialized to this key.
 KEY_ID="${GPG_KEY_ID:-6F43032151FFADD6}"
 
-if gpg --list-secret-keys "$KEY_ID" >/dev/null 2>&1; then
+# The key can be present but useless: an interrupted import leaves a stub —
+# `gpg --list-secret-keys` still exits 0, but the token field of a sec/ssb
+# line shows '#' (secret material missing) instead of '+'. gopass decrypts
+# with the encryption subkey, so require real material on every line.
+secret_key_complete() {
+  gpg --list-secret-keys --with-colons "$KEY_ID" 2>/dev/null |
+    awk -F: '$1 == "sec" || $1 == "ssb" { lines += 1; if ($15 != "+") bad = 1 }
+      END { exit (lines == 0 || bad) }'
+}
+
+if secret_key_complete; then
   log "key $KEY_ID already in keyring, skipping"
   exit 0
+fi
+if gpg --list-secret-keys "$KEY_ID" >/dev/null 2>&1; then
+  die "key $KEY_ID is in the keyring but missing secret material (interrupted import?): delete it with 'gpg --delete-secret-keys $KEY_ID', then re-run this script"
 fi
 
 # The backup lives in the dotfiles repo's gpg/ dir, but this script is
@@ -82,6 +95,9 @@ done
 unset pass
 
 gpg --import "$tmp/private-key.asc"
+
+secret_key_complete ||
+  die "secret material incomplete after import; the backup may be missing the encryption subkey — regenerate it with generate-gpg-backup.sh and retry"
 
 fpr="$(gpg --list-secret-keys --with-colons "$KEY_ID" | awk -F: '/^fpr:/ {print $10; exit}')"
 [[ -n "$fpr" ]] || die "key $KEY_ID not found in keyring after import"
