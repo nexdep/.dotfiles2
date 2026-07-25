@@ -185,6 +185,22 @@ if [[ "$current_shell" != "$zsh_path" ]]; then
   $SUDO usermod --shell "$zsh_path" "$login_user"
 fi
 
+# --- clear forced password changes -----------------------------------------------
+# Hetzner cloud images ship accounts with shadow last-change = 0 ("password
+# must be changed at next login"). PAM's account stage then demands the change
+# on every authentication, which breaks tools that cannot complete it: chsh
+# (the reason usermod is used above), and nested sudo — root running `sudo`
+# inside `sudo make ...` aborts with "PAM error: Authentication token
+# manipulation error". Reset only the change date; the password itself stays
+# untouched (locked accounts stay locked).
+for account in root "$login_user"; do
+  lstchg="$($SUDO getent shadow "$account" | cut -d: -f3)"
+  if [[ "$lstchg" == "0" ]]; then
+    log "clearing forced password change for $account"
+    $SUDO chage -d "$(date +%F)" "$account"
+  fi
+done
+
 # --- start ssh in this session ---------------------------------------------------
 # Daemon auto-start was suppressed during install, so ssh.socket is enabled but
 # not yet running; start it now so ssh works without a reboot. Best effort —

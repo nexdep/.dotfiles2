@@ -221,6 +221,11 @@ check "zshrc has dotfiles autopull" grep -q "dotfiles-last-pull" "$zshrc"
 check "zshrc does not autostart tmux" eval '! grep -q "tmux attach-session\\|tmux new-session" "$zshrc"'
 check "dircolors deployed" test -f "$HOME/.dircolors"
 check "login shell is zsh" test "$(getent passwd "$(id -un)" | cut -d: -f7)" = "$(command -v zsh)"
+# Hetzner images ship accounts with a forced password change (shadow
+# last-change 0), which breaks nested sudo and chsh under PAM; bootstrap
+# clears the flag for root and the login user.
+check "no forced password change on root" eval '[[ "$(getent shadow root | cut -d: -f3)" != "0" ]]'
+check "no forced password change on login user" eval '[[ "$(getent shadow "$(id -un)" | cut -d: -f3)" != "0" ]]'
 # bootstrap never imports the personal GPG key (that's the manual
 # ~/.scripts/gpg/import-gpg-key.sh), so no secret key may exist here.
 check "no gpg secret key imported by bootstrap" eval '! gpg --list-secret-keys --with-colons 2>/dev/null | grep -q "^sec"'
