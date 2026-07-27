@@ -4,7 +4,7 @@ Each tier is a superset of the one below it (laptop ⊃ wsl ⊃ server):
 
 | Tier  | Machines       | Programs                                          |
 |-------|----------------|---------------------------------------------------|
-| core  | all            | zsh (default shell), gopass (+ password store), gnupg (+ personal GPG key, scdaemon), starship, Ubuntu Mono Nerd Font (+ fontconfig, xz-utils), neovim (+ LazyVim config and its toolchain: build-essential, npm, luarocks, sqlite3, fd, tree-sitter via rust), vim-gtk3 (+ vimrc), tmux (+ config), ssh config, git (+ config), WezTerm config, git-lfs, gh, lazygit, prompts, ripgrep, fzf, bat, zoxide, eza, fastfetch, jq, btop, restic, sshfs (+ fuse3), openssh-server, mosh, tailscale, rclone, Claude Code (+ bubblewrap), Codex CLI, Cursor Agent CLI, GitHub Copilot CLI, Pi CLI, opencode, Herdr (+ config), uv, curl, chezmoi |
+| core  | all            | zsh (default shell), gopass (+ password store), gnupg (+ personal GPG key, scdaemon), starship, Ubuntu Mono Nerd Font (+ fontconfig, xz-utils), neovim (+ LazyVim config and its toolchain: build-essential, npm, luarocks, sqlite3, fd, tree-sitter via rust), vim-gtk3 (+ vimrc), tmux (+ config), ssh config, git (+ config), WezTerm config, git-lfs, gh (official repo), lazygit, prompts, ripgrep, fzf, bat, zoxide, eza, fastfetch, jq, btop, restic, sshfs (+ fuse3), openssh-server, mosh, tailscale, rclone, Claude Code (+ bubblewrap), Codex CLI, Cursor Agent CLI, GitHub Copilot CLI, Pi CLI, opencode, Herdr (+ config), uv, curl, chezmoi |
 | extra | laptop, wsl    | gomi (+ config), conda (miniforge), yazi (+ config, previews: imagemagick, ffmpeg, poppler, chafa, 7z), rga (+ pandoc), dezoomify-rs, LaTeX (texlive + biber + latexmk), zathura, qt6-wayland |
 | gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS), Google Chrome, Slack, Zoom, ParaView, VLC, Zotero, Clockify, LibreOffice (+ en-US help), Spotify, libfuse2t64 (AppImage support) |
 
@@ -104,14 +104,19 @@ neutronics tooling + data fetcher), `restic_b2_backups/`
 backed-up folder back after redeploying a system), and `deploy_secrets/`
 (writes API-key env files from gopass secrets, e.g. `~/.hermes/.env` and
 `~/.openclaw/.env`, deploys Restic/Backblaze credentials as root-owned files
-under `/etc/restic`, and deploys multiline SSH private keys with matching
-derived public keys).
+under `/etc/restic`, deploys multiline SSH private keys with matching
+derived public keys, and authenticates GitHub CLI for the `marco-de-pietri`
+and `nexdep` accounts).
 Unlike the `lib/` install scripts they are
 self-contained and do not source `lib/common.sh`, since they run from
 `~/.scripts/` rather than the repo. Secrets are never committed — the Restic
 config creator writes only `CHANGE_ME` placeholders into `/etc/restic`, and
 the separately run `deploy_secrets/restic_b2.sh` replaces the credential
-files from the user's unlocked gopass store.
+files from the user's unlocked gopass store. Likewise,
+`deploy_secrets/gh_tokens.sh` pipes the two `gh/*-token-1` entries directly
+from gopass into `gh auth login`; it uses the deliberately requested
+plaintext gh credential storage, attempts both accounts, and leaves `nexdep`
+active after a successful run.
 
 The core `.zshrc` sources every file in `~/.zsh/` (a drop-in dir that is
 **not** chezmoi-managed): put machine-local shell snippets there instead of

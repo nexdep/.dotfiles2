@@ -89,7 +89,7 @@ apps=(
   'core|bat|command -v bat' # also proves bootstrap's bat -> batcat shim
   'core|zoxide|command -v zoxide'
   'core|git-lfs|command -v git-lfs'
-  'core|gh|command -v gh'
+  'core|gh|command -v gh && gh auth login --help | grep -q -- "--skip-ssh-key"'
   'core|jq|command -v jq'
   'core|btop|command -v btop'
   'core|build-essential|command -v gcc'
@@ -207,6 +207,7 @@ check "hermes script deployed" test -x "$HOME/.scripts/deploy_secrets/hermes_ope
 check "openclaw script deployed" test -x "$HOME/.scripts/deploy_secrets/openclaw_openrouter.sh"
 check "gopass SSH fetch script deployed" test -x "$HOME/.scripts/deploy_secrets/fetch_ssh_keys.sh"
 check "Restic secret deploy script deployed" test -x "$HOME/.scripts/deploy_secrets/restic_b2.sh"
+check "GitHub token deploy script deployed" test -x "$HOME/.scripts/deploy_secrets/gh_tokens.sh"
 check "zshrc sources ~/.zsh drop-ins" grep -q 'HOME/.zsh' "$zshrc"
 # the ephemeral devcontainer credential helper must not have shipped
 check "no ephemeral credential helper" eval '! grep -q vscode-remote-containers "$HOME/.gitconfig_marco"'

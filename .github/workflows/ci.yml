@@ -22,6 +22,8 @@ jobs:
         run: bash tests/bootstrap-logging.sh
       - name: APT update retry smoke test
         run: bash tests/apt-update-retry.sh
+      - name: GitHub token deployment smoke test
+        run: bash tests/gh-token-deploy.sh
       - name: Render .zshrc for every machine type
         run: |
           for machine in wsl server laptop; do

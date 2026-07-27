@@ -1,6 +1,7 @@
 # apt packages installed on every machine (core tier).
-# gopass comes from its own apt repo (registered by bootstrap.sh via
-# add_apt_repo) because Ubuntu 26.04 dropped it from universe.
+# gopass and gh come from their official apt repos (registered by bootstrap.sh
+# via add_apt_repo). Ubuntu 26.04 dropped gopass from universe, and its gh 2.46
+# package lacks features used by ~/.scripts/deploy_secrets/gh_tokens.sh.
 bat # yazi previews call `bat`; Ubuntu ships it as batcat, bootstrap.sh adds the shim
 btop # system monitor
 bubblewrap # bwrap: Claude Code's Linux sandbox
@@ -13,7 +14,7 @@ fd-find # fd: LazyVim file finding; Ubuntu ships it as fdfind, bootstrap.sh adds
 fontconfig # fc-cache: register Ubuntu Mono Nerd Font after its system-wide install
 fuse3 # fusermount3 for sshfs mounts (~/.scripts/hetzner_mount)
 fzf # fuzzy finder: zshrc keybindings + yazi's fzf/fg plugins
-gh # GitHub CLI
+gh # GitHub CLI; official cli.github.com apt repo
 git
 git-lfs # ~/.gitconfig declares the lfs filter with required=true
 gnupg # gpg: gopass encryption + personal key import (~/.scripts/gpg/import-gpg-key.sh)

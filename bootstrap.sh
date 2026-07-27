@@ -87,6 +87,10 @@ $SUDO apt-get install -y --no-install-recommends curl ca-certificates
 add_apt_repo gopass https://packages.gopass.pw/repos/gopass/gopass-archive-keyring.gpg \
   "" "https://packages.gopass.pw/repos/gopass stable main"
 
+github_cli_arch="$(dpkg --print-architecture)"
+add_apt_repo github-cli https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+  "arch=$github_cli_arch" "https://cli.github.com/packages stable main"
+
 if [[ "$MACHINE" == server || "$MACHINE" == laptop ]]; then
   docker_arch="$(dpkg --print-architecture)"
   docker_codename="$(

@@ -24,6 +24,14 @@ tailscale is left for its manual `tailscale up`.
 - **gopass**: from its official apt repo (packages.gopass.pw, registered by
   `bootstrap.sh`) since Ubuntu 26.04 dropped it from universe; updates with
   `apt upgrade`.
+- **GitHub CLI (`gh`)**: from GitHub CLI's official apt repository
+  (`cli.github.com/packages`, registered by `bootstrap.sh`) rather than
+  Ubuntu's outdated 2.46 package; updates with `apt upgrade`. The official
+  build supports the non-interactive `--skip-ssh-key` flow used by
+  `~/.scripts/deploy_secrets/gh_tokens.sh`, which manually loads the
+  `marco-de-pietri` and `nexdep` tokens from the unlocked gopass store.
+  That helper deliberately passes `--insecure-storage`, so gh writes the
+  tokens to its plaintext per-user configuration; bootstrap never runs it.
 - **Docker** (server and laptop only): Docker Engine (`docker-ce`), its CLI,
   containerd, Buildx and Docker Compose come from Docker's official Ubuntu apt
   repository (`download.docker.com`) and update with `apt upgrade`. WSL is
