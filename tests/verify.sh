@@ -100,6 +100,7 @@ apps=(
   'core|restic|command -v restic'
   'core|sshfs|command -v sshfs'
   'core|openssh-server|test -x /usr/sbin/sshd'
+  'core|mosh|command -v mosh'
   'core|bubblewrap|command -v bwrap'
   'core|eza|command -v eza'
   'core|fastfetch|command -v fastfetch'
