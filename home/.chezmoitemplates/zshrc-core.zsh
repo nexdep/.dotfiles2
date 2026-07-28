@@ -43,8 +43,9 @@ if command -v dircolors >/dev/null 2>&1; then
 fi
 
 # eza metadata colors are not supported by GNU dircolors. Keep permissions,
-# sizes, owners, and dates black while retaining the LS_COLORS file palette.
-export EZA_COLORS="${EZA_COLORS:+$EZA_COLORS:}oc=30:ur=30:uw=30:ux=30:ue=30:gr=30:gw=30:gx=30:tr=30:tw=30:tx=30:su=30:sf=30:xx=30:sn=30:sb=30:uu=30:uR=30:un=30:da=30"
+# sizes, owners, and dates on the terminal's default foreground while retaining
+# the LS_COLORS file palette.
+export EZA_COLORS='oc=0:ur=0:uw=0:ux=0:ue=0:gr=0:gw=0:gx=0:tr=0:tw=0:tx=0:su=0:sf=0:xx=0:sn=0:sb=0:uu=0:uR=0:un=0:da=0'
 
 zstyle ':completion:*' auto-description 'specify: %d'
 zstyle ':completion:*' completer _my_number_completer _complete

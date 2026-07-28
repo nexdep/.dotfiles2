@@ -21,7 +21,7 @@ return {
       servers = {
         ltex_plus = {
           cmd = { "ltex-ls-plus" },
-          filetypes = { "tex", "bib", "markdown" },
+          filetypes = { "tex", "bib" },
 
           on_attach = function(_, bufnr)
             require("ltex-utils").on_attach(bufnr)
