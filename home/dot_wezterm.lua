@@ -8,6 +8,7 @@ local act = wezterm.action
 
 local config = wezterm.config_builder()
 local is_windows = wezterm.target_triple:find("windows", 1, true) ~= nil
+local wsl_home_prog = { "wsl.exe", "--cd", "~" }
 
 -- ============================================================================
 -- FONT AND COLOR THEME
@@ -73,16 +74,15 @@ config.show_close_tab_button_in_tabs = true
 -- ============================================================================
 
 -- Native Linux uses WezTerm's default login-shell behavior. On Windows, start
--- the default WSL distribution and offer both WSL and PowerShell launchers.
+-- the default WSL distribution in its default user's home and offer both WSL
+-- and PowerShell launchers.
 if is_windows then
-  config.default_prog = {
-    "wsl.exe",
-  }
+  config.default_prog = wsl_home_prog
 
   config.launch_menu = {
     {
       label = "WSL — Default",
-      args = { "wsl.exe" },
+      args = wsl_home_prog,
     },
 
     {
@@ -133,13 +133,38 @@ local spawn_tab_to_right = wezterm.action_callback(function(window, pane)
   )
 end)
 
+-- Split in the active pane's working directory. On Windows the local domain
+-- launches wsl.exe, so pass the Linux path to WSL itself rather than asking
+-- Windows to use it as the process working directory.
+local function split_in_current_directory(direction)
+  return wezterm.action_callback(function(window, pane)
+    local cwd = pane:get_current_working_dir()
+    local cwd_path = cwd and cwd.file_path or nil
+    local command = {}
+
+    if is_windows then
+      command.args = cwd_path and { "wsl.exe", "--cd", cwd_path } or wsl_home_prog
+    elseif cwd_path then
+      command.cwd = cwd_path
+    end
+
+    window:perform_action(
+      act.SplitPane({
+        direction = direction,
+        command = command,
+      }),
+      pane
+    )
+  end)
+end
+
 -- Prefix+c deliberately starts in the shell home, matching the final tmux
 -- binding. The Windows config launches the default WSL distribution, so ask
 -- wsl.exe to use the Linux home rather than the Windows user profile.
 local spawn_home_tab
 if is_windows then
   spawn_home_tab = act.SpawnCommandInNewTab({
-    args = { "wsl.exe", "--cd", "~" },
+    args = wsl_home_prog,
     domain = "CurrentPaneDomain",
   })
 else
@@ -168,12 +193,12 @@ config.keys = {
   {
     key = "|",
     mods = "LEADER|SHIFT",
-    action = act.SplitHorizontal({ domain = "CurrentPaneDomain" }),
+    action = split_in_current_directory("Right"),
   },
   {
     key = "-",
     mods = "LEADER",
-    action = act.SplitVertical({ domain = "CurrentPaneDomain" }),
+    action = split_in_current_directory("Down"),
   },
 
   -- Navigate panes with the same Ctrl-a, Ctrl-h/j/k/l chords as tmux.

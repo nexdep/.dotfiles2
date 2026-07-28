@@ -198,10 +198,12 @@ tailscale is left for its manual `tailscale up`.
   repo (apt.fury.io/wez), so it updates with `apt upgrade`. The shared
   `~/.wezterm.lua` config deploys on every machine and detects the runtime platform:
   Linux uses Gnome-style integrated buttons and its default login shell, while
-  Windows uses Windows-style buttons, starts WSL by default, and offers WSL and
-  PowerShell launchers. A WSL-only chezmoi `run_onchange` script atomically
+  Windows uses Windows-style buttons, starts the default WSL distribution in
+  its default user's home, and offers WSL and PowerShell launchers. A WSL-only
+  chezmoi `run_onchange` script atomically
   mirrors the config to `%USERPROFILE%\.wezterm.lua` for a separately installed
-  Windows WezTerm.
+  Windows WezTerm. New split panes retain the active pane's working directory
+  on both native Linux and Windows/WSL.
 - **VS Code Insiders**: `code-insiders` apt package from Microsoft's
   official repo (packages.microsoft.com/repos/code), so it updates with
   `apt upgrade`.

@@ -68,8 +68,9 @@ on every machine. A Linux laptop uses it directly; on WSL, a `run_onchange`
 script atomically mirrors it to `%USERPROFILE%\.wezterm.lua` for Windows
 WezTerm. The config selects Gnome- or Windows-style integrated title buttons
 at runtime; native Linux uses its login shell, while Windows defaults to WSL
-and offers WSL and PowerShell launchers. The mirror owns the Windows file and
-no-ops when WSL interop is unavailable. Its `Ctrl-a` leader mirrors the tmux
+in the default Linux user's home and offers WSL and PowerShell launchers. The
+mirror owns the Windows file and no-ops when WSL interop is unavailable. Its
+`Ctrl-a` leader mirrors the tmux
 pane and tab workflow: `|` / `-` split right/below, `Ctrl-h/j/k/l` navigate
 panes, `x` closes a pane, `r` reloads the config, `c` opens a tab at home,
 `v` opens one immediately to the right with the current working directory,

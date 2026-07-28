@@ -237,10 +237,12 @@ check "gopass store cloned" test -d "$HOME/.local/share/gopass/stores/root/.git"
 check "gopass store push url is ssh" eval '[[ "$(git -C "$HOME/.local/share/gopass/stores/root" remote get-url --push origin)" == git@* ]]'
 check "wezterm config deployed" test -f "$HOME/.wezterm.lua"
 check "wezterm uses Ctrl-a leader" grep -q 'config.leader = {' "$HOME/.wezterm.lua"
-check "wezterm has tmux-style splits" eval 'grep -q "act.SplitHorizontal" "$HOME/.wezterm.lua" && grep -q "act.SplitVertical" "$HOME/.wezterm.lua"'
+check "wezterm has tmux-style splits" eval 'grep -q "act.SplitPane" "$HOME/.wezterm.lua" && grep -q '\''split_in_current_directory("Right")'\'' "$HOME/.wezterm.lua" && grep -q '\''split_in_current_directory("Down")'\'' "$HOME/.wezterm.lua"'
+check "wezterm splits reuse current cwd" eval 'grep -q "pane:get_current_working_dir()" "$HOME/.wezterm.lua" && grep -Fq '\''{ "wsl.exe", "--cd", cwd_path }'\'' "$HOME/.wezterm.lua"'
 check "wezterm has tmux-style pane navigation" grep -q 'act.ActivatePaneDirection' "$HOME/.wezterm.lua"
 check "wezterm has tmux-style tab navigation" grep -q 'act.ActivateTabRelative' "$HOME/.wezterm.lua"
 check "wezterm has tmux-style copy mode" grep -q 'act.ActivateCopyMode' "$HOME/.wezterm.lua"
+check "wezterm Windows WSL starts at Linux home" eval 'grep -Fq '\''local wsl_home_prog = { "wsl.exe", "--cd", "~" }'\'' "$HOME/.wezterm.lua" && grep -Fq "config.default_prog = wsl_home_prog" "$HOME/.wezterm.lua"'
 
 if [[ "$machine" != server ]]; then
   check "condarc deployed" test -f "$HOME/.condarc"
