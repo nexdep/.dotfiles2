@@ -14,7 +14,10 @@ local wsl_home_prog = { "wsl.exe", "--cd", "~" }
 -- FONT AND COLOR THEME
 -- ============================================================================
 
-config.font = wezterm.font("UbuntuMono Nerd Font Mono")
+config.font = wezterm.font_with_fallback {
+  "UbuntuMono Nerd Font Mono",
+  "Noto Sans Symbols",
+}
 
 config.font_size = 10.0
 
