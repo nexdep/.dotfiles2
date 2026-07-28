@@ -67,8 +67,8 @@ rank() {
 #    PATH presence is checked.
 #  - opencode: same story headless — `opencode --version` produces no output
 #    and hangs without a TTY, so only PATH presence is checked.
-#  - evolution-ews, libreoffice-help-en-us and libreoffice-gnome have no
-#    executable of their own, hence dpkg -s.
+#  - fonts-noto-core, evolution-ews, libreoffice-help-en-us and
+#    libreoffice-gnome have no executable of their own, hence dpkg -s.
 #  - the spotify row is named after its binary, not its package
 #    (spotify-client), so the derived absent check asserts something.
 apps=(
@@ -79,6 +79,7 @@ apps=(
   'core|chezmoi|command -v chezmoi'
   'core|starship|command -v starship'
   'core|fontconfig|command -v fc-cache'
+  'core|fonts-noto-core|dpkg -s fonts-noto-core'
   'core|xz-utils|command -v xz'
   'core|ubuntu-mono-nerd-font|test -f /usr/local/share/fonts/UbuntuMonoNerdFont/UbuntuMonoNerdFont-Regular.ttf'
   'core|neovim|/usr/local/bin/nvim --version'
@@ -243,6 +244,8 @@ check "wezterm has tmux-style pane navigation" grep -q 'act.ActivatePaneDirectio
 check "wezterm has tmux-style tab navigation" grep -q 'act.ActivateTabRelative' "$HOME/.wezterm.lua"
 check "wezterm has tmux-style copy mode" grep -q 'act.ActivateCopyMode' "$HOME/.wezterm.lua"
 check "wezterm Windows WSL starts at Linux home" eval 'grep -Fq '\''local wsl_home_prog = { "wsl.exe", "--cd", "~" }'\'' "$HOME/.wezterm.lua" && grep -Fq "config.default_prog = wsl_home_prog" "$HOME/.wezterm.lua"'
+check "wezterm uses platform symbol fallbacks" eval 'grep -Fq '\''local symbol_font = "Noto Sans Symbols"'\'' "$HOME/.wezterm.lua" && grep -Fq '\''symbol_font = {'\'' "$HOME/.wezterm.lua" && grep -Fq '\''family = "Segoe UI Symbol"'\'' "$HOME/.wezterm.lua"'
+check "wezterm home tabs handle SSH domains" eval 'grep -Fq '\''pane:get_domain_name() == "local"'\'' "$HOME/.wezterm.lua" && grep -Fq '\''cd && exec "${SHELL:-/bin/sh}" -l'\'' "$HOME/.wezterm.lua"'
 
 if [[ "$machine" != server ]]; then
   check "condarc deployed" test -f "$HOME/.condarc"

@@ -14,9 +14,17 @@ local wsl_home_prog = { "wsl.exe", "--cd", "~" }
 -- FONT AND COLOR THEME
 -- ============================================================================
 
+local symbol_font = "Noto Sans Symbols"
+if is_windows then
+  symbol_font = {
+    family = "Segoe UI Symbol",
+    assume_emoji_presentation = false,
+  }
+end
+
 config.font = wezterm.font_with_fallback {
   "UbuntuMono Nerd Font Mono",
-  "Noto Sans Symbols",
+  symbol_font,
 }
 
 config.font_size = 10.0
@@ -162,20 +170,27 @@ local function split_in_current_directory(direction)
 end
 
 -- Prefix+c deliberately starts in the shell home, matching the final tmux
--- binding. The Windows config launches the default WSL distribution, so ask
--- wsl.exe to use the Linux home rather than the Windows user profile.
-local spawn_home_tab
-if is_windows then
-  spawn_home_tab = act.SpawnCommandInNewTab({
-    args = wsl_home_prog,
+-- binding. Choose the command at keypress time because CurrentPaneDomain may
+-- be an SSH domain: wsl.exe is valid only in WezTerm's local Windows domain.
+local spawn_home_tab = wezterm.action_callback(function(window, pane)
+  local command = {
     domain = "CurrentPaneDomain",
-  })
-else
-  spawn_home_tab = act.SpawnCommandInNewTab({
-    cwd = wezterm.home_dir,
-    domain = "CurrentPaneDomain",
-  })
-end
+  }
+
+  if pane:get_domain_name() == "local" then
+    if is_windows then
+      command.args = wsl_home_prog
+    else
+      command.cwd = wezterm.home_dir
+    end
+  else
+    -- A local home path cannot be reused in a remote domain. Let the remote
+    -- shell resolve its own home, then replace the wrapper with a login shell.
+    command.args = { "/bin/sh", "-lc", 'cd && exec "${SHELL:-/bin/sh}" -l' }
+  end
+
+  window:perform_action(act.SpawnCommandInNewTab(command), pane)
+end)
 
 -- IMPORTANT:
 -- Define config.keys only once. Assigning another table to config.keys later
