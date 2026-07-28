@@ -283,7 +283,9 @@ fi
 # interop) on wsl, xdg-open on the laptop.
 if [[ "$machine" == wsl ]]; then
   check "windows PowerShell profile deployer enabled" eval '[[ -n "$(chezmoi execute-template -f "$powershell_profile_deployer")" ]]'
-  check "windows PowerShell profile path queried dynamically" eval 'chezmoi execute-template -f "$powershell_profile_deployer" | grep -Fq "Command '\''\\$PROFILE'\''"'
+  check "windows PowerShell profile path queried dynamically" grep -Fq "Command '\$PROFILE'" <(
+    chezmoi execute-template -f "$powershell_profile_deployer"
+  )
   check "yazi opener uses explorer.exe" grep -q "explorer.exe" "$HOME/.config/yazi/yazi.toml"
 elif [[ "$machine" == laptop ]]; then
   check "windows PowerShell profile deployer disabled" eval '[[ -z "$(chezmoi execute-template -f "$powershell_profile_deployer")" ]]'
