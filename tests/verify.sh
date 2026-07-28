@@ -12,6 +12,8 @@ machine="${1:?usage: $0 <wsl|server|laptop>}"
 # shellcheck disable=SC2034
 repo_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 zshrc="$HOME/.zshrc"
+powershell_profile_source="$repo_dir/home/.chezmoitemplates/windows-powershell-profile.ps1"
+powershell_profile_deployer="$repo_dir/home/.chezmoiscripts/run_onchange_after_deploy-windows-powershell-profile.sh.tmpl"
 fail=0
 
 check() {
@@ -237,6 +239,12 @@ check "no gpg secret key imported by bootstrap" eval '! gpg --list-secret-keys -
 check "gopass store cloned" test -d "$HOME/.local/share/gopass/stores/root/.git"
 check "gopass store push url is ssh" eval '[[ "$(git -C "$HOME/.local/share/gopass/stores/root" remote get-url --push origin)" == git@* ]]'
 check "wezterm config deployed" test -f "$HOME/.wezterm.lua"
+check "windows PowerShell profile source exists" test -f "$powershell_profile_source"
+check "windows PowerShell profile defines y" grep -Fq 'yazi.exe @args --cwd-file="$tmp"' "$powershell_profile_source"
+check "windows PowerShell profile initializes zoxide" eval '[[ "$(tail -n 1 "$powershell_profile_source")" == "Invoke-Expression (& { (zoxide init powershell | Out-String) })" ]]'
+check "windows PowerShell profile deployer parses" sh -n <(
+  chezmoi execute-template -f "$powershell_profile_deployer"
+)
 check "wezterm uses Ctrl-a leader" grep -q 'config.leader = {' "$HOME/.wezterm.lua"
 check "wezterm has tmux-style splits" eval 'grep -q "act.SplitPane" "$HOME/.wezterm.lua" && grep -q '\''split_in_current_directory("Right")'\'' "$HOME/.wezterm.lua" && grep -q '\''split_in_current_directory("Down")'\'' "$HOME/.wezterm.lua"'
 check "wezterm splits reuse current cwd" eval 'grep -q "pane:get_current_working_dir()" "$HOME/.wezterm.lua" && grep -Fq '\''{ "wsl.exe", "--cd", cwd_path }'\'' "$HOME/.wezterm.lua"'
@@ -274,9 +282,14 @@ fi
 # The yazi "open" opener is templated per machine: explorer.exe (via WSL
 # interop) on wsl, xdg-open on the laptop.
 if [[ "$machine" == wsl ]]; then
+  check "windows PowerShell profile deployer enabled" eval '[[ -n "$(chezmoi execute-template -f "$powershell_profile_deployer")" ]]'
+  check "windows PowerShell profile path queried dynamically" eval 'chezmoi execute-template -f "$powershell_profile_deployer" | grep -Fq "Command '\''\\$PROFILE'\''"'
   check "yazi opener uses explorer.exe" grep -q "explorer.exe" "$HOME/.config/yazi/yazi.toml"
 elif [[ "$machine" == laptop ]]; then
+  check "windows PowerShell profile deployer disabled" eval '[[ -z "$(chezmoi execute-template -f "$powershell_profile_deployer")" ]]'
   check "yazi opener uses xdg-open" grep -Fq 'xdg-open %s1' "$HOME/.config/yazi/yazi.toml"
+else
+  check "windows PowerShell profile deployer disabled" eval '[[ -z "$(chezmoi execute-template -f "$powershell_profile_deployer")" ]]'
 fi
 
 # WSL-only quiet-login markers (deployed via home/.chezmoiignore). Present on

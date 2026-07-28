@@ -79,6 +79,12 @@ panes and the remote user's home in SSH domains. `Alt-h` / `Alt-l` switch tabs
 without the leader. tmux session/workspace navigation and the
 scrollback-in-nvim shortcut are intentionally not mapped.
 
+The Windows PowerShell 7 profile is also owned from WSL. A WSL-only
+`run_onchange` script asks `pwsh.exe` for `$PROFILE`, converts that result to a
+WSL path, and atomically overwrites the file with the managed Yazi `y` wrapper
+and zoxide initialization. It creates the profile directory when needed and
+no-ops when WSL interop or PowerShell 7 is unavailable.
+
 The git config is deployed on every machine from `home/dot_gitconfig`,
 `home/dot_gitconfig_nexdep`, `home/dot_gitconfig_marco` and
 `home/dot_gitignore_global` — plain static files, identical everywhere. The

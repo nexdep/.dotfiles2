@@ -204,6 +204,11 @@ tailscale is left for its manual `tailscale up`.
   mirrors the config to `%USERPROFILE%\.wezterm.lua` for a separately installed
   Windows WezTerm. New split panes retain the active pane's working directory
   on both native Linux and Windows/WSL.
+- **PowerShell profile (Windows host)**: chezmoi does not install Windows
+  PowerShell 7. On WSL, a `run_onchange` script queries `pwsh.exe` for the
+  current `$PROFILE` path, creates its parent directory, and atomically
+  overwrites the profile with the repository-managed Yazi wrapper and zoxide
+  initialization. It no-ops when WSL interop or `pwsh.exe` is unavailable.
 - **VS Code Insiders**: `code-insiders` apt package from Microsoft's
   official repo (packages.microsoft.com/repos/code), so it updates with
   `apt upgrade`.

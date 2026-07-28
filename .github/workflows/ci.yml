@@ -30,6 +30,16 @@ jobs:
             home="$(mktemp -d)"
             HOME="$home" MACHINE_TYPE="$machine" "$RUNNER_TEMP/bin/chezmoi" init --apply --source "$PWD"
             zsh -n "$home/.zshrc"
+            powershell_deployer="$home/deploy-windows-powershell-profile.sh"
+            HOME="$home" "$RUNNER_TEMP/bin/chezmoi" execute-template \
+              -f "$PWD/home/.chezmoiscripts/run_onchange_after_deploy-windows-powershell-profile.sh.tmpl" \
+              >"$powershell_deployer"
+            if [ "$machine" = wsl ]; then
+              test -s "$powershell_deployer"
+              shellcheck "$powershell_deployer"
+            else
+              test ! -s "$powershell_deployer"
+            fi
             echo "--- rendered $machine OK ---"
           done
 
