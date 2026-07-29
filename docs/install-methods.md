@@ -202,8 +202,10 @@ tailscale is left for its manual `tailscale up`.
   its default user's home, and offers WSL and PowerShell launchers. A WSL-only
   chezmoi `run_onchange` script atomically
   mirrors the config to `%USERPROFILE%\.wezterm.lua` for a separately installed
-  Windows WezTerm. New split panes retain the active pane's working directory
-  on both native Linux and Windows/WSL.
+  Windows WezTerm. New split panes and `Ctrl-a v` tabs retain the active pane's
+  working directory on both native Linux and Windows/WSL. The WSL zsh fragment
+  reports its Linux working directory to Windows WezTerm with OSC 7 before each
+  prompt, avoiding Windows-side `wsl.exe` cwd guesses.
 - **PowerShell profile (Windows host)**: chezmoi does not install Windows
   PowerShell 7. On WSL, a `run_onchange` script queries `pwsh.exe` for the
   current `$PROFILE` path, creates its parent directory, and atomically

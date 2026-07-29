@@ -122,42 +122,53 @@ config.leader = {
   timeout_milliseconds = 1000,
 }
 
--- tmux's Prefix+v inserts a window immediately after the current one. WezTerm
--- normally appends new tabs, so remember the current index and move the newly
--- spawned tab into the equivalent position.
+-- Build a command in the active pane's domain and working directory. Windows
+-- local panes launch WSL through wsl.exe, so pass the Linux path to WSL itself
+-- rather than asking Windows to use it as the process working directory.
+local function command_in_current_directory(pane)
+  local cwd = pane:get_current_working_dir()
+  local cwd_path = cwd and cwd.file_path or nil
+  local cwd_is_windows_path = cwd_path
+    and (cwd_path:match("^/%a:/") or cwd_path:match("^%a:/"))
+  local command = {
+    domain = "CurrentPaneDomain",
+  }
+
+  if is_windows and pane:get_domain_name() == "local" then
+    if cwd_path and not cwd_is_windows_path then
+      command.args = { "wsl.exe", "--cd", cwd_path }
+    else
+      command.args = wsl_home_prog
+    end
+  elseif cwd_path then
+    command.cwd = cwd_path
+  end
+
+  return command
+end
+
+-- tmux's Prefix+v inserts a window immediately after the current one. The mux
+-- spawn API waits for the new tab to exist, so MoveTab can target it reliably.
 local spawn_tab_to_right = wezterm.action_callback(function(window, pane)
+  local mux_window = window:mux_window()
   local active_index = 0
 
-  for _, tab_info in ipairs(window:mux_window():tabs_with_info()) do
+  for _, tab_info in ipairs(mux_window:tabs_with_info()) do
     if tab_info.is_active then
       active_index = tab_info.index
       break
     end
   end
 
-  window:perform_action(
-    act.Multiple({
-      act.SpawnTab("CurrentPaneDomain"),
-      act.MoveTab(active_index + 1),
-    }),
-    pane
-  )
+  local new_tab, new_pane = mux_window:spawn_tab(command_in_current_directory(pane))
+  new_tab:activate()
+  window:perform_action(act.MoveTab(active_index + 1), new_pane)
 end)
 
--- Split in the active pane's working directory. On Windows the local domain
--- launches wsl.exe, so pass the Linux path to WSL itself rather than asking
--- Windows to use it as the process working directory.
+-- Split in the active pane's working directory.
 local function split_in_current_directory(direction)
   return wezterm.action_callback(function(window, pane)
-    local cwd = pane:get_current_working_dir()
-    local cwd_path = cwd and cwd.file_path or nil
-    local command = {}
-
-    if is_windows then
-      command.args = cwd_path and { "wsl.exe", "--cd", cwd_path } or wsl_home_prog
-    elseif cwd_path then
-      command.cwd = cwd_path
-    end
+    local command = command_in_current_directory(pane)
 
     window:perform_action(
       act.SplitPane({

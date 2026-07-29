@@ -69,7 +69,9 @@ script atomically mirrors it to `%USERPROFILE%\.wezterm.lua` for Windows
 WezTerm. The config selects Gnome- or Windows-style integrated title buttons
 at runtime; native Linux uses its login shell, while Windows defaults to WSL
 in the default Linux user's home and offers WSL and PowerShell launchers. The
-mirror owns the Windows file and no-ops when WSL interop is unavailable. Its
+mirror owns the Windows file and no-ops when WSL interop is unavailable. The
+WSL zsh fragment emits OSC 7 before each prompt so Windows WezTerm sees the
+real Linux working directory instead of the `wsl.exe` process directory. Its
 `Ctrl-a` leader mirrors the tmux
 pane and tab workflow: `|` / `-` split right/below, `Ctrl-h/j/k/l` navigate
 panes, `x` closes a pane, `r` reloads the config, `c` opens a tab at home,

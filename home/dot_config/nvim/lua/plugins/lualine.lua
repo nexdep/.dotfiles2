@@ -15,6 +15,12 @@ return {
         },
 
         sections = {
+          lualine_c = {
+            {
+              "filename",
+              path = 2,
+            },
+          },
           lualine_x = {
             {
               tex_wordcount.status,

@@ -247,7 +247,8 @@ check "windows PowerShell profile deployer parses" sh -n <(
 )
 check "wezterm uses Ctrl-a leader" grep -q 'config.leader = {' "$HOME/.wezterm.lua"
 check "wezterm has tmux-style splits" eval 'grep -q "act.SplitPane" "$HOME/.wezterm.lua" && grep -q '\''split_in_current_directory("Right")'\'' "$HOME/.wezterm.lua" && grep -q '\''split_in_current_directory("Down")'\'' "$HOME/.wezterm.lua"'
-check "wezterm splits reuse current cwd" eval 'grep -q "pane:get_current_working_dir()" "$HOME/.wezterm.lua" && grep -Fq '\''{ "wsl.exe", "--cd", cwd_path }'\'' "$HOME/.wezterm.lua"'
+check "wezterm current cwd is platform and domain aware" eval 'grep -Fq "local function command_in_current_directory(pane)" "$HOME/.wezterm.lua" && grep -Fq "pane:get_current_working_dir()" "$HOME/.wezterm.lua" && grep -Fq "cwd_is_windows_path" "$HOME/.wezterm.lua" && grep -Fq '\''is_windows and pane:get_domain_name() == "local"'\'' "$HOME/.wezterm.lua" && grep -Fq '\''{ "wsl.exe", "--cd", cwd_path }'\'' "$HOME/.wezterm.lua"'
+check "wezterm tabs spawn synchronously to the right" eval 'grep -Fq "mux_window:spawn_tab(command_in_current_directory(pane))" "$HOME/.wezterm.lua" && grep -Fq "new_tab:activate()" "$HOME/.wezterm.lua" && grep -Fq "act.MoveTab(active_index + 1)" "$HOME/.wezterm.lua"'
 check "wezterm has tmux-style pane navigation" grep -q 'act.ActivatePaneDirection' "$HOME/.wezterm.lua"
 check "wezterm has tmux-style tab navigation" grep -q 'act.ActivateTabRelative' "$HOME/.wezterm.lua"
 check "wezterm has tmux-style copy mode" grep -q 'act.ActivateCopyMode' "$HOME/.wezterm.lua"
@@ -307,8 +308,10 @@ done
 # WSL-only zshrc fragment.
 if [[ "$machine" == wsl ]]; then
   check "zshrc has wsl clip alias" grep -q "clip.exe" "$zshrc"
+  check "zshrc reports WSL cwd to WezTerm" eval 'grep -Fq "_wezterm_osc7_cwd()" "$zshrc" && grep -Fq "file://%s%s" "$zshrc"'
 else
   check "no wsl clip alias in zshrc" eval '! grep -q "clip.exe" "$zshrc"'
+  check "no WSL WezTerm cwd hook in zshrc" eval '! grep -Fq "_wezterm_osc7_cwd()" "$zshrc"'
 fi
 
 # OneDrive symlinks (lib/install-onedrive-links.sh). Real WSL machines have a
