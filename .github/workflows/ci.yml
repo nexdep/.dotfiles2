@@ -22,6 +22,8 @@ jobs:
         run: bash tests/bootstrap-logging.sh
       - name: APT update retry smoke test
         run: bash tests/apt-update-retry.sh
+      - name: Windows write retry smoke test
+        run: bash tests/windows-write-retry.sh
       - name: GitHub token deployment smoke test
         run: bash tests/gh-token-deploy.sh
       - name: Render .zshrc for every machine type
@@ -30,16 +32,17 @@ jobs:
             home="$(mktemp -d)"
             HOME="$home" MACHINE_TYPE="$machine" "$RUNNER_TEMP/bin/chezmoi" init --apply --source "$PWD"
             zsh -n "$home/.zshrc"
-            powershell_deployer="$home/deploy-windows-powershell-profile.sh"
-            HOME="$home" "$RUNNER_TEMP/bin/chezmoi" execute-template \
-              -f "$PWD/home/.chezmoiscripts/run_onchange_after_deploy-windows-powershell-profile.sh.tmpl" \
-              >"$powershell_deployer"
-            if [ "$machine" = wsl ]; then
-              test -s "$powershell_deployer"
-              shellcheck "$powershell_deployer"
-            else
-              test ! -s "$powershell_deployer"
-            fi
+            for source in "$PWD"/home/.chezmoiscripts/run_after_deploy-windows-*.sh.tmpl; do
+              deployer="$home/${source##*/}"
+              HOME="$home" "$RUNNER_TEMP/bin/chezmoi" execute-template \
+                -f "$source" >"$deployer"
+              if [ "$machine" = wsl ]; then
+                test -s "$deployer"
+                shellcheck "$deployer"
+              else
+                test ! -s "$deployer"
+              fi
+            done
             echo "--- rendered $machine OK ---"
           done
 

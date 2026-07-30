@@ -1,0 +1,94 @@
+{{ if eq .machine "wsl" -}}
+#!/bin/sh
+# Mirror the SSH config into the Windows user's home so Windows-side tools
+# (OpenSSH, VS Code) can use the same host aliases. Non-destructive: the
+# repo config lands in .ssh/config_dotfiles and the Windows .ssh/config
+# gets an Include line prepended; Windows-only hosts stay in that file.
+# config hash: {{ include "private_dot_ssh/config" | sha256sum }}
+set -eu
+{{ include ".chezmoitemplates/windows-write-helpers.sh" }}
+
+# No WSL interop (e.g. CI containers): nothing to do.
+[ -e /proc/sys/fs/binfmt_misc/WSLInterop ] || exit 0
+command -v cmd.exe >/dev/null 2>&1 || exit 0
+
+resolve_windows_home() {
+  # cd to a Windows filesystem path first: cmd.exe warns on UNC/Linux cwd.
+  windows_home="$(
+    cd /mnt/c &&
+      cmd.exe /c 'echo %USERPROFILE%' 2>/dev/null | tr -d '\r'
+  )" || return
+  [ -n "$windows_home" ] || return 1
+  winhome="$(wslpath "$windows_home")" || return
+  [ -d "$winhome" ]
+}
+
+if ! windows_retry "querying the Windows user profile" resolve_windows_home; then
+  exit 0
+fi
+
+winssh="$winhome/.ssh"
+if ! windows_retry "preparing $winssh" mkdir -p "$winssh"; then
+  exit 0
+fi
+
+mirror="$winssh/config_dotfiles"
+if ! windows_retry "synchronizing the Windows SSH mirror at $mirror" \
+  windows_atomic_copy_if_changed "$HOME/.ssh/config" "$mirror"; then
+  exit 0
+fi
+
+# Ensure the Windows SSH config includes the mirror before any Host block
+# (an Include after a Host line would nest under that host). If the file cannot
+# be read, an atomic no-clobber create avoids replacing Windows-only hosts.
+winconfig="$winhome/.ssh/config"
+ensure_windows_ssh_include() {
+  ssh_config_source="$(mktemp)" || return
+
+  if grep -Fxq 'Include config_dotfiles' "$winconfig" 2>/dev/null; then
+    rm -f "$ssh_config_source"
+    return 0
+  fi
+
+  if {
+    printf 'Include config_dotfiles\n\n'
+    cat "$winconfig"
+  } >"$ssh_config_source" 2>/dev/null; then
+    if windows_atomic_copy_if_changed "$ssh_config_source" "$winconfig"; then
+      rm -f "$ssh_config_source"
+      return 0
+    else
+      ssh_config_status=$?
+      rm -f "$ssh_config_source"
+      return "$ssh_config_status"
+    fi
+  fi
+
+  # The config may genuinely be absent, or Windows may have denied the read.
+  # Rename without clobbering, then verify: an inaccessible existing config is
+  # never mistaken for an absent one and overwritten.
+  printf 'Include config_dotfiles\n' >"$ssh_config_source"
+  ssh_config_tmp="${winconfig}.tmp.$$"
+  if cp "$ssh_config_source" "$ssh_config_tmp"; then
+    :
+  else
+    ssh_config_status=$?
+    rm -f "$ssh_config_source" "$ssh_config_tmp" 2>/dev/null || :
+    return "$ssh_config_status"
+  fi
+  if mv -n "$ssh_config_tmp" "$winconfig"; then
+    :
+  else
+    ssh_config_status=$?
+    rm -f "$ssh_config_source" "$ssh_config_tmp" 2>/dev/null || :
+    return "$ssh_config_status"
+  fi
+  rm -f "$ssh_config_source" "$ssh_config_tmp" 2>/dev/null || :
+  grep -Fxq 'Include config_dotfiles' "$winconfig"
+}
+
+if windows_retry "ensuring $winconfig includes config_dotfiles" \
+  ensure_windows_ssh_include; then
+  echo "windows ssh config synchronized in $winssh"
+fi
+{{ end -}}

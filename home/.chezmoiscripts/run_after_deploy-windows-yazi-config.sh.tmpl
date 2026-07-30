@@ -1,0 +1,49 @@
+{{ if eq .machine "wsl" -}}
+#!/bin/sh
+# Mirror the managed Yazi config files into the Windows config directory so
+# native Windows Yazi uses the same settings. Windows-only files and installed
+# plugins in that directory are left untouched.
+# yazi.toml hash: {{ include "dot_config/yazi/yazi.toml.tmpl" | sha256sum }}
+# keymap.toml hash: {{ include "dot_config/yazi/keymap.toml" | sha256sum }}
+# theme.toml hash: {{ include "dot_config/yazi/theme.toml" | sha256sum }}
+# package.toml hash: {{ include "dot_config/yazi/package.toml" | sha256sum }}
+set -eu
+{{ include ".chezmoitemplates/windows-write-helpers.sh" }}
+
+# No WSL interop (e.g. CI containers): nothing to do.
+[ -e /proc/sys/fs/binfmt_misc/WSLInterop ] || exit 0
+command -v cmd.exe >/dev/null 2>&1 || exit 0
+
+resolve_windows_appdata() {
+  # cd to a Windows filesystem path first: cmd.exe warns on UNC/Linux cwd.
+  windows_appdata="$(
+    cd /mnt/c &&
+      cmd.exe /c 'echo %APPDATA%' 2>/dev/null | tr -d '\r'
+  )" || return
+  [ -n "$windows_appdata" ] || return 1
+  winappdata="$(wslpath "$windows_appdata")" || return
+  [ -d "$winappdata" ]
+}
+
+if ! windows_retry "querying the Windows AppData path" \
+  resolve_windows_appdata; then
+  exit 0
+fi
+
+winconfig="$winappdata/yazi/config"
+if ! windows_retry "preparing $winconfig" mkdir -p "$winconfig"; then
+  exit 0
+fi
+
+yazi_sync_failed=0
+for config in yazi.toml keymap.toml theme.toml package.toml; do
+  if ! windows_retry "synchronizing Windows Yazi $config at $winconfig/$config" \
+    windows_atomic_copy_if_changed "$HOME/.config/yazi/$config" "$winconfig/$config"; then
+    yazi_sync_failed=1
+  fi
+done
+
+if [ "$yazi_sync_failed" -eq 0 ]; then
+  echo "windows yazi config synchronized in $winconfig"
+fi
+{{ end -}}

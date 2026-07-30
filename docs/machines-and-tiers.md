@@ -49,7 +49,7 @@ The SSH client config (`home/private_dot_ssh/config`) is deployed to
 `~/.ssh/config` on every machine — only the config (host aliases) is
 versioned, never private keys. The `private_` prefix keeps `~/.ssh` at mode
 `0700`, and chezmoi manages just that one file, leaving existing keys and
-`known_hosts` in place. On WSL, a chezmoi `run_onchange` script
+`known_hosts` in place. On WSL, a chezmoi `run_after` script
 (`home/.chezmoiscripts/`) additionally mirrors the config into the Windows
 user's home as `.ssh/config_dotfiles` and prepends
 `Include config_dotfiles` to the Windows `.ssh/config` (creating it if
@@ -58,13 +58,13 @@ Windows-only hosts stay in the Windows file. The script no-ops when WSL
 interop is unavailable (as in CI containers).
 
 The Yazi config is also mirrored from WSL into the Windows host by a
-`run_onchange` script. It copies the four managed TOML files to
+`run_after` script. It copies the four managed TOML files to
 `%AppData%\yazi\config`, overwriting those files when their dotfile sources
 change while leaving Windows-side plugins and unrelated files untouched. The
 script does not install plugins for Windows and no-ops without WSL interop.
 
 The shared WezTerm config (`home/dot_wezterm.lua`) deploys to `~/.wezterm.lua`
-on every machine. A Linux laptop uses it directly; on WSL, a `run_onchange`
+on every machine. A Linux laptop uses it directly; on WSL, a `run_after`
 script atomically mirrors it to `%USERPROFILE%\.wezterm.lua` for Windows
 WezTerm. The config selects Gnome- or Windows-style integrated title buttons
 at runtime; native Linux uses its login shell, while Windows defaults to WSL
@@ -82,10 +82,16 @@ without the leader. tmux session/workspace navigation and the
 scrollback-in-nvim shortcut are intentionally not mapped.
 
 The Windows PowerShell 7 profile is also owned from WSL. A WSL-only
-`run_onchange` script asks `pwsh.exe` for `$PROFILE`, converts that result to a
+`run_after` script asks `pwsh.exe` for `$PROFILE`, converts that result to a
 WSL path, and atomically overwrites the file with the managed Yazi `y` wrapper
 and zoxide initialization. It creates the profile directory when needed and
 no-ops when WSL interop or PowerShell 7 is unavailable.
+
+All WSL-to-Windows configuration writes compare before replacing and retry up
+to four times with short backoff. Persistent Windows filesystem or interop
+failures do not abort Linux bootstrap: they are collected into a prominent
+warning summary at the end of the run. Because these scripts check on every
+chezmoi apply, a later run retries any Windows update that remained stale.
 
 The git config is deployed on every machine from `home/dot_gitconfig`,
 `home/dot_gitconfig_nexdep`, `home/dot_gitconfig_marco` and

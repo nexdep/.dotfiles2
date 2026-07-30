@@ -159,7 +159,7 @@ tailscale is left for its manual `tailscale up`.
   laptop+wsl only (gated in `home/.chezmoiignore`); `yazi.toml` is a
   template because the "open" opener differs per machine — Windows
   Explorer via WSL interop on wsl, `xdg-open` on the laptop. On WSL, a
-  separate `run_onchange` script copies the four managed TOML files into
+  separate `run_after` script copies the four managed TOML files into
   `%AppData%\yazi\config` for native Windows Yazi; it preserves unrelated
   Windows files and plugins and does not install Windows plugins. Plugins are
   pinned in `package.toml` and installed/updated on Linux by a chezmoi
@@ -200,14 +200,14 @@ tailscale is left for its manual `tailscale up`.
   Linux uses Gnome-style integrated buttons and its default login shell, while
   Windows uses Windows-style buttons, starts the default WSL distribution in
   its default user's home, and offers WSL and PowerShell launchers. A WSL-only
-  chezmoi `run_onchange` script atomically
+  chezmoi `run_after` script atomically
   mirrors the config to `%USERPROFILE%\.wezterm.lua` for a separately installed
   Windows WezTerm. New split panes and `Ctrl-a v` tabs retain the active pane's
   working directory on both native Linux and Windows/WSL. The WSL zsh fragment
   reports its Linux working directory to Windows WezTerm with OSC 7 before each
   prompt, avoiding Windows-side `wsl.exe` cwd guesses.
 - **PowerShell profile (Windows host)**: chezmoi does not install Windows
-  PowerShell 7. On WSL, a `run_onchange` script queries `pwsh.exe` for the
+  PowerShell 7. On WSL, a `run_after` script queries `pwsh.exe` for the
   current `$PROFILE` path, creates its parent directory, and atomically
   overwrites the profile with the repository-managed Yazi wrapper and zoxide
   initialization. It no-ops when WSL interop or `pwsh.exe` is unavailable.

@@ -13,7 +13,8 @@ machine="${1:?usage: $0 <wsl|server|laptop>}"
 repo_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 zshrc="$HOME/.zshrc"
 powershell_profile_source="$repo_dir/home/.chezmoitemplates/windows-powershell-profile.ps1"
-powershell_profile_deployer="$repo_dir/home/.chezmoiscripts/run_onchange_after_deploy-windows-powershell-profile.sh.tmpl"
+powershell_profile_deployer="$repo_dir/home/.chezmoiscripts/run_after_deploy-windows-powershell-profile.sh.tmpl"
+windows_deployers=("$repo_dir"/home/.chezmoiscripts/run_after_deploy-windows-*.sh.tmpl)
 fail=0
 
 check() {
@@ -242,9 +243,11 @@ check "wezterm config deployed" test -f "$HOME/.wezterm.lua"
 check "windows PowerShell profile source exists" test -f "$powershell_profile_source"
 check "windows PowerShell profile defines y" grep -Fq 'yazi.exe @args --cwd-file="$tmp"' "$powershell_profile_source"
 check "windows PowerShell profile initializes zoxide" eval '[[ "$(tail -n 1 "$powershell_profile_source")" == "Invoke-Expression (& { (zoxide init powershell | Out-String) })" ]]'
-check "windows PowerShell profile deployer parses" sh -n <(
-  chezmoi execute-template -f "$powershell_profile_deployer"
-)
+for windows_deployer in "${windows_deployers[@]}"; do
+  check "$(basename "$windows_deployer") parses" sh -n <(
+    chezmoi execute-template -f "$windows_deployer"
+  )
+done
 check "wezterm uses Ctrl-a leader" grep -q 'config.leader = {' "$HOME/.wezterm.lua"
 check "wezterm has tmux-style splits" eval 'grep -q "act.SplitPane" "$HOME/.wezterm.lua" && grep -q '\''split_in_current_directory("Right")'\'' "$HOME/.wezterm.lua" && grep -q '\''split_in_current_directory("Down")'\'' "$HOME/.wezterm.lua"'
 check "wezterm current cwd is platform and domain aware" eval 'grep -Fq "local function command_in_current_directory(pane)" "$HOME/.wezterm.lua" && grep -Fq "pane:get_current_working_dir()" "$HOME/.wezterm.lua" && grep -Fq "cwd_is_windows_path" "$HOME/.wezterm.lua" && grep -Fq '\''is_windows and pane:get_domain_name() == "local"'\'' "$HOME/.wezterm.lua" && grep -Fq '\''{ "wsl.exe", "--cd", cwd_path }'\'' "$HOME/.wezterm.lua"'

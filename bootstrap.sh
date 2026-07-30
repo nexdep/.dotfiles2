@@ -19,6 +19,8 @@ source "$LIB_DIR/common.sh"
 LOG_FILE="$(mktemp "$HOME/bootstrap-$(date '+%Y%m%d-%H%M%S')-XXXXXX.log")"
 LOG_PIPE_DIR="$(mktemp -d)"
 LOG_PIPE="$LOG_PIPE_DIR/output"
+DOTFILES_WINDOWS_WARNINGS_FILE="$LOG_PIPE_DIR/windows-warnings"
+export DOTFILES_WINDOWS_WARNINGS_FILE
 mkfifo "$LOG_PIPE"
 exec 3>&1 4>&2
 tee /dev/fd/3 <"$LOG_PIPE" |
@@ -35,6 +37,12 @@ cleanup() {
     log "failed with exit status $status"
   fi
   unblock_daemon_starts || true
+  if [[ -s "$DOTFILES_WINDOWS_WARNINGS_FILE" ]]; then
+    printf '\033[1;33m[bootstrap] WARNING: Windows-side configuration updates were not completed:\033[0m\n' >&2
+    while IFS= read -r warning; do
+      printf '\033[1;33m[bootstrap] WARNING:\033[0m %s\n' "$warning" >&2
+    done <"$DOTFILES_WINDOWS_WARNINGS_FILE"
+  fi
 
   # Restoring stdout/stderr closes the FIFO writer. Wait for the logger before
   # reporting the path so callers can read a complete log immediately.
@@ -42,6 +50,7 @@ cleanup() {
   exec 3>&- 4>&-
   wait "$LOG_WRITER_PID" || true
   rm -f "$LOG_PIPE"
+  rm -f "$DOTFILES_WINDOWS_WARNINGS_FILE"
   rmdir "$LOG_PIPE_DIR"
   printf '[bootstrap] install log saved to %s\n' "$LOG_FILE"
 

@@ -1,0 +1,51 @@
+{{ if eq .machine "wsl" -}}
+#!/bin/sh
+# Replace the PowerShell 7 current-user/current-host profile on the Windows
+# host with the profile managed by this repository.
+# profile hash: {{ include ".chezmoitemplates/windows-powershell-profile.ps1" | sha256sum }}
+set -eu
+{{ include ".chezmoitemplates/windows-write-helpers.sh" }}
+
+# No WSL interop (e.g. CI containers): nothing to do.
+[ -e /proc/sys/fs/binfmt_misc/WSLInterop ] || exit 0
+command -v pwsh.exe >/dev/null 2>&1 || exit 0
+
+resolve_windows_profile() {
+  # cd to a Windows filesystem path first: Windows executables warn on a
+  # UNC/Linux cwd. -NoProfile keeps the existing profile out of path lookup.
+  # $PROFILE must be expanded by PowerShell, not this POSIX shell.
+  # shellcheck disable=SC2016
+  windows_profile="$(
+    cd /mnt/c &&
+      pwsh.exe -NoLogo -NoProfile -NonInteractive -Command '$PROFILE' 2>/dev/null
+  )" || return
+  windows_profile="$(printf '%s' "$windows_profile" | tr -d '\r')"
+  [ -n "$windows_profile" ] || return 1
+  profile="$(wslpath "$windows_profile")" || return
+  [ -n "$profile" ]
+}
+
+if ! windows_retry "querying the Windows PowerShell profile path" \
+  resolve_windows_profile; then
+  exit 0
+fi
+
+profile_dir="${profile%/*}"
+if ! windows_retry "preparing $profile_dir" mkdir -p "$profile_dir"; then
+  exit 0
+fi
+
+# Render locally, then use the shared atomic copier for the Windows write.
+profile_source="$(mktemp)"
+trap 'rm -f "$profile_source"' EXIT HUP INT TERM
+cat >"$profile_source" <<'EOF'
+{{ include ".chezmoitemplates/windows-powershell-profile.ps1" -}}
+EOF
+
+if windows_retry "synchronizing the Windows PowerShell profile at $profile" \
+  windows_atomic_copy_if_changed "$profile_source" "$profile"; then
+  echo "windows powershell profile synchronized in $profile"
+fi
+rm -f "$profile_source"
+trap - EXIT HUP INT TERM
+{{ end -}}
