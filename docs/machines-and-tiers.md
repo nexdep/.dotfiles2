@@ -6,7 +6,7 @@ Each tier is a superset of the one below it (laptop ⊃ wsl ⊃ server):
 |-------|----------------|---------------------------------------------------|
 | core  | all            | zsh (default shell), gopass (+ password store), gnupg (+ personal GPG key, scdaemon), starship, Ubuntu Mono Nerd Font (+ fontconfig, xz-utils), Noto core fonts, neovim (+ LazyVim config and its toolchain: build-essential, npm, luarocks, sqlite3, fd, tree-sitter via rust), vim-gtk3 (+ vimrc), tmux (+ config), ssh config, git (+ config), WezTerm config, git-lfs, gh (official repo), lazygit, prompts, ripgrep, fzf, bat, zoxide, eza, fastfetch, jq, btop, restic, sshfs (+ fuse3), openssh-server, mosh, tailscale, rclone, Claude Code (+ bubblewrap), Codex CLI, Cursor Agent CLI, GitHub Copilot CLI, Pi CLI, opencode, Herdr (+ config), uv, curl, chezmoi |
 | extra | laptop, wsl    | gomi (+ config), conda (miniforge), yazi (+ config, previews: imagemagick, ffmpeg, poppler, chafa, 7z), rga (+ pandoc), dezoomify-rs, LaTeX (texlive + biber + latexmk), zathura, qt6-wayland |
-| gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS), Google Chrome, Slack, Zoom, ParaView, VLC, Zotero, Clockify, LibreOffice (+ en-US help), Spotify, libfuse2t64 (AppImage support) |
+| gui   | laptop         | Firefox Developer Edition, Thunderbird Beta, WezTerm (nightly), VS Code Insiders, Obsidian, Evolution (+ EWS), Google Chrome, Slack, Zoom, ParaView, VLC, Zotero, Clockify, LibreOffice (+ en-US help), Spotify, OneDrive client, libfuse2t64 (AppImage support) |
 
 Docker is a deliberate machine-specific exception to the tier hierarchy:
 

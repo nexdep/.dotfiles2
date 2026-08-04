@@ -155,6 +155,7 @@ apps=(
   'gui|libreoffice-help-en-us|dpkg -s libreoffice-help-en-us|! dpkg -s libreoffice-help-en-us'
   'gui|libreoffice-gnome|dpkg -s libreoffice-gnome|! dpkg -s libreoffice-gnome'
   'gui|spotify|command -v spotify'
+  'gui|onedrive|command -v onedrive && dpkg -s onedrive && grep -Fq "https://download.opensuse.org/repositories/home:/npreining:/debian-ubuntu-onedrive/xUbuntu_26.04" < <(apt-cache policy onedrive)|! command -v onedrive && ! dpkg -s onedrive && ! grep -RqsF "https://download.opensuse.org/repositories/home:/npreining:/debian-ubuntu-onedrive/xUbuntu_26.04" /etc/apt/sources.list /etc/apt/sources.list.d'
 )
 
 echo "== verify machine=$machine =="

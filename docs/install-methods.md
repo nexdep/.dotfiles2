@@ -1,10 +1,10 @@
 # Install method notes
 
-Note on Recommends: packages from the `lib/packages-*.txt` lists are
-installed with `--no-install-recommends` to keep servers and CI lean, while
-the GUI apps below (both repo- and .deb-based) deliberately keep apt's
-default Recommends handling — desktop apps often rely on them (e.g. Zoom
-pulls in ibus and mesa extras).
+Note on Recommends: the tier package batch is installed with
+`--no-install-recommends --no-install-suggests` to keep servers and CI lean.
+The apps installed later by `lib/install-gui.sh` deliberately keep apt's
+default Recommends handling because desktop apps often rely on them (e.g.
+Zoom pulls in ibus and mesa extras).
 
 Note on service startup: for the duration of the run `bootstrap.sh` installs a
 `policy-rc.d` (exit 101) so package postinst scripts don't start their daemons
@@ -284,6 +284,15 @@ tailscale is left for its manual `tailscale up`.
   list installs vlc, which pulls real ALSA, before `install-gui.sh` runs —
   so `libasound2t64` is listed explicitly in that `apt-get install` to make
   the choice deterministic instead of a side effect of vlc.
+- **OneDrive client** (laptop only): `onedrive` comes from the project's
+  supported OpenSuSE Build Service repository for Ubuntu 26.04
+  (`home:/npreining:/debian-ubuntu-onedrive/xUbuntu_26.04`), rather than
+  Ubuntu's outdated universe package, and updates with `apt upgrade`.
+  Bootstrap follows the upstream architecture-qualified source and installs
+  with both Recommends and Suggests disabled. Before first configuring OBS it
+  removes a detected retired `yann1ck/onedrive` PPA, an installed non-OBS
+  package, and the distribution package's automatically enabled user-service
+  link; reruns recognize the OBS source and keep the supported package.
 - **OneDrive links** (wsl only): `lib/install-onedrive-links.sh` resolves
   the logged-in Windows profile via cmd.exe interop (falling back to
   scanning `/mnt/c/Users`) and symlinks each `OneDrive*` folder into the

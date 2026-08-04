@@ -12,6 +12,8 @@ LIB_DIR="$REPO_DIR/lib"
 LOG_TAG=bootstrap
 # shellcheck source=lib/common.sh
 source "$LIB_DIR/common.sh"
+# shellcheck source=lib/onedrive.sh
+source "$LIB_DIR/onedrive.sh"
 
 # Keep a complete transcript of every run while preserving the colored live
 # output. The logger reads from a FIFO so the EXIT trap can close the stream
@@ -101,6 +103,10 @@ read_packages() { sed -e 's/#.*//' -e 's/[[:space:]]*$//' "$1" | grep -vE '^$' |
 for repo in gopass github-cli docker mozilla wezterm vscode spotify; do
   reconcile_apt_repo_source "$repo"
 done
+if [[ "$MACHINE" == laptop ]]; then
+  cleanup_legacy_onedrive
+  reconcile_apt_repo_source onedrive
+fi
 
 # curl is needed to fetch third-party repo keys but isn't present in a bare
 # system, so install it (and ca-certificates) before adding repos; the
@@ -126,6 +132,10 @@ if [[ "$MACHINE" == server || "$MACHINE" == laptop ]]; then
     "arch=$docker_arch" "https://download.docker.com/linux/ubuntu $docker_codename stable"
 fi
 
+if [[ "$MACHINE" == laptop ]]; then
+  register_onedrive_repo
+fi
+
 packages=()
 mapfile -t -O "${#packages[@]}" packages < <(read_packages "$LIB_DIR/packages-core.txt")
 if [[ "$MACHINE" != server ]]; then
@@ -133,6 +143,7 @@ if [[ "$MACHINE" != server ]]; then
 fi
 if [[ "$MACHINE" == laptop ]]; then
   mapfile -t -O "${#packages[@]}" packages < <(read_packages "$LIB_DIR/packages-gui.txt")
+  packages+=(onedrive)
 fi
 if [[ "$MACHINE" == server || "$MACHINE" == laptop ]]; then
   packages+=(
@@ -146,7 +157,7 @@ fi
 
 log "installing apt packages: ${packages[*]}"
 apt_update
-$SUDO apt-get install -y --no-install-recommends "${packages[@]}"
+$SUDO apt-get install -y --no-install-recommends --no-install-suggests "${packages[@]}"
 
 # Ubuntu ships bat's binary as batcat; expose the upstream name for scripts
 # that call `bat` (e.g. yazi's fg plugin previews).

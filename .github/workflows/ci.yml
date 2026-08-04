@@ -24,6 +24,8 @@ jobs:
         run: bash tests/apt-update-retry.sh
       - name: APT repository reconciliation smoke test
         run: bash tests/apt-repo-reconcile.sh
+      - name: OneDrive setup smoke test
+        run: bash tests/onedrive-setup.sh
       - name: Windows write retry smoke test
         run: bash tests/windows-write-retry.sh
       - name: GitHub token deployment smoke test
