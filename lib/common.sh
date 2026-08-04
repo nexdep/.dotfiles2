@@ -8,6 +8,9 @@ if [[ "$(id -u)" -ne 0 ]]; then
 fi
 export DEBIAN_FRONTEND=noninteractive
 
+APT_SOURCES_DIR=/etc/apt/sources.list.d
+APT_KEYRINGS_DIR=/etc/apt/keyrings
+
 log() { printf '\033[1;34m[%s]\033[0m %s\n' "${LOG_TAG:-setup}" "$*"; }
 die() {
   printf '\033[1;31m[%s]\033[0m %s\n' "${LOG_TAG:-setup}" "$*" >&2
@@ -65,33 +68,77 @@ unblock_daemon_starts() {
   fi
 }
 
+# Remove an unusable Deb822 source whose referenced signing key is missing or
+# empty, then remove a one-line source previously written by add_apt_repo only
+# when a usable Deb822 source remains. Vendor keyring packages and older
+# installers commonly create the .sources form; keeping both can make apt
+# reject the entire source list when their Signed-By paths differ.
+reconcile_apt_repo_source() {
+  local name="$1"
+  local deb822_source="$APT_SOURCES_DIR/$name.sources"
+  local managed_source="$APT_SOURCES_DIR/$name.list"
+  local signed_by=""
+
+  if [[ -f "$deb822_source" ]]; then
+    signed_by="$(
+      awk '
+        tolower($0) ~ /^[[:space:]]*signed-by:[[:space:]]*\// {
+          sub(/^[^:]*:[[:space:]]*/, "")
+          sub(/[[:space:]].*$/, "")
+          print
+          exit
+        }
+      ' "$deb822_source"
+    )"
+    if [[ -n "$signed_by" && ! -s "$signed_by" ]]; then
+      log "removing invalid $name apt source (signing key missing or empty: $signed_by)"
+      $SUDO rm -f "$deb822_source"
+    fi
+  fi
+
+  if [[ -f "$deb822_source" && -f "$managed_source" ]]; then
+    log "removing redundant $name apt source"
+    $SUDO rm -f "$managed_source"
+  fi
+}
+
 # add_apt_repo <name> <key_url> <options> <repo-and-suites>
-# Writes the signing key to /etc/apt/keyrings/<name>.{asc,gpg} and the source
-# to /etc/apt/sources.list.d/<name>.list. apt decides armored-vs-binary key
-# format by file EXTENSION, so it is chosen from the downloaded content.
+# Reuses an existing valid /etc/apt/sources.list.d/<name>.sources when present.
+# Otherwise, writes the signing key to /etc/apt/keyrings/<name>.{asc,gpg} and
+# the source to /etc/apt/sources.list.d/<name>.list. apt decides armored-vs-
+# binary key format by file EXTENSION, so it is chosen from the downloaded
+# content.
 # <options> is extra bracket options like "arch=amd64" ("" for none). Does NOT
 # run apt-get update — callers batch one update after adding all their repos.
 add_apt_repo() {
   local name="$1" key_url="$2" options="$3" repo="$4"
-  local keydir=/etc/apt/keyrings keyring
-  if [[ -f "$keydir/$name.asc" ]]; then
+  local keydir="$APT_KEYRINGS_DIR" keyring
+
+  reconcile_apt_repo_source "$name"
+  if [[ -f "$APT_SOURCES_DIR/$name.sources" ]]; then
+    log "using existing $name apt repository"
+    return 0
+  fi
+
+  if [[ -s "$keydir/$name.asc" ]]; then
     keyring="$keydir/$name.asc"
-  elif [[ -f "$keydir/$name.gpg" ]]; then
+  elif [[ -s "$keydir/$name.gpg" ]]; then
     keyring="$keydir/$name.gpg"
   else
     log "adding $name apt repository"
     local tmpkey
     tmpkey="$(mktemp)"
     curl -fsSL "$key_url" -o "$tmpkey"
-    case "$(head -c 14 "$tmpkey")" in
-      "-----BEGIN PGP") keyring="$keydir/$name.asc" ;;
-      *) keyring="$keydir/$name.gpg" ;;
-    esac
+    if LC_ALL=C grep -aqm1 '^-----BEGIN PGP' "$tmpkey"; then
+      keyring="$keydir/$name.asc"
+    else
+      keyring="$keydir/$name.gpg"
+    fi
     $SUDO install -D -m 0644 "$tmpkey" "$keyring"
     rm -f "$tmpkey"
   fi
   echo "deb [signed-by=${keyring}${options:+ $options}] $repo" |
-    $SUDO tee "/etc/apt/sources.list.d/${name}.list" >/dev/null
+    $SUDO tee "$APT_SOURCES_DIR/${name}.list" >/dev/null
 }
 
 # install_deb <name> <url>

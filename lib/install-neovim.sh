@@ -10,7 +10,8 @@ LOG_TAG=neovim
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/common.sh"
 
 if [[ -x /opt/nvim/bin/nvim ]]; then
-  log "already installed, skipping"
+  $SUDO ln -sf /opt/nvim/bin/nvim /usr/local/bin/nvim
+  log "already installed, ensured /usr/local/bin/nvim symlink"
   exit 0
 fi
 

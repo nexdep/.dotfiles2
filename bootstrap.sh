@@ -84,9 +84,24 @@ fi
 # exit even if bootstrap fails. See lib/common.sh.
 block_daemon_starts
 
+# Finish configuration left behind by an interrupted apt/dpkg run before apt
+# reads package metadata. This is a no-op on healthy systems; keeping it after
+# block_daemon_starts also prevents resumed postinst scripts from trying to
+# start daemons through an unavailable systemd bus on WSL.
+log "finishing any interrupted dpkg configuration"
+$SUDO dpkg --configure -a
+
 read_packages() { sed -e 's/#.*//' -e 's/[[:space:]]*$//' "$1" | grep -vE '^$' || true; }
 
 # --- apt packages per tier ---------------------------------------------------
+# Prefer valid Deb822 sources from vendor packages or older installers. Do this
+# before the first apt-get update so a partial earlier bootstrap that left
+# duplicate sources or an empty signing key can repair itself instead of
+# failing immediately.
+for repo in gopass github-cli docker mozilla wezterm vscode spotify; do
+  reconcile_apt_repo_source "$repo"
+done
+
 # curl is needed to fetch third-party repo keys but isn't present in a bare
 # system, so install it (and ca-certificates) before adding repos; the
 # second update then picks up the new sources.
