@@ -103,6 +103,7 @@ apps=(
   'core|fd-find|command -v fd' # also proves bootstrap's fd -> fdfind shim
   'core|restic|command -v restic'
   'core|sshfs|command -v sshfs'
+  'core|sudo|command -v sudo'
   'core|openssh-server|test -x /usr/sbin/sshd'
   'core|mosh|command -v mosh'
   'core|bubblewrap|command -v bwrap'
@@ -228,6 +229,13 @@ check "zshrc has dotfiles autopull" grep -q "dotfiles-last-pull" "$zshrc"
 check "zshrc does not autostart tmux" eval '! grep -q "tmux attach-session\\|tmux new-session" "$zshrc"'
 check "dircolors deployed" test -f "$HOME/.dircolors"
 check "login shell is zsh" test "$(getent passwd "$(id -un)" | cut -d: -f7)" = "$(command -v zsh)"
+check "passwordless sudo policy installed" sudo -n cmp -s \
+  "$repo_dir/lib/90-dotfiles-nopasswd" /etc/sudoers.d/90-dotfiles-nopasswd
+check "passwordless sudo policy permissions" test \
+  "$(stat -c '%U:%G %a' /etc/sudoers.d/90-dotfiles-nopasswd)" = "root:root 440"
+check "passwordless sudo policy is valid" sudo -n visudo -cf \
+  /etc/sudoers.d/90-dotfiles-nopasswd
+check "passwordless sudo works" sudo -n true
 # Hetzner images ship accounts with a forced password change (shadow
 # last-change 0), which breaks nested sudo and chsh under PAM; bootstrap
 # clears the flag for root and the login user.

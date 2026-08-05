@@ -159,6 +159,19 @@ log "installing apt packages: ${packages[*]}"
 apt_update
 $SUDO apt-get install -y --no-install-recommends --no-install-suggests "${packages[@]}"
 
+# Give Ubuntu administrative users non-interactive root access. Validate the
+# tracked policy before installing it so a malformed update cannot replace
+# the active sudoers drop-in. The compare keeps reruns idempotent while the
+# install command sets the ownership and permissions sudo requires.
+sudoers_source="$LIB_DIR/90-dotfiles-nopasswd"
+sudoers_target="/etc/sudoers.d/90-dotfiles-nopasswd"
+visudo -cf "$sudoers_source" >/dev/null \
+  || die "invalid passwordless sudo policy: $sudoers_source"
+if ! $SUDO cmp -s "$sudoers_source" "$sudoers_target"; then
+  log "enabling passwordless sudo for the sudo group"
+  $SUDO install -o root -g root -m 0440 "$sudoers_source" "$sudoers_target"
+fi
+
 # Ubuntu ships bat's binary as batcat; expose the upstream name for scripts
 # that call `bat` (e.g. yazi's fg plugin previews).
 if command -v batcat >/dev/null 2>&1 && ! command -v bat >/dev/null 2>&1; then

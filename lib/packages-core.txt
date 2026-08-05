@@ -33,6 +33,7 @@ restic # ~/.scripts/restic_b2_backups runtime dep
 ripgrep # rg: yazi's fg plugin content search
 sqlite3
 sshfs # ~/.scripts/hetzner_mount runtime dep
+sudo # bootstrap grants the sudo group NOPASSWD via /etc/sudoers.d
 tmux
 vim-gtk3 # vim with +clipboard (needed by ~/.vimrc's clipboard=unnamedplus)
 xz-utils # xz: extract the Ubuntu Mono Nerd Font release archive
