@@ -72,6 +72,72 @@ export PATH
 # prompt
 command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
 
+# Mark each prompt, command line and command output as OSC 133 semantic zones.
+# WezTerm uses these boundaries for Prefix+Shift-V, while tmux 3.4+ uses the raw
+# markers for its own prompt navigation. Inside tmux, send a second wrapped
+# copy through to the host terminal as well. Direct shells keep WezTerm's
+# packaged integration when it is already active; inside tmux, replace just
+# its semantic hooks so one marker pair serves both tmux and the host terminal.
+if [[ -o interactive && -t 1 && "$TERM" != linux && "$TERM" != dumb ]] &&
+  { (( ! ${+functions[__wezterm_semantic_precmd]} )) || [[ -n "${TMUX:-}" ]]; }; then
+  typeset -g _dotfiles_wezterm_semantic_running=
+  typeset -g _dotfiles_wezterm_semantic_emit_raw=1
+
+  if [[ -n "${TMUX:-}" ]] &&
+    (( ${+functions[__wezterm_semantic_precmd]} )); then
+    precmd_functions=("${(@)precmd_functions:#__wezterm_semantic_precmd}")
+    preexec_functions=("${(@)preexec_functions:#__wezterm_semantic_preexec}")
+  fi
+
+  _dotfiles_wezterm_semantic_sequence() {
+    local payload="$1"
+
+    if (( _dotfiles_wezterm_semantic_emit_raw )); then
+      printf '\033]133;%s\007' "$payload"
+    fi
+    if [[ -n "${TMUX:-}" ]]; then
+      printf '\033Ptmux;\033\033]133;%s\007\033\\' "$payload"
+    fi
+  }
+
+  _dotfiles_wezterm_semantic_precmd() {
+    local last_status=$?
+
+    if [[ "$_dotfiles_wezterm_semantic_running" != 0 ]]; then
+      typeset -g _dotfiles_wezterm_saved_ps1="$PS1"
+      typeset -g _dotfiles_wezterm_saved_ps2="$PS2"
+      local primary_start secondary_start input_start
+      primary_start="$(_dotfiles_wezterm_semantic_sequence 'P;k=i')"
+      secondary_start="$(_dotfiles_wezterm_semantic_sequence 'P;k=s')"
+      input_start="$(_dotfiles_wezterm_semantic_sequence B)"
+      PS1="%{${primary_start}%}${PS1}%{${input_start}%}"
+      PS2="%{${secondary_start}%}${PS2}%{${input_start}%}"
+      typeset -g _dotfiles_wezterm_wrapped_ps1="$PS1"
+    fi
+
+    if [[ -n "$_dotfiles_wezterm_semantic_running" ]]; then
+      _dotfiles_wezterm_semantic_sequence "D;${last_status};aid=$$"
+    fi
+    _dotfiles_wezterm_semantic_sequence "A;cl=m;aid=$$"
+    _dotfiles_wezterm_semantic_running=0
+  }
+
+  _dotfiles_wezterm_semantic_preexec() {
+    if [[ -n "${_dotfiles_wezterm_saved_ps1+x}" &&
+      "${_dotfiles_wezterm_wrapped_ps1:-}" == "$PS1" ]]; then
+      PS1="$_dotfiles_wezterm_saved_ps1"
+      PS2="$_dotfiles_wezterm_saved_ps2"
+    fi
+    unset _dotfiles_wezterm_saved_ps1 _dotfiles_wezterm_saved_ps2
+    unset _dotfiles_wezterm_wrapped_ps1
+    _dotfiles_wezterm_semantic_sequence 'C;'
+    _dotfiles_wezterm_semantic_running=1
+  }
+
+  precmd_functions+=(_dotfiles_wezterm_semantic_precmd)
+  preexec_functions+=(_dotfiles_wezterm_semantic_preexec)
+fi
+
 # zoxide: adds the z/zi jump commands and tracks visited directories
 # (also feeds yazi's zoxide plugin)
 if command -v zoxide >/dev/null 2>&1; then

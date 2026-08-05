@@ -194,6 +194,16 @@ check "herdr config valid" env HERDR_CONFIG_PATH="$HOME/.config/herdr/config.tom
 check "nvim config deployed" test -f "$HOME/.config/nvim/init.lua"
 check "nvim lazy-lock deployed" test -f "$HOME/.config/nvim/lazy-lock.json"
 check "tmux config deployed" test -f "$HOME/.config/tmux/tmux.conf"
+check "tmux passes semantic zones to WezTerm" grep -Fq \
+  "set -g allow-passthrough on" "$HOME/.config/tmux/tmux.conf"
+check "tmux publishes copied text to the host clipboard" grep -Fq \
+  "set -g set-clipboard external" "$HOME/.config/tmux/tmux.conf"
+check "tmux last-command yank binding deployed" grep -Fq \
+  "tmux-yank-last-command.sh" "$HOME/.config/tmux/tmux.conf"
+check "tmux last-command yank helper deployed" test -x \
+  "$HOME/.scripts/tmux-yank-last-command.sh"
+check "tmux last-command yank boundaries" \
+  "$repo_dir/tests/tmux-yank-last-command.sh"
 check "vimrc deployed" test -f "$HOME/.vimrc"
 check "ssh config deployed" test -f "$HOME/.ssh/config"
 check "gitconfig deployed" test -f "$HOME/.gitconfig"
@@ -218,6 +228,10 @@ check "zshrc sources ~/.zsh drop-ins" grep -q 'HOME/.zsh' "$zshrc"
 # the ephemeral devcontainer credential helper must not have shipped
 check "no ephemeral credential helper" eval '! grep -q vscode-remote-containers "$HOME/.gitconfig_marco"'
 check "zshrc initializes starship" grep -q "starship init zsh" "$zshrc"
+check "zshrc marks semantic command zones" eval \
+  'grep -Fq "_dotfiles_wezterm_semantic_precmd" "$zshrc" && grep -Fq "_dotfiles_wezterm_semantic_preexec" "$zshrc"'
+check "zshrc passes semantic zones through tmux" grep -Fq \
+  "printf '\\033Ptmux;\\033\\033]133;%s\\007\\033\\\\'" "$zshrc"
 check "zshrc initializes zoxide" grep -q "zoxide init zsh" "$zshrc"
 # the zoxide cd wrapper must keep the builtin for scripts and coding agents
 check "zshrc cd wrapper falls back to builtin" grep -q 'builtin cd "$@"' "$zshrc"
@@ -251,7 +265,13 @@ check "gopass store push url is ssh" eval '[[ "$(git -C "$HOME/.local/share/gopa
 check "wezterm config deployed" test -f "$HOME/.wezterm.lua"
 check "windows PowerShell profile source exists" test -f "$powershell_profile_source"
 check "windows PowerShell profile defines y" grep -Fq 'yazi.exe @args --cwd-file="$tmp"' "$powershell_profile_source"
-check "windows PowerShell profile initializes zoxide" eval '[[ "$(tail -n 1 "$powershell_profile_source")" == "Invoke-Expression (& { (zoxide init powershell | Out-String) })" ]]'
+check "windows PowerShell profile initializes zoxide" grep -Fxq \
+  "Invoke-Expression (& { (zoxide init powershell | Out-String) })" \
+  "$powershell_profile_source"
+check "windows PowerShell profile marks semantic prompts" eval \
+  'grep -Fq '\''$out += "`e]133;A`a"'\'' "$powershell_profile_source" && grep -Fq '\''$out += "`e]133;B`a"'\'' "$powershell_profile_source"'
+check "windows PowerShell profile marks command output" eval \
+  'grep -Fq '\''$Host.UI.Write("`e]133;C;`a")'\'' "$powershell_profile_source" && grep -Fq '\''$out += "`e]133;D;$lastStatus`a"'\'' "$powershell_profile_source"'
 for windows_deployer in "${windows_deployers[@]}"; do
   check "$(basename "$windows_deployer") parses" sh -n <(
     chezmoi execute-template -f "$windows_deployer"
@@ -264,6 +284,8 @@ check "wezterm tabs spawn synchronously to the right" eval 'grep -Fq "mux_window
 check "wezterm has tmux-style pane navigation" grep -q 'act.ActivatePaneDirection' "$HOME/.wezterm.lua"
 check "wezterm has tmux-style tab navigation" grep -q 'act.ActivateTabRelative' "$HOME/.wezterm.lua"
 check "wezterm has tmux-style copy mode" grep -q 'act.ActivateCopyMode' "$HOME/.wezterm.lua"
+check "wezterm copies the last semantic command block" eval \
+  'grep -Fq "local copy_last_command_block" "$HOME/.wezterm.lua" && grep -Fq "pane:get_semantic_zones()" "$HOME/.wezterm.lua" && grep -Fq '\''action = copy_last_command_block'\'' "$HOME/.wezterm.lua"'
 check "wezterm Windows WSL starts at Linux home" eval 'grep -Fq '\''local wsl_home_prog = { "wsl.exe", "--cd", "~" }'\'' "$HOME/.wezterm.lua" && grep -Fq "config.default_prog = wsl_home_prog" "$HOME/.wezterm.lua"'
 check "wezterm uses platform symbol fallbacks" eval 'grep -Fq '\''local symbol_font = "Noto Sans Symbols"'\'' "$HOME/.wezterm.lua" && grep -Fq '\''symbol_font = {'\'' "$HOME/.wezterm.lua" && grep -Fq '\''family = "Segoe UI Symbol"'\'' "$HOME/.wezterm.lua"'
 check "wezterm home tabs handle SSH domains" eval 'grep -Fq '\''pane:get_domain_name() == "local"'\'' "$HOME/.wezterm.lua" && grep -Fq '\''cd && exec "${SHELL:-/bin/sh}" -l'\'' "$HOME/.wezterm.lua"'

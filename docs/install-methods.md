@@ -205,12 +205,19 @@ tailscale is left for its manual `tailscale up`.
   Windows WezTerm. New split panes and `Ctrl-a v` tabs retain the active pane's
   working directory on both native Linux and Windows/WSL. The WSL zsh fragment
   reports its Linux working directory to Windows WezTerm with OSC 7 before each
-  prompt, avoiding Windows-side `wsl.exe` cwd guesses.
+  prompt, avoiding Windows-side `wsl.exe` cwd guesses. Core zsh integration
+  emits OSC 133 command zones on every machine; `Ctrl-a Shift-v` uses them to
+  copy the latest prompt, command, and output, including partial output from a
+  running command but excluding the next empty prompt. tmux receives the same
+  zones for prompt navigation and passes a wrapped copy to WezTerm, while OSC
+  52 publishes tmux yanks to the host clipboard.
 - **PowerShell profile (Windows host)**: chezmoi does not install Windows
   PowerShell 7. On WSL, a `run_after` script queries `pwsh.exe` for the
   current `$PROFILE` path, creates its parent directory, and atomically
   overwrites the profile with the repository-managed Yazi wrapper and zoxide
-  initialization. It no-ops when WSL interop or `pwsh.exe` is unavailable.
+  initialization. The managed profile also adds OSC 133 prompt/input/output
+  markers for the shared `Ctrl-a Shift-v` command-block copy action. It no-ops
+  when WSL interop or `pwsh.exe` is unavailable.
 - **VS Code Insiders**: `code-insiders` apt package from Microsoft's
   official repo (packages.microsoft.com/repos/code), so it updates with
   `apt upgrade`.

@@ -82,16 +82,25 @@ real Linux working directory instead of the `wsl.exe` process directory. Its
 pane and tab workflow: `|` / `-` split right/below, `Ctrl-h/j/k/l` navigate
 panes, `x` closes a pane, `r` reloads the config, `c` opens a tab at home,
 `v` opens one immediately to the right with the current working directory,
-and `[` enters vi-style copy mode. Home tabs use the local WSL home in local
-panes and the remote user's home in SSH domains. `Alt-h` / `Alt-l` switch tabs
-without the leader. tmux session/workspace navigation and the
-scrollback-in-nvim shortcut are intentionally not mapped.
+`[` enters vi-style copy mode, and `Shift-v` copies the latest prompt, command,
+and output as one block. The latter uses OSC 133 semantic zones, excludes the
+new empty prompt after a completed command, and copies partial output while a
+command is still running. The same chord works through tmux: its raw markers
+drive tmux prompt navigation, explicitly wrapped markers reach WezTerm, and
+tmux copy operations publish through OSC 52. Home tabs use the local WSL home
+in local panes and the remote user's home in SSH domains. `Alt-h` / `Alt-l`
+switch tabs without the leader. tmux session/workspace navigation is
+intentionally not mapped in WezTerm. The old tmux `Prefix+Shift-v`
+scrollback-in-Neovim binding is replaced by the command-block copy action.
 
 The Windows PowerShell 7 profile is also owned from WSL. A WSL-only
 `run_after` script asks `pwsh.exe` for `$PROFILE`, converts that result to a
 WSL path, and atomically overwrites the file with the managed Yazi `y` wrapper
-and zoxide initialization. It creates the profile directory when needed and
-no-ops when WSL interop or PowerShell 7 is unavailable.
+and zoxide initialization. The profile also emits OSC 133 boundaries around
+PowerShell prompts, complete submitted input, and command output so the shared
+WezTerm command-block shortcut has the same behavior there. It creates the
+profile directory when needed and no-ops when WSL interop or PowerShell 7 is
+unavailable.
 
 All WSL-to-Windows configuration writes compare before replacing and retry up
 to four times with short backoff. Persistent Windows filesystem or interop

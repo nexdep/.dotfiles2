@@ -203,6 +203,76 @@ local spawn_home_tab = wezterm.action_callback(function(window, pane)
   window:perform_action(act.SpawnCommandInNewTab(command), pane)
 end)
 
+local function semantic_zone_before(left, right)
+  if left.start_y == right.start_y then
+    return left.start_x < right.start_x
+  end
+  return left.start_y < right.start_y
+end
+
+local function notify_copy_failure(window, message)
+  wezterm.log_warn(message)
+  window:toast_notification("WezTerm", message, nil, 3000)
+end
+
+-- Copy the newest prompt + command + output as one logical, unwrapped block.
+-- OSC 133 shell integration supplies the exact boundaries on Linux, WSL and
+-- PowerShell; no platform-specific clipboard command is needed here.
+local copy_last_command_block = wezterm.action_callback(function(window, pane)
+  if pane:is_alt_screen_active() then
+    notify_copy_failure(window, "Last command is unavailable in the alternate screen")
+    return
+  end
+
+  local zones = pane:get_semantic_zones()
+  table.sort(zones, semantic_zone_before)
+
+  local output_index
+  for index = #zones, 1, -1 do
+    if zones[index].semantic_type == "Output" then
+      output_index = index
+      break
+    end
+  end
+
+  if not output_index then
+    notify_copy_failure(window, "No command output found in this pane")
+    return
+  end
+
+  local prompt
+  for index = output_index - 1, 1, -1 do
+    if zones[index].semantic_type == "Prompt" then
+      prompt = zones[index]
+      break
+    end
+  end
+
+  if not prompt then
+    notify_copy_failure(window, "The command prompt is no longer in scrollback")
+    return
+  end
+
+  local output = zones[output_index]
+  local cursor = pane:get_cursor_position()
+  local end_x = output.end_x or cursor.x
+  local end_y = output.end_y or cursor.y
+  local text = pane:get_text_from_region(
+    prompt.start_x,
+    prompt.start_y,
+    end_x,
+    end_y
+  )
+
+  if not text or text == "" then
+    notify_copy_failure(window, "The last command block is empty")
+    return
+  end
+
+  window:copy_to_clipboard(text, "Clipboard")
+  window:toast_notification("WezTerm", "Copied last command block", nil, 2000)
+end)
+
 -- IMPORTANT:
 -- Define config.keys only once. Assigning another table to config.keys later
 -- replaces all of the bindings defined here.
@@ -293,6 +363,19 @@ config.keys = {
     key = "[",
     mods = "LEADER",
     action = act.ActivateCopyMode,
+  },
+
+  -- Copy the previous prompt, command and output. Accept both key
+  -- representations produced for Shift-v by supported keyboard modes.
+  {
+    key = "V",
+    mods = "LEADER",
+    action = copy_last_command_block,
+  },
+  {
+    key = "V",
+    mods = "LEADER|SHIFT",
+    action = copy_last_command_block,
   },
 
   -- --------------------------------------------------------------------------
