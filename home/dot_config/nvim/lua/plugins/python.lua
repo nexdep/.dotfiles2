@@ -4,6 +4,14 @@ return {
     opts = {
       servers = {
         pyright = {
+          capabilities = {
+            workspace = {
+              didChangeWatchedFiles = {
+                dynamicRegistration = true,
+                relativePatternSupport = true,
+              },
+            },
+          },
           settings = {
             pyright = {
               -- Hide editor-only tagged hints (such as unreachable-code graying)
