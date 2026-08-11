@@ -29,7 +29,8 @@ eza aliases with auto-listing on cd, a zoxide-backed `cd` (frecency
 jumps), the acp/mkcd/scroll/showpath helpers, and a background
 autopull that ff-pulls `~/.dotfiles` at most every 12h — pull only,
 never an unattended `chezmoi apply`), a wsl fragment (clip/start interop
-aliases, Windows VS Code on PATH), a workstation fragment for laptop/wsl,
+aliases, an `explorer` alias for Windows Explorer, Windows VS Code on PATH),
+a workstation fragment for laptop/wsl,
 and a server fragment for servers. The
 fragments live in `home/.chezmoitemplates/` and are assembled by
 `home/dot_zshrc.tmpl` based on the machine type stored in chezmoi's data;

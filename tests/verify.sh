@@ -342,9 +342,13 @@ done
 # WSL-only zshrc fragment.
 if [[ "$machine" == wsl ]]; then
   check "zshrc has wsl clip alias" grep -q "clip.exe" "$zshrc"
+  check "zshrc has wsl explorer alias" grep -Fq \
+    "alias explorer='explorer.exe'" "$zshrc"
   check "zshrc reports WSL cwd to WezTerm" eval 'grep -Fq "_wezterm_osc7_cwd()" "$zshrc" && grep -Fq "file://%s%s" "$zshrc"'
 else
   check "no wsl clip alias in zshrc" eval '! grep -q "clip.exe" "$zshrc"'
+  check "no wsl explorer alias in zshrc" eval \
+    '! grep -Fq "alias explorer=" "$zshrc"'
   check "no WSL WezTerm cwd hook in zshrc" eval '! grep -Fq "_wezterm_osc7_cwd()" "$zshrc"'
 fi
 

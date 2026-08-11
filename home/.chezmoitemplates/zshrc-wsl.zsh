@@ -10,6 +10,7 @@ precmd_functions+=(_wezterm_osc7_cwd)
 
 # Windows interop shortcuts
 alias clip="clip.exe "
+alias explorer='explorer.exe'
 alias start='cmd.exe /c start  '
 
 # Windows-side VS Code launcher (`code`), when installed for the Windows user
