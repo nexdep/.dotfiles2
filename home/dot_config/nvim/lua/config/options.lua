@@ -9,9 +9,16 @@ vim.g.autoformat = false
 -- Keep long lines on a single screen line and scroll horizontally instead.
 vim.opt.wrap = false
 
--- Enable Windows clipboard when running in WSL
+-- Send explicit system-clipboard yanks back through the SSH client terminal.
+-- Inside tmux, use its clipboard provider so tmux can publish via OSC 52.
+local function env_set(name)
+  local value = vim.env[name]
+  return value ~= nil and value ~= ""
+end
 
-if vim.fn.has("wsl") == 1 then
+if env_set("SSH_CONNECTION") or env_set("SSH_TTY") then
+  vim.g.clipboard = env_set("TMUX") and "tmux" or "osc52"
+elseif vim.fn.has("wsl") == 1 then
   vim.g.clipboard = {
     name = "win32yank-wsl",
     copy = {

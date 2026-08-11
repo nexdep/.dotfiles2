@@ -2,6 +2,10 @@
 -- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
 -- Add any additional keymaps here
 
+vim.keymap.set({ "n", "x" }, "<leader>y", '"+y', {
+  desc = "Copy to system clipboard",
+})
+
 -- in insert mode, Ctrl+Right to jump forward by one word
 vim.keymap.set("i", "<C-l>", "<C-o>e", {
   noremap = true,
@@ -90,4 +94,3 @@ vim.keymap.set("n", "<leader>xy", function()
 
   vim.notify("Copied line + diagnostics to clipboard", vim.log.levels.INFO)
 end, { desc = "Copy current line + diagnostics to clipboard" })
-
