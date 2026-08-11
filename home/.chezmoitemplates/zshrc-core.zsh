@@ -66,7 +66,7 @@ zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
 
 # path
 typeset -U path
-path=("$HOME/.local/bin" "$HOME/.cargo/bin" $path)
+path=("$HOME/.local/bin" "$HOME/.cargo/bin" "$HOME/.npm-global/bin" $path)
 export PATH
 
 # prompt
