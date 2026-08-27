@@ -221,10 +221,12 @@ tailscale is left for its manual `tailscale up`.
 - **VS Code Insiders**: `code-insiders` apt package from Microsoft's
   official repo (packages.microsoft.com/repos/code), so it updates with
   `apt upgrade`.
-- **Obsidian**: official `.deb` from the latest GitHub release
-  (obsidianmd/obsidian-releases), installed via `apt install ./obsidian.deb`
-  so its declared dependencies resolve from the standard repos. No apt repo
-  is published, so this doesn't auto-update with `apt upgrade` — re-running
+- **Obsidian**: official `.deb` from GitHub
+  (obsidianmd/obsidian-releases), with the newest desktop download resolved
+  from Obsidian's official download page because GitHub's latest release can
+  be mobile-only. It is installed via `apt install ./obsidian.deb` so its
+  declared dependencies resolve from the standard repos. No apt repo is
+  published, so this doesn't auto-update with `apt upgrade` — re-running
   `bootstrap.sh` only reinstalls if the `obsidian` command is missing.
 - **Evolution / evolution-ews**: plain Ubuntu universe apt packages, listed
   in `lib/packages-gui.txt` like any other apt package (no extra repo

@@ -17,6 +17,19 @@ die() {
   exit 1
 }
 
+# Fetch a vendor page and print its first URL matching an extended regular
+# expression. This avoids release APIs for vendors that publish authoritative
+# download links on their own site. A fetch failure or missing match is nonzero.
+resolve_url_from_page() {
+  local page_url="$1" pattern="$2"
+  local page url
+
+  page="$(curl -fsSL "$page_url")" || return
+  url="$(printf '%s\n' "$page" | grep -oE "$pattern" | head -n1 || true)"
+  [[ -n "$url" ]] || return 1
+  printf '%s\n' "$url"
+}
+
 # Run apt-get update with bounded retries. Acquire::Retries covers transient
 # download failures within one apt invocation; the outer loop starts a fresh
 # metadata transaction, which also recovers from repository publication races

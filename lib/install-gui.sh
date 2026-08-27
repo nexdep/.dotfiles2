@@ -19,8 +19,8 @@
 #     source ships a beta channel for this release. The install dir is
 #     chowned to the user so the app's internal updater can write to it.
 #   - Obsidian from the official .deb release on GitHub: no apt repo, and
-#     release filenames embed the version, so the latest tag is resolved
-#     via GitHub's releases/latest redirect (no jq dependency).
+#     release filenames embed the version. The newest desktop .deb is resolved
+#     from obsidian.md/download because GitHub's latest release may be mobile-only.
 #   - Google Chrome from the official .deb at dl.google.com (fixed URL).
 #     Its postinst self-registers Google's apt repo, so unlike the other
 #     .deb apps it updates with a normal apt upgrade afterwards.
@@ -176,9 +176,10 @@ if command -v obsidian >/dev/null 2>&1; then
   log "obsidian already installed, skipping"
 else
   [[ "$(uname -m)" == x86_64 ]] || die "obsidian: unsupported architecture $(uname -m) (only amd64 .deb is published)"
-  tag="$(curl -fsSL -I -o /dev/null -w '%{url_effective}' \
-    https://github.com/obsidianmd/obsidian-releases/releases/latest | sed 's#.*/tag/##')"
-  install_deb obsidian "https://github.com/obsidianmd/obsidian-releases/releases/download/${tag}/obsidian_${tag#v}_amd64.deb"
+  url="$(resolve_url_from_page https://obsidian.md/download \
+    'https://github\.com/obsidianmd/obsidian-releases/releases/download/v[0-9.]+/obsidian_[0-9.]+_amd64\.deb')" ||
+    die "obsidian: could not resolve the latest amd64 .deb from the official download page"
+  install_deb obsidian "$url"
 fi
 
 if command -v google-chrome >/dev/null 2>&1; then

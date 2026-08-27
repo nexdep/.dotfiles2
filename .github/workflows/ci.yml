@@ -30,6 +30,8 @@ jobs:
         run: bash tests/windows-write-retry.sh
       - name: GitHub token deployment smoke test
         run: bash tests/gh-token-deploy.sh
+      - name: Download URL resolution smoke test
+        run: bash tests/download-url-resolution.sh
       - name: Render .zshrc for every machine type
         run: |
           for machine in wsl server laptop; do
