@@ -116,9 +116,9 @@ cd ..
 echo "Installing Python package (editable mode with tests)"
 
 pip install -e '.[test]'
-pip install PySide6
-pip install openmc-plotter --no-deps
-pip install neutronics_material_maker
+conda install -y -c conda-forge pyside6 matplotlib
+python -m pip install --no-deps openmc-plotter
+python -m pip install neutronics_material_maker
 
 
 
