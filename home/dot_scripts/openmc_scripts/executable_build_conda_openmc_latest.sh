@@ -5,11 +5,12 @@
 # This script:
 # 1. Creates a fresh conda environment with required dependencies
 # 2. Clones the OpenMC repository (develop branch)
-# 3. Optionally downloads OpenMC nuclear data into the script's original directory
-# 4. If downloaded, sets its paths only in this conda environment
-# 5. Builds and installs OpenMC from source into the conda environment
-# 6. Installs Python bindings + testing extras
-# 7. Verifies the installation
+# 3. Creates a workspace at $PWD/$ENV_NAME and clones OpenMC into it
+# 4. Optionally downloads OpenMC nuclear data into that workspace
+# 5. If downloaded, sets its paths only in this conda environment
+# 6. Builds and installs OpenMC from source into the conda environment
+# 7. Installs Python bindings + testing extras
+# 8. Verifies the installation
 # -----------------------------------------------------------------------------
 
 set -euo pipefail
@@ -20,10 +21,12 @@ set -euo pipefail
 ENV_NAME="openmc-dev-latest" # Name of the conda environment
 GH_PROFILE="openmc-dev"
 PY_VER="3.14"
-DOWNLOAD_NUCLEAR_DATA=false # Set to true to download and configure nuclear data
+DOWNLOAD_NUCLEAR_DATA=false
 
-# Directory where this script was launched
-ROOT_DIR="$(pwd)"
+
+# Keep the repository, build tree, and optional nuclear data together.
+ROOT_DIR="$PWD/$ENV_NAME"
+mkdir -p "$ROOT_DIR"
 
 # ---------------------------
 # Create conda environment
@@ -51,9 +54,10 @@ echo "Cloning OpenMC (develop branch)"
 
 git clone --recurse-submodules \
   --branch develop \
-  https://github.com/$GH_PROFILE/openmc.git
+  "https://github.com/$GH_PROFILE/openmc.git" \
+  "$ROOT_DIR/openmc"
 
-cd openmc
+cd "$ROOT_DIR/openmc"
 
 git checkout develop
 git submodule update --init --recursive
@@ -88,7 +92,7 @@ if [[ "$DOWNLOAD_NUCLEAR_DATA" == true ]]; then
   echo "XS_NNDC=$XS_NNDC"
   echo "OPENMC_ENDF_DATA=$OPENMC_ENDF_DATA"
 else
-  echo "Skipping OpenMC nuclear data download (set DOWNLOAD_NUCLEAR_DATA=true to enable it)"
+  echo "Skipping OpenMC nuclear data download (pass --download-nuclear-data to enable it)"
 fi
 
 # ---------------------------
