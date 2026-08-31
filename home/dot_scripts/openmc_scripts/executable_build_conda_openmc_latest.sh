@@ -5,8 +5,8 @@
 # This script:
 # 1. Creates a fresh conda environment with required dependencies
 # 2. Clones the OpenMC repository (develop branch)
-# 3. Downloads OpenMC nuclear data into the script's original directory
-# 4. Sets OPENMC_CROSS_SECTIONS and OPENMC_ENDF_DATA only in this conda env
+# 3. Optionally downloads OpenMC nuclear data into the script's original directory
+# 4. If downloaded, sets its paths only in this conda environment
 # 5. Builds and installs OpenMC from source into the conda environment
 # 6. Installs Python bindings + testing extras
 # 7. Verifies the installation
@@ -20,6 +20,7 @@ set -euo pipefail
 ENV_NAME="openmc-dev-latest" # Name of the conda environment
 GH_PROFILE="openmc-dev"
 PY_VER="3.14"
+DOWNLOAD_NUCLEAR_DATA=false # Set to true to download and configure nuclear data
 
 # Directory where this script was launched
 ROOT_DIR="$(pwd)"
@@ -58,35 +59,37 @@ git checkout develop
 git submodule update --init --recursive
 
 # ---------------------------
-# Download nuclear data locally
+# Optionally download nuclear data locally
 # ---------------------------
-echo "Downloading OpenMC nuclear data into: $ROOT_DIR"
+if [[ "$DOWNLOAD_NUCLEAR_DATA" == true ]]; then
+  echo "Downloading OpenMC nuclear data into: $ROOT_DIR"
 
-HOME="$ROOT_DIR" bash tools/ci/download-xs.sh
+  HOME="$ROOT_DIR" bash tools/ci/download-xs.sh
 
-# Paths created by tools/ci/download-xs.sh when HOME is overridden
-NNDC_XS="$ROOT_DIR/nndc_hdf5/cross_sections.xml"
-ENDF_DATA="$ROOT_DIR/endf-b-vii.1"
+  # Paths created by tools/ci/download-xs.sh when HOME is overridden
+  NNDC_XS="$ROOT_DIR/nndc_hdf5/cross_sections.xml"
+  ENDF_DATA="$ROOT_DIR/endf-b-vii.1"
 
-# Sanity checks
-test -f "$NNDC_XS"
-test -d "$ENDF_DATA"
+  # Sanity checks
+  test -f "$NNDC_XS"
+  test -d "$ENDF_DATA"
 
-# ---------------------------
-# Set conda env-specific variables
-# ---------------------------
-echo "Setting conda environment variables"
+  # Set data paths only in this conda environment.
+  echo "Setting conda environment variables"
 
-conda env config vars set \
-  OPENMC_CROSS_SECTIONS="$NNDC_XS" \
-  OPENMC_ENDF_DATA="$ENDF_DATA"
+  conda env config vars set \
+    XS_NNDC="$NNDC_XS" \
+    OPENMC_ENDF_DATA="$ENDF_DATA"
 
-# Reload environment so variables take effect in this shell
-conda deactivate
-conda activate "$ENV_NAME"
+  # Reload environment so variables take effect in this shell.
+  conda deactivate
+  conda activate "$ENV_NAME"
 
-echo "OPENMC_CROSS_SECTIONS=$OPENMC_CROSS_SECTIONS"
-echo "OPENMC_ENDF_DATA=$OPENMC_ENDF_DATA"
+  echo "XS_NNDC=$XS_NNDC"
+  echo "OPENMC_ENDF_DATA=$OPENMC_ENDF_DATA"
+else
+  echo "Skipping OpenMC nuclear data download (set DOWNLOAD_NUCLEAR_DATA=true to enable it)"
+fi
 
 # ---------------------------
 # Build OpenMC
@@ -127,7 +130,7 @@ import numba
 
 print("openmc:", openmc.__version__)
 print("numba:", numba.__version__)
-print("OPENMC_CROSS_SECTIONS:", os.environ.get("OPENMC_CROSS_SECTIONS"))
+print("XS_NNDC:", os.environ.get("XS_NNDC"))
 print("OPENMC_ENDF_DATA:", os.environ.get("OPENMC_ENDF_DATA"))
 EOF
 
