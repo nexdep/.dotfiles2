@@ -9,6 +9,11 @@ vim.g.autoformat = false
 -- Keep long lines on a single screen line and scroll horizontally instead.
 vim.opt.wrap = false
 
+-- Keep one browser preview open and follow the active Markdown buffer.
+vim.g.mkdp_auto_close = 0
+vim.g.mkdp_combine_preview = 1
+vim.g.mkdp_combine_preview_auto_refresh = 1
+
 -- Send explicit system-clipboard yanks back through the SSH client terminal.
 -- Inside tmux, use its clipboard provider so tmux can publish via OSC 52.
 local function env_set(name)
