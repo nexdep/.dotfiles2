@@ -15,9 +15,9 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
--- set no spelling in markdown files
+-- set no spelling in plain text and markdown files
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "markdown", "markdown.mdx" },
+  pattern = { "text", "markdown", "markdown.mdx" },
   callback = function()
     vim.opt_local.spell = false
   end,
