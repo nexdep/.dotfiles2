@@ -116,7 +116,7 @@ cd ..
 echo "Installing Python package (editable mode with tests)"
 
 pip install -e '.[test]'
-conda install -y -c conda-forge pyside6 matplotlib
+conda install -y -c conda-forge pyside6 matplotlib njoy2016
 python -m pip install --no-deps openmc-plotter
 python -m pip install neutronics_material_maker
 
