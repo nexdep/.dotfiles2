@@ -7,6 +7,16 @@ return {
     config = function()
       local tex_wordcount = require("config.tex_wordcount")
 
+      local function is_visual()
+        return vim.fn.mode():match("[vV\22]") ~= nil
+      end
+
+      local function selection_size()
+        local lines = math.abs(vim.fn.line(".") - vim.fn.line("v")) + 1
+        local cols = math.abs(vim.fn.virtcol(".") - vim.fn.virtcol("v")) + 1
+        return string.format("%d lines, %d cols", lines, cols)
+      end
+
       require("lualine").setup({
         options = {
           refresh = {
@@ -30,6 +40,10 @@ return {
             },
             "encoding",
             "filetype",
+          },
+          lualine_y = {
+            { selection_size, cond = is_visual },
+            "progress",
           },
         },
       })
