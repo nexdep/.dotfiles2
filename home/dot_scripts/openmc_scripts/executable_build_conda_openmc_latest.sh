@@ -4,7 +4,7 @@
 # -----------------------------------------------------------------------------
 # This script:
 # 1. Creates a fresh conda environment with required dependencies
-# 2. Clones the OpenMC repository (develop branch)
+# 2. Clones the selected OpenMC repository branch
 # 3. Creates a workspace at $PWD/$ENV_NAME and clones OpenMC into it
 # 4. Optionally downloads OpenMC nuclear data into that workspace
 # 5. If downloaded, sets its paths only in this conda environment
@@ -20,6 +20,7 @@ set -euo pipefail
 # ---------------------------
 ENV_NAME="openmc-dev-latest" # Name of the conda environment
 GH_PROFILE="openmc-dev"
+OPENMC_BRANCH="develop"
 PY_VER="3.14"
 DOWNLOAD_NUCLEAR_DATA=false
 
@@ -50,16 +51,16 @@ echo "Activated environment: $ENV_NAME"
 # ---------------------------
 # Clone OpenMC repository
 # ---------------------------
-echo "Cloning OpenMC (develop branch)"
+echo "Cloning OpenMC ($OPENMC_BRANCH branch)"
 
 git clone --recurse-submodules \
-  --branch develop \
+  --branch "$OPENMC_BRANCH" \
   "https://github.com/$GH_PROFILE/openmc.git" \
   "$ROOT_DIR/openmc"
 
 cd "$ROOT_DIR/openmc"
 
-git checkout develop
+git checkout "$OPENMC_BRANCH"
 git submodule update --init --recursive
 
 # ---------------------------
