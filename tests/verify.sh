@@ -297,6 +297,7 @@ if [[ "$machine" != server ]]; then
   check "no server zshrc fragment" eval '! grep -q -- "--- server ---" "$zshrc"'
   check "zshrc defines y wrapper" grep -q "function y()" "$zshrc"
   check "yazi config deployed" test -f "$HOME/.config/yazi/yazi.toml"
+  check "yazi init.lua records visits in zoxide" grep -Fq "update_db = true" "$HOME/.config/yazi/init.lua"
   # proves the ya pkg run script installed the plugins pinned in package.toml
   check "yazi fg plugin installed" test -d "$HOME/.config/yazi/plugins/fg.yazi"
   check "yazi zsh completions installed" test -f /usr/local/share/zsh/site-functions/_yazi
