@@ -158,7 +158,10 @@ tailscale is left for its manual `tailscale up`.
   package list. The config (`home/dot_config/yazi/`) deploys on
   laptop+wsl only (gated in `home/.chezmoiignore`); `yazi.toml` is a
   template because the "open" opener differs per machine — Windows
-  Explorer via WSL interop on wsl, `xdg-open` on the laptop. On WSL, a
+  Explorer via WSL interop on wsl, `xdg-open` on the laptop.
+  `keymap.toml` is also templated: `g e` opens the current folder in
+  Explorer on WSL and native Windows, or the desktop file manager on
+  laptop, without blocking Yazi. On WSL, a
   separate `run_after` script copies the four managed TOML files into
   `%AppData%\yazi\config` for native Windows Yazi; it preserves unrelated
   Windows files and plugins and does not install Windows plugins. Plugins are

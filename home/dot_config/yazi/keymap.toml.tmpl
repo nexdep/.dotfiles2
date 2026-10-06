@@ -332,3 +332,21 @@ desc = "find file by content (ripgrep match)"
 on   = [ "f","f" ]
 run  = "plugin fg --args='fzf'"
 desc = "find file by filename"
+
+# Open the current directory in the platform's file manager.
+[[mgr.prepend_keymap]]
+on   = [ "g", "e" ]
+for  = "linux"
+{{- if eq .machine "wsl" }}
+run  = '''shell 'explorer.exe "$(wslpath -w "$PWD")"' --orphan'''
+desc = "Open current folder in Explorer"
+{{- else }}
+run  = '''shell 'xdg-open "$PWD"' --orphan'''
+desc = "Open current folder in file manager"
+{{- end }}
+
+[[mgr.prepend_keymap]]
+on   = [ "g", "e" ]
+for  = "windows"
+run  = '''shell 'explorer.exe .' --orphan'''
+desc = "Open current folder in Explorer"
