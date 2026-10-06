@@ -1,5 +1,6 @@
 return {
   "hat0uma/csvview.nvim",
+  ft = { "csv", "tsv" },
   ---@module "csvview"
   ---@type CsvView.Options
   opts = {
@@ -19,4 +20,18 @@ return {
     },
   },
   cmd = { "CsvViewEnable", "CsvViewDisable", "CsvViewToggle" },
+  config = function(_, opts)
+    require("csvview").setup(opts)
+
+    vim.api.nvim_create_autocmd("FileType", {
+      pattern = { "csv", "tsv" },
+      callback = function()
+        vim.cmd("CsvViewEnable")
+      end,
+    })
+
+    if vim.tbl_contains({ "csv", "tsv" }, vim.bo.filetype) then
+      vim.cmd("CsvViewEnable")
+    end
+  end,
 }
